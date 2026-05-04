@@ -1,19 +1,16 @@
 # KL9-RHIZOME
 
-> **在 LLM 之上运行的认知协议层 / A cognitive protocol layer on top of LLMs**
+> **在 LLM 之上运行的认知协议层** · *A cognitive protocol layer on top of LLMs*
 
 让AI从对话开始就持有两种不可调和的角度，不缝合、不综合、不走第三条路。
 
 *Enables AI to hold two irreconcilable perspectives from the very start — no synthesis, no third way.*
 
-[English](README.en.md)
-
 ---
 
 ## 📖 缘起 · Origin（你来写）
 
-> *// TODO: 这里留给你写自己的故事*  
-> *// 比如：什么时候、为什么开始做这个项目*
+> *// TODO: 留给你写自己的故事*
 
 ---
 
@@ -27,7 +24,7 @@
 
 ## 🎯 对比 · Comparison
 
-| | 传统 AI 输出 | KL9-RHIZOME 输出 |
+| | 传统 AI 输出 · *Traditional AI* | KL9-RHIZOME 输出 |
 |:---|:---|:---|
 | 用户问 | "X 和 Y 哪个更合理？" | 同一问题 |
 | AI 答 | "两者各有道理，需根据具体情况平衡" ❌ 缝合 | A 的前提被 B 直接否定——不在同一个层面上说话 |
@@ -45,51 +42,55 @@
 
 推理开始前加载两个平等的、不可调和的角度。非"先站 A 再反思 B"，而是**同时持有 A 与 B**。
 
-> *Before reasoning begins, load two equal, irreconcilable perspectives — not "stand on A then reflect on B," but hold both simultaneously.*
+*Load two equal, irreconcilable perspectives before reasoning begins — not "stand on A then reflect on B," but hold both simultaneously.*
 
 ### 2. TensionBus（张力总线）
 
 各模块通过事件总线松耦合对话。无中央调度器，任意模块可订阅它关心的事件。
 
-> *Modules communicate through a decentralized event bus. No central orchestrator — any module subscribes to what it cares about.*
+*A decentralized event bus. No central orchestrator — any module subscribes to what it cares about.*
 
 ### 3. dual_fold（递归二重折叠）
 
-从 A 与 B 两个视⻆同时出发，每次折叠识别结构性张力，评估是否达到 `genuine_suspension` 状态。
+从 A 与 B 两个视角同时出发，每次折叠识别结构性张力，评估是否达到 genuine suspension 状态。
 
-> *Operates from both perspectives simultaneously; each fold identifies structural tension and evaluates whether genuine suspension has been reached.*
+*Operates from both perspectives simultaneously; each fold identifies structural tension and evaluates whether genuine suspension has been reached.*
 
 ### 4. Suspension（张力悬置）
 
-**悬置 ≠ 解决。** 两个视角的张力被充分表达后保持为张力，不缝合为"更高层次的统一"。输出以反诘、悖论或开放张力结尾。
+**悬置 ≠ 解决。** 两个视角之间的张力被充分表达后保持为张力，不缝合为"更高层次的统一"。输出以反诘、悖论或开放张力结尾。
 
-> *Suspension ≠ resolution. After tension is fully expressed, it stays as tension — not synthesized into "higher unity." Outputs end with aporia, paradox, or open tension.*
+*Suspension ≠ resolution. After tension is fully expressed, it stays as tension — not synthesized into "higher unity."*
 
 ### 5. Constitutional DNA（宪法五原则）
 
-不可修改的存在方式声明：**二重性存在 · 张力悬置 · 概念对话 · 结构性情感 · 拒绝收束**。所有表达生成前须通过宪法审查（纯规则引擎，零 LLM 开销）。
+不可修改的存在方式声明。所有表达生成前须通过宪法审查（纯规则引擎，零 LLM 开销）。
 
-> *Five immutable principles defining the mode of being: Dual Existence · Tension Suspension · Conceptual Dialogue · Structural Affect · Refusal of Closure. Every expression passes a constitutional audit before output (rule-based engine, zero LLM cost).*
+*Five immutable principles. Every expression passes a constitutional audit before output (rule-based engine, zero LLM cost).*
+
+**五原则：** 二重性存在 · 张力悬置 · 概念对话 · 结构性情感 · 拒绝收束
+
+*Dual Existence · Tension Suspension · Conceptual Dialogue · Structural Affect · Refusal of Closure*
 
 ---
 
 ## 🏗 架构 · Architecture
 
-### 九层模块
+### 九层模块 · Nine Modules
 
-| 模块 | 角色 | 中 | EN |
-|:---|:---|:---|:---|
-| **kailejiu-core** | 认知初始化：加载 DualState，声明 DNA | 核心 | Core |
-| **kailejiu-reasoner** | Perspective A：理论视角运算 | 推理 | Reasoner |
-| **kailejiu-soul** | Perspective B：具身成长引擎 | 灵魂 | Soul |
-| **kailejiu-graph** | 概念知识图谱（6 张力类型 × 7 二重组） | 图谱 | Graph |
-| **kailejiu-research** | 对话式理论激活（与思想家对话） | 研究 | Research |
-| **kailejiu-memory** | 持久记忆层（SQLite，全活跃无归档） | 记忆 | Memory |
-| **kailejiu-learner** | 迭代双面学习（事后优化） | 学习 | Learner |
-| **kailejiu-orchestrator** | 6 阶段认知流程协调 | 协调 | Orchestrator |
-| **kailejiu-shared** | 共享基础设施（11 模块，~2843 行） | 共享 | Shared |
+| 模块 | 角色 | 行数 |
+|:---|:---|:---:|
+| **kailejiu-core** | 认知初始化：加载 DualState，声明 DNA | 751 |
+| **kailejiu-reasoner** | Perspective A：理论视角运算 | 641 |
+| **kailejiu-soul** | Perspective B：具身成长引擎 | 64+426 |
+| **kailejiu-graph** | 概念知识图谱（6 张力类型 × 7 二重组） | 370 |
+| **kailejiu-research** | 对话式理论激活（与思想家对话而非检索） | 511 |
+| **kailejiu-memory** | 持久记忆层（SQLite，全活跃无归档） | 400 |
+| **kailejiu-learner** | 迭代双面学习（事后优化） | 573 |
+| **kailejiu-orchestrator** | 6 阶段认知流程协调 | 1114 |
+| **kailejiu-shared** | 共享基础设施（11 模块，~2843 行） | 173 |
 
-### 张力类型系统
+### 张力类型系统 · Tension Type System
 
 6 种预定义张力类型，每类对应一组不可调和的双视角：
 
@@ -102,9 +103,9 @@ economic_vs_grotesque ← economic_grotesque.economic  ↔  economic_grotesque.g
 truth_vs_slander      ← truth_construction.truth  ↔  truth_construction.slander
 ```
 
-### 事件系统（TensionBus）
+### 事件系统 · Event System（TensionBus）
 
-| 事件类型 | 发射时机 |
+| 事件 | 触发时机 |
 |:---|:---|
 | `QueryEvent` | 收到用户 query |
 | `PerspectiveEvent` | DualState 加载完成 |
@@ -112,51 +113,46 @@ truth_vs_slander      ← truth_construction.truth  ↔  truth_construction.slan
 | `SuspensionEvent` | 悬置评估完成 |
 | `FoldCompleteEvent` | 全流程结束 |
 
-### 6 阶段协调流程
+### 6 阶段协调流程 · 6-Phase Pipeline
 
 ```
-Phase 0: 检测二重性（detect_dual_nature）
-Phase 1: 检索概念（_retrieve_concepts）
-Phase 2: 激活对话（_activate_dialogues）
-Phase 3: 递归折叠（dual_fold）
-Phase 4: 涌现风格（emergent_style）
-Phase 5: 生成响应（_generate_response）
-Phase 6: 触发完成事件
+Phase 0: detect_dual_nature    检测二重性
+Phase 1: _retrieve_concepts    检索概念
+Phase 2: _activate_dialogues   激活对话
+Phase 3: dual_fold             递归折叠
+Phase 4: emergent_style        涌现风格
+Phase 5: _generate_response    生成响应
+Phase 6: FoldCompleteEvent     触发完成事件
 ```
 
 ---
 
 ## 🚀 快速开始 · Quick Start
 
-### 作为 Agent Skill 使用
+### 作为 Agent Skill 使用 · As an Agent Skill
 
 ```bash
 cp -r skills/kailejiu-core ~/.agents/skills/
 # 然后告诉 AI："请激活 kailejiu-core"
+# Then tell your AI: "Activate kailejiu-core"
 ```
 
-### 作为 Python 库
+### 作为 Python 库 · As a Python Library
 
 ```python
 from kl9_core.perspective_types import PERSPECTIVE_TYPES, TENSION_TYPES
 from kl9_core.tension_bus import TensionBus
-from kl9_core.dual_fold import dual_fold
-from kl9_core.constitutional_dna import ConstitutionalDNA
 
-# 查看可用视角对
+# 查看可用视角对 / List available dualities
 for pair in PERSPECTIVE_TYPES.recommended_dualities:
     print(f"{pair['perspective_A']} ↔ {pair['perspective_B']}")
 
-# 订阅事件
+# 订阅事件 / Subscribe to events
 bus = TensionBus()
 bus.subscribe("QueryEvent", lambda e: print(f"收到: {e['data']}"))
-
-# 宪法审查
-dna = ConstitutionalDNA.load()
-result = dna.audit("some_expression")
 ```
 
-### 30 秒测试
+### 30 秒测试 · Quick Test
 
 ```bash
 cd tests && python test_basic.py
@@ -164,7 +160,7 @@ cd tests && python test_basic.py
 
 ---
 
-## 📚 深入 · Further Reading
+## 📚 深入阅读 · Further Reading
 
 | 文档 | 内容 |
 |:---|:---|
@@ -192,10 +188,26 @@ cd tests && python test_basic.py
 
 不会写代码也能贡献：使用反馈 / 文档翻译 / 测试用例 / Bug 汇报 / 想法建议。
 
+*No coding skills required: use & feedback / doc translation / tests / bug reports / ideas.*
+
 详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+---
+
+## 🙏 致谢 · Acknowledgements
+
+这个架构由以下 AI 共同参与制作：
+
+*This architecture was built with the assistance of:*
+
+| AI | 角色 |
+|:---|:---|
+| **Claude** (Anthropic) | 核心架构设计、代码实现、文档编写 |
+| **DeepSeek** | 提供推理支持与视角启发 |
+| **Kimi** (Moonshot AI) | 提供创意碰撞与思路验证 |
 
 ---
 
 ## 📜 许可 · License
 
-MIT
+MIT © 2026 kaile9
