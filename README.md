@@ -119,6 +119,23 @@
 
 
 
+### 📊 运行数据 · Runtime Stats
+
+截至 2026-05-02，在 DeepSeek V4 Pro 上累计处理 **~5.9 亿 tokens**，
+输入 Prompt Caching 命中率稳定在 **~95%**。
+
+*As of May 2, 2026: ~592M tokens processed on DeepSeek V4 Pro with a ~95% input cache hit rate.*
+
+| 指标 | 数值 |
+|:---|:---:|
+| 累计处理 tokens | ~591,855,153 |
+| 输入（命中缓存） | 484,950,784 |
+| 输入（未命中缓存） | 22,786,180 |
+| 输出 | 4,763,077 |
+| **输入缓存命中率** | **~95%** |
+
+![DeepSeek V4 Pro Cache Hit Rate](assets/cache-hit-rate.png)
+
 ## 🧠 核心概念 · Core Concepts
 
 ### 1. DualState（双视角状态）
