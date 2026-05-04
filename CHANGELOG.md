@@ -12,7 +12,7 @@ All notable changes to KL9-RHIZOME will be documented in this file.
 - **`store_concept()` 增强**: 支持所有新字段的持久化
 - **CLI 导出工具** (`scripts/export_skillbook.py`): 一行命令将 SQLite 图谱导出为标准技能书 JSON
 - **桥接测试套件** (`tests/test_bridge.py`): 11 个测试覆盖导出/导入/往返/边完整性/新字段
-- **样本技能书** (`skillbooks/de/brock_on_money.skillbook.json`): 7 个布德克货币哲学概念，quality_tier=4
+- **样本技能书** (`skillbooks/de/Brodbeck-Phaenomenologie_des_Geldes-2023.skillbook.json`): 7 个布德克货币哲学概念，quality_tier=4
 - **版本公告** (`docs/RELEASE_v1.5.0.md`): v1.5.0 发布说明
 
 ### Changed
