@@ -28,3 +28,4 @@ Thumbs.db
 # Runtime
 .op_count
 learner_state.json
+.coverage

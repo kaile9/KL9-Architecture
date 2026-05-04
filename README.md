@@ -315,16 +315,76 @@ Stage 4: ACTIVATE  → 合并 + 张力梯度重计算
 
 ---
 
+## 🔗 v1.5 技能书吸收协议 · Skillbook Absorption Protocol
+
+> **SQLite 图谱 ↔ 技能书 JSON 的双向桥接。**
+
+v1.5 新增 `kl9_skillbook/bridge.py`，实现概念图谱的导入/导出：
+
+### 导出 · Export
+
+将 SQLite 中的概念图谱导出为标准技能书 JSON 格式：
+
+```bash
+python scripts/export_skillbook.py "书名" "llm源" [quality_tier]
+```
+
+```bash
+# 示例：导出当前图谱为布德克货币现象学技能书
+python scripts/export_skillbook.py "Phänomenologie des Geldes" "deepseek-v4-pro" 4
+```
+
+### 导入 · Import
+
+从技能书 JSON 导入概念到 SQLite 图谱（含碰撞检测、分叉与张力重算）：
+
+```python
+from kl9_skillbook.bridge import import_skillbook_to_graph
+
+result = import_skillbook_to_graph("examples/brock_on_money.skillbook.json")
+print(result)
+# {
+#   'success': True,
+#   'nodes_imported': 7,
+#   'nodes_bifurcated': 0,
+#   'exact_collisions': 0,
+#   'nearby_warnings': 0,
+#   'warnings': [...]
+# }
+```
+
+### 核心原理 · How It Works
+
+```
+SQLite (nodes + edges)                    技能书 JSON
+─────────────────────                    ─────────────
+store_concept()     ──→ export ──→      {manifest, concepts}
+create_edge()       ←── import ──       collision detection
+tension_score       ←── merge ──→       shadow bifurcation
+perspective_a/b     ←── recalc ──       2-hop tension update
+```
+
+**碰撞分叉**：同名概念不自动覆盖 → 创建 `__shadow_` 节点保留双方版本。
+**近似合并**：相似度 ≥ 95% 的概念合并定义，附加来源标注。
+**张力局部重算**：导入后 2-hop 邻域内重算 tension_score。
+
+### 样本技能书 · Sample
+
+`examples/brock_on_money.skillbook.json` — 7 个布德克货币哲学概念，quality_tier=4，可立即导入测试。
+
+---
+
 ## 📦 代码统计 · Statistics
 
 | 类别 | 数量 |
 |:---|:---:|
-| Python 模块 | 13 |
+| Python 模块 | 14 |
 | Skills | 9 |
-| 代码总行数 | ~8,692 |
+| 代码总行数 | ~9,200 |
 | 张力类型 | 6 |
 | 推荐二重组 | 7 |
 | 涌现风格 | 4 |
+| 技能书格式版本 | 1.0 |
 
 ---
 
