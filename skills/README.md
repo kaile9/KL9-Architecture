@@ -1,6 +1,8 @@
-# skills — KL9 认知技能模块
+# skills — KL9 认知技能模块 · Cognitive Skill Modules
 
 每个子目录是一个独立的认知技能，由 orchestrator 通过 TensionBus 动态激活。
+
+*Each subdirectory is an independent cognitive skill, dynamically activated by the orchestrator via TensionBus.*
 
 ### 技能架构
 

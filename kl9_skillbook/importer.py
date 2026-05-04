@@ -59,8 +59,10 @@ def import_skill_book(local_graph_path: str, skill_book_path: str,
     if not ok:
         raise ValueError(f"Manifest validation FAILED: {warnings}")
 
-    # ── 步骤 2.5: 信任评估 (v1.1) ──
-    trust = calculate_trust(manifest.difficulty, manifest.quality_score)
+    # ── 步骤 2.5: 信任评估 (v1.1 + 语言偏差) ──
+    book_language = getattr(manifest, 'book_language', '') or manifest.extra.get('book_language', '')
+    trust = calculate_trust(manifest.difficulty, manifest.quality_score,
+                           manifest.llm_source, book_language)
     trust_level = classify_trust_level(trust)
 
     if trust_level == "reject":

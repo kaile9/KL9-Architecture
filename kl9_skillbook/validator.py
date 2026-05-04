@@ -3,8 +3,22 @@ import time
 from .models import SkillBookManifest, ProductionRecord, DifficultyBreakdown
 
 KNOWN_LLM = {
-    "claude","claude-3","claude-3.5","gpt-4","gpt-4o","gpt-4-turbo",
-    "gemini","gemini-pro","llama","llama-3","mistral","qwen","deepseek",
+    # Tier 1
+    "claude","claude-3","claude-3.5","claude-opus-4.7","claude-opus-4.5",
+    "gpt-4","gpt-4o","gpt-4-turbo","gpt-4.5",
+    "gemini","gemini-pro","gemini-2.5-pro",
+    # Tier 2
+    "deepseek","deepseek-v4-pro","deepseek-v3",
+    "claude-sonnet-4.6","claude-sonnet-4.5",
+    "gemini-2.0-flash",
+    "qwen","qwen-3-max",
+    # Tier 3
+    "kimi","kimi-2.6","qwen-3",
+    "llama","llama-3","llama-4",
+    "gpt-4o-mini","claude-haiku-4.5",
+    # Tier 4
+    "mistral",
+    # Generic
     "anthropic","openai","google",
 }
 
@@ -73,7 +87,7 @@ def validate_manifest(manifest_json: dict, current_version: str = "1.1"
 
     # ── unknown fields ──
     known = {"skill_book_id","version","quality_tier","llm_source",
-             "kl9_version","created_timestamp","book_title","concept_count","extra",
+             "kl9_version","created_timestamp","book_title","book_language","concept_count","extra",
              "difficulty","quality_score","production_record","difficulty_breakdown"}
     unk = set(manifest_json) - known
     if unk:
@@ -112,6 +126,7 @@ def validate_manifest(manifest_json: dict, current_version: str = "1.1"
         kl9_version=manifest_json.get("kl9_version",""),
         created_timestamp=ts,
         book_title=manifest_json.get("book_title",""),
+        book_language=manifest_json.get("book_language",""),
         concept_count=cc,
         extra=manifest_json.get("extra",{}),
         difficulty=difficulty if is_v11 else 0.0,

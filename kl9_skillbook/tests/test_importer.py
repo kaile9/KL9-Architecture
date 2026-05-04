@@ -19,6 +19,7 @@ from kl9_skillbook.importer import import_skill_book
 from kl9_skillbook.scorer import (
     calculate_trust, classify_trust_level,
     estimate_difficulty, estimate_quality,
+    apply_language_bias, resolve_llm,
 )
 
 
@@ -467,6 +468,67 @@ class TestScorer:
         q = estimate_quality(pr)
         # rounds: 3*20=60 → clipped to 60, verify: external=20, counter: 1*5=5 → 85
         assert abs(q - 85.0) < 0.01
+
+    # ── 语言偏差测试 · Language Bias ──
+
+    def test_language_bias_zh_model_zh_book(self):
+        """中文模型读中文书 +3%"""
+        q = apply_language_bias(80.0, "deepseek-v4-pro", "zh")
+        # deepseek is zh family, zh book → +3% → 80 * 1.03 = 82.4
+        assert abs(q - 82.4) < 0.01
+
+    def test_language_bias_en_model_zh_book(self):
+        """英文模型读中文书 -3%"""
+        q = apply_language_bias(80.0, "claude-opus-4.7", "zh")
+        # claude is en family, zh book → -3% → 80 * 0.97 = 77.6
+        assert abs(q - 77.6) < 0.01
+
+    def test_language_bias_cross_tier_protection(self):
+        """跨层级保护：DeepSeek(ceiling=92) +3% 不能超过 92"""
+        q = apply_language_bias(91.0, "deepseek-v4-pro", "zh")
+        # 91 * 1.03 = 93.73, but ceiling=92 → clamped to 92
+        assert abs(q - 92.0) < 0.01
+
+        # 但 Claude Opus 4.7 ceiling=100, so 98 * 1.03 = 100.94 → clamped to 100
+        q2 = apply_language_bias(98.0, "claude-opus-4.7", "en")
+        assert abs(q2 - 100.0) < 0.01
+
+    def test_calculate_trust_with_bias(self):
+        """带语言偏差的信任计算"""
+        # zh model + zh book: quality boosted from 80 to 82.4
+        # trust = 82.4 * (1 - 50/200) = 82.4 * 0.75 = 61.8
+        t = calculate_trust(50.0, 80.0, "deepseek-v4-pro", "zh")
+        assert abs(t - 61.8) < 0.01
+
+        # en model + zh book: quality reduced from 80 to 77.6
+        # trust = 77.6 * 0.75 = 58.2
+        t2 = calculate_trust(50.0, 80.0, "claude-opus-4.7", "zh")
+        assert abs(t2 - 58.2) < 0.01
+
+        # no bias when llm_name or book_language not provided
+        t3 = calculate_trust(50.0, 80.0)
+        assert abs(t3 - 60.0) < 0.01  # 80 * 0.75 = 60
+
+    def test_resolve_llm_exact_match(self):
+        """精确匹配已知 LLM"""
+        info = resolve_llm("deepseek-v4-pro")
+        assert info["tier"] == 2
+        assert info["family"] == "zh"
+        assert info["ceiling"] == 92
+
+    def test_resolve_llm_fuzzy_match(self):
+        """模糊匹配 LLM"""
+        info = resolve_llm("claude")
+        # "claude" 应该匹配到某个 known key
+        assert info["family"] == "en"
+
+    def test_resolve_llm_unknown(self):
+        """未知 LLM 返回 neutral"""
+        info = resolve_llm("skynet-9000")
+        assert info["family"] == "neutral"
+        # neutral family → no bias applied
+        q = apply_language_bias(80.0, "skynet-9000", "zh")
+        assert abs(q - 80.0) < 0.01
 
 
 # ═══════════════════ Integration: import_skill_book (v1.1) ═══════════════════

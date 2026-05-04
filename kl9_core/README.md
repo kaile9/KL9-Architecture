@@ -1,6 +1,8 @@
-# kl9_core — 核心运行时
+# kl9_core — 核心运行时 · Core Runtime
 
 KL9-RHIZOME 的认知引擎，包含二重折叠、张力总线、概念图谱后端和风格涌现。
+
+*Cognitive engine of KL9-RHIZOME: dual-fold, tension bus, concept graph backend, and emergent style.*
 
 | 模块 | 职责 |
 |------|------|

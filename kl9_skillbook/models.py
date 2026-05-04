@@ -60,6 +60,7 @@ class SkillBookManifest:
     # ── v1.1 新增字段 ──
     difficulty: float = 0.0             # 0-100 难度评分
     quality_score: float = 0.0          # 0-100 质量评分
+    book_language: str = ""             # 书籍语言: "zh"/"en"/"de"/"fr"/"other"
     production_record: Optional[ProductionRecord] = None
     difficulty_breakdown: Optional[DifficultyBreakdown] = None
 

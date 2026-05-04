@@ -1,8 +1,8 @@
-# scripts — 命令行工具
+# scripts — 命令行工具 · CLI Tools
 
 | 脚本 | 用途 |
 |------|------|
-| `export_skillbook.py` | 将当前 SQLite 图谱导出为技能书 JSON |
+| `export_skillbook.py` | 将当前 SQLite 图谱导出为技能书 JSON · Export SQLite graph to skillbook JSON |
 
 ### 使用
 

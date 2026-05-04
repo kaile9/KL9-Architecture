@@ -116,8 +116,10 @@ def export_graph_to_skillbook(
             # Fallback: derive from quality_tier
             quality_score = float(manifest.get("quality_tier", 4) * 20)
 
-        # ── v1.1: 信任计算 ──
-        trust = calculate_trust(difficulty, quality_score)
+        # ── v1.1: 信任计算（含语言偏差）──
+        llm_source = manifest.get("llm_source", "unknown")
+        book_language = manifest.get("book_language", manifest.get("extra", {}).get("book_language", ""))
+        trust = calculate_trust(difficulty, quality_score, llm_source, book_language)
         trust_level = classify_trust_level(trust)
 
         # 构建完整技能书 manifest
@@ -125,10 +127,11 @@ def export_graph_to_skillbook(
             "skill_book_id": manifest.get("skill_book_id", ""),
             "version": "1.1",  # v1.1
             "quality_tier": manifest.get("quality_tier", 4),
-            "llm_source": manifest.get("llm_source", "unknown"),
+            "llm_source": llm_source,
             "kl9_version": manifest.get("kl9_version", "1.5.0"),
             "created_timestamp": manifest.get("created_timestamp", int(time.time())),
             "book_title": book_title,
+            "book_language": book_language,
             "concept_count": len(concepts),
             "extra": manifest.get("extra", {}),
             # v1.1 新字段
@@ -212,8 +215,10 @@ def import_skillbook_to_graph(
     if not ok:
         return {"success": False, "error": f"Manifest validation FAILED: {warnings}"}
 
-    # ── 步骤 2.5: 信任评估 (v1.1) ──
-    trust = calculate_trust(manifest.difficulty, manifest.quality_score)
+    # ── 步骤 2.5: 信任评估 (v1.1 + 语言偏差) ──
+    book_language = getattr(manifest, 'book_language', '') or manifest.extra.get('book_language', '')
+    trust = calculate_trust(manifest.difficulty, manifest.quality_score,
+                           manifest.llm_source, book_language)
     trust_level = classify_trust_level(trust)
 
     if trust_level == "reject":

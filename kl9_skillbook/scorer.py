@@ -3,24 +3,158 @@
 trust = quality * (1 - difficulty/200)
 难度评估: 启发式 LLM 代理（v1.1 用启发式替代，后续接真实 LLM API）
 质量评估: 基于 ProductionRecord 的客观评分
+语言偏差: ±3% based on LLM model family and book language match
 """
 from .models import ProductionRecord, DifficultyBreakdown
+
+
+# ═══════════════════════════════════════════════════════════════
+# LLM 模型层级与语言族
+# ═══════════════════════════════════════════════════════════════
+
+LLM_TABLE = {
+    # Tier 1 — 顶级
+    "claude-opus-4.7":    {"tier": 1, "family": "en", "ceiling": 100},
+    "claude-opus-4.5":    {"tier": 1, "family": "en", "ceiling": 98},
+    "gpt-4.5":            {"tier": 1, "family": "en", "ceiling": 100},
+    "gpt-4o":             {"tier": 1, "family": "en", "ceiling": 96},
+    "gemini-2.5-pro":     {"tier": 1, "family": "en", "ceiling": 95},
+
+    # Tier 2 — 强大
+    "deepseek-v4-pro":    {"tier": 2, "family": "zh", "ceiling": 92},
+    "deepseek-v3":        {"tier": 2, "family": "zh", "ceiling": 88},
+    "claude-sonnet-4.6":  {"tier": 2, "family": "en", "ceiling": 90},
+    "claude-sonnet-4.5":  {"tier": 2, "family": "en", "ceiling": 88},
+    "gemini-2.0-flash":   {"tier": 2, "family": "en", "ceiling": 86},
+    "qwen-3-max":         {"tier": 2, "family": "zh", "ceiling": 87},
+
+    # Tier 3 — 良好
+    "kimi-2.6":           {"tier": 3, "family": "zh", "ceiling": 82},
+    "qwen-3":             {"tier": 3, "family": "zh", "ceiling": 80},
+    "llama-4":            {"tier": 3, "family": "en", "ceiling": 78},
+    "gpt-4o-mini":        {"tier": 3, "family": "en", "ceiling": 75},
+    "claude-haiku-4.5":   {"tier": 3, "family": "en", "ceiling": 76},
+
+    # Tier 4 — 基础
+    "mistral":            {"tier": 4, "family": "en", "ceiling": 70},
+    "llama-3":            {"tier": 4, "family": "en", "ceiling": 65},
+}
+
+# 语言补偿分: zh族模型读中文书+3%, 读英文0%, 读其他-3%
+#              en族模型读英文书+3%, 读中文-3%, 读其他0%
+LANGUAGE_BIAS = {
+    ("zh", "zh"): 0.03,     # 中文模型 + 中文书
+    ("zh", "en"): 0.00,     # 中文模型 + 英文书
+    ("zh", "other"): -0.03,  # 中文模型 + 其他语言
+    ("en", "en"): 0.03,     # 英文模型 + 英文书
+    ("en", "zh"): -0.03,    # 英文模型 + 中文书
+    ("en", "other"): 0.00,  # 英文模型 + 其他语言
+}
+
+
+def resolve_llm(llm_name: str) -> dict:
+    """模糊匹配 LLM 名称到已知模型表。返回 {tier, family, ceiling}。
+
+    匹配策略:
+    1. 精确匹配 LLM_TABLE
+    2. 子串匹配（如 "claude" 匹配 "claude-opus-4.7"）
+    3. 基于名称前缀推断 family（含 "deepseek"/"qwen"/"kimi" → zh, 其余 → en）
+    4. 无匹配 → family="neutral", tier=99, ceiling=100
+    """
+    if not llm_name:
+        return {"tier": 99, "family": "neutral", "ceiling": 100}
+
+    key = llm_name.lower().strip()
+
+    # 1. 精确匹配
+    if key in LLM_TABLE:
+        return dict(LLM_TABLE[key])
+
+    # 2. 子串匹配
+    for known, info in LLM_TABLE.items():
+        if key in known or known in key:
+            return dict(info)
+
+    # 3. 前缀推断
+    zh_families = ["deepseek", "qwen", "kimi", "doubao", "ernie", "glm", "baichuan"]
+    for prefix in zh_families:
+        if key.startswith(prefix):
+            return {"tier": 99, "family": "zh", "ceiling": 80}
+
+    en_families = ["claude", "gpt", "gemini", "llama", "mistral", "anthropic", "openai"]
+    for prefix in en_families:
+        if key.startswith(prefix) or prefix in key:
+            return {"tier": 99, "family": "en", "ceiling": 80}
+
+    # 4. 无匹配
+    return {"tier": 99, "family": "neutral", "ceiling": 100}
+
+
+def apply_language_bias(quality: float, llm_name: str, book_language: str) -> float:
+    """对质量分应用语言偏差。
+
+    规则:
+    - zh族模型 + 中文书 → quality * 1.03
+    - zh族模型 + 其他语言 → quality * 0.97
+    - en族模型 + 英文书 → quality * 1.03
+    - en族模型 + 中文书 → quality * 0.97
+    - 其他组合不变
+
+    跨层级保护: 调整后的 quality 不能超过模型所在层级的 ceiling。
+    例如 DeepSeek(ceiling=92) 即使 +3% 也不能超过 92。
+
+    Args:
+        quality: 原始质量分 0-100
+        llm_name: LLM 名称（用于 resolve_llm）
+        book_language: 书籍语言 ("zh"/"en"/"de"/"fr"/"other")
+
+    Returns:
+        调整后的质量分 (clamped to [0, ceiling])
+    """
+    if not llm_name or not book_language:
+        return quality
+
+    llm_info = resolve_llm(llm_name)
+    family = llm_info["family"]
+    ceiling = llm_info["ceiling"]
+
+    if family == "neutral":
+        return quality
+
+    # 规范化书籍语言
+    lang = book_language.lower().strip()
+    if lang not in ("zh", "en"):
+        lang = "other"
+
+    bias = LANGUAGE_BIAS.get((family, lang), 0.0)
+    adjusted = quality * (1.0 + bias)
+
+    # 跨层级保护
+    return max(0.0, min(float(ceiling), adjusted))
 
 
 # ═══════════════════════════════════════════════════════════════
 # 信任计算
 # ═══════════════════════════════════════════════════════════════
 
-def calculate_trust(difficulty: float, quality: float) -> float:
+def calculate_trust(difficulty: float, quality: float,
+                    llm_name: str = "", book_language: str = "") -> float:
     """信任公式: trust = quality * (1 - difficulty/200), 裁剪到 [0, 100].
+
+    v1.1+: 先通过 apply_language_bias 调整 quality，再计算 trust。
 
     Args:
         difficulty: 0-100, 越高越难
         quality: 0-100, 越高越好
+        llm_name: LLM 名称（可选，用于语言偏差）
+        book_language: 书籍语言（可选，"zh"/"en"/"de"/"fr"/"other"）
 
     Returns:
         trust score in [0, 100]
     """
+    if llm_name and book_language:
+        quality = apply_language_bias(quality, llm_name, book_language)
+
     trust = quality * (1.0 - difficulty / 200.0)
     return max(0.0, min(100.0, trust))
 
