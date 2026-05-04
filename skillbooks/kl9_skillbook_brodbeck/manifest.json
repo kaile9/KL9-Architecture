@@ -1,0 +1,26 @@
+{
+  "skillbook_name": "brodbeck_phaenomenologie_des_geldes",
+  "version": "1.0.0",
+  "kl9_rhizome_version": ">=1.5",
+  "architecture_version": "v1.5",
+  "llm_name": "deepseek-v4-pro",
+  "source_text": {
+    "title": "Phänomenologie des Geldes",
+    "author": "Karl-Heinz Brodbeck",
+    "year": 2023,
+    "pages": 110,
+    "language": "German"
+  },
+  "author": {
+    "creator": "2youg1",
+    "learning_date": "2026-05-05"
+  },
+  "description": "Brodbeck 货币现象学的完整二重折叠学习记录。12个DualStates，12个核心概念，涵盖货币作为思维形式、述行承认、循环效力幻象、Logos/Ratio二分等核心论点，以及与Simmel/Hegel/Husserl/Marx/MMT的谱系关系。经两轮完整学习迭代（逐章折叠 + 三线程交叉验证）。",
+  "dependencies": [],
+  "rounds_completed": 2,
+  "followup_queries_remaining": 7,
+  "tension_gradient_peak": "zirkuläre_Illusion_der_Geltung (0.92)",
+  "estimated_cycles_to_stability": 2,
+  "quality_notes": "德语原文逐页阅读，非摘要/二手文献。第二轮通过Simmel重读、Marx互补、经济学回应三线程交叉验证。每个DualState包含明确的源文本引用段落。",
+  "git_repo": "https://github.com/kaile9/KL9-RHIZOME"
+}

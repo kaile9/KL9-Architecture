@@ -26,6 +26,14 @@
 ### 💡 提 Idea / Suggest Ideas
 DualState 还能怎么改进？TensionBus 应该支持什么新事件类型？你说了算。
 
+### 📚 贡献技能书 · Contribute a Skill Book
+读完一本有深度的书后，在你的 KL9 实例上完成至少 1 轮完整学习，
+导出 → 填写 manifest → 提交到 `skillbooks/` 目录。
+
+详见 [skillbooks/SKILLBOOK_STANDARD.md](skillbooks/SKILLBOOK_STANDARD.md)。
+
+⚠️ **技能书不是 AI 摘要。** 只接受精读原著后产生的学习记录。
+
 ### 🌐 翻译 / Translate
 把 README 和文档翻译成你的语言。
 

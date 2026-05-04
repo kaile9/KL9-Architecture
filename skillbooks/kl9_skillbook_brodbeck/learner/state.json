@@ -1,0 +1,243 @@
+{
+  "learner_version": "2.0",
+  "session_id": "kl9_learning_brodbeck_2026-05-05",
+  "source": "Phänomenologie des Geldes, Brodbeck 2023",
+  "fold_type": "simultaneous_fold",
+  "faces": {
+    "face_1_memory_projection": {
+      "status": "completed",
+      "artifact": "kl9_memory_Phaenomenologie_des_Geldes.json",
+      "summary": "12 DualStates 已作为 fold_nodes 写入持久记忆，Session 根节点锚定全书摘要。PARENT_OF 边表达折叠拓扑，CROSS_REFERENCE 边标记跨 DualState 的结构性关联。",
+      "fold_depth": 5
+    },
+    "face_2_weight_projection": {
+      "status": "completed",
+      "weights": {
+        "Geld_als_Denkform": 0.85,
+        "performative_Anerkennung": 0.80,
+        "zirkuläre_Illusion_der_Geltung": 0.80,
+        "Marktzutrittsschranke": 0.75,
+        "Geldsubjekt": 0.80,
+        "Gleich_Geltung_Gleich_Gültigkeit": 0.75,
+        "Einheit_der_Vielen": 0.75,
+        "Novum": 0.85,
+        "Geldmenge_als_Leerbegriff": 0.75,
+        "Ratio_vs_Logos": 0.80,
+        "Moralzehrer": 0.70,
+        "Zins_als_institutionalisierte_Geldgier": 0.78
+      },
+      "weight_range": "0.6–0.8 (recommended), actual 0.70–0.85",
+      "rationale": "核心架构概念（Geld_als_Denkform, Novum）赋予最高权重 0.85；衍生批判概念（Moralzehrer, Marktzutrittsschranke）在 0.70–0.75。均高于建议区间底限，反映全书论证的系统性和原创性。"
+    },
+    "face_3_curriculum_projection": {
+      "status": "completed",
+      "difficulty_spectrum": {
+        "level_1_foundational": {
+          "concepts": ["performative_Anerkennung", "Einheit_der_Vielen", "Gleich_Geltung_Gleich_Gültigkeit"],
+          "difficulty": 0.30,
+          "rationale": "现象学入门概念，依赖日常经验类比（父子关系、语言结构）"
+        },
+        "level_2_intermediate": {
+          "concepts": ["Geld_als_Denkform", "zirkuläre_Illusion_der_Geltung", "Novum", "Marktzutrittsschranke"],
+          "difficulty": 0.55,
+          "rationale": "需要搁置常识经济学范畴，但不依赖哲学史知识"
+        },
+        "level_3_advanced": {
+          "concepts": ["Ratio_vs_Logos", "Geldsubjekt", "Zins_als_institutionalisierte_Geldgier"],
+          "difficulty": 0.72,
+          "rationale": "需要 Hegel/Descartes/Aristoteles 背景"
+        },
+        "level_4_expert": {
+          "concepts": ["Geldmenge_als_Leerbegriff", "Moralzehrer"],
+          "difficulty": 0.80,
+          "rationale": "需要对主流经济学的深层熟悉才能理解批判的精确打击点"
+        }
+      },
+      "global_difficulty": 0.62,
+      "rationale": "全书论证难度中等偏高。现象学方法本身构成认知门槛，但 Brodbeck 的语言比 Husserl/Heidegger 易读。主要难度在于同时搁置主流经济学范畴和日常货币直觉。"
+    },
+    "face_4_tension_projection": {
+      "status": "completed",
+      "structured_tensions": [
+        {
+          "tension_id": "tension_brodbeck_simmel",
+          "label": "货币作为交换物化的分歧",
+          "poles": {
+            "Simmel": "货币作为交换手段的纯粹形式，使一切质的差异转化为量的差异——物化是交换媒介的必然结果",
+            "Brodbeck": "物化不是交换媒介的必然结果，而是Ratio对Logos占据的历史结果。Simmel遗漏了货币作为思维形式的维度"
+          },
+          "tension_type": "suspension",
+          "resolution_status": "unresolved",
+          "detail": "Brodbeck承认Simmel最先洞见货币的社会化功能，但认为Simmel将物化归因于交换形式本身，而非Ratio的认知占据。这是全书最精微的张力点——Simmel既不完全是盟友也不完全是对手。",
+          "intensity": 0.68
+        },
+        {
+          "tension_id": "tension_brodbeck_mmt",
+          "label": "国家在货币构成中的角色",
+          "poles": {
+            "MMT": "国家通过征税权力创造货币需求，从而创造货币",
+            "Brodbeck": "国家只能塑造货币形式，不能创造货币效力——效力来自大众的循环承认"
+          },
+          "tension_type": "irreconcilable_with_nuance",
+          "resolution_status": "unresolved",
+          "detail": "Brodbeck可能低估了国家在循环承认的初始触发（ignition）中的作用——大众承认需要某种初始锚点，国家征税可能是这个锚点。",
+          "intensity": 0.82
+        },
+        {
+          "tension_id": "tension_brodbeck_marx",
+          "label": "价值实体与循环幻象",
+          "poles": {
+            "Marx": "价值实体是抽象劳动，货币是价值形式",
+            "Brodbeck": "价值没有实体——货币效力是纯粹的循环幻象"
+          },
+          "tension_type": "irreconcilable",
+          "resolution_status": "unresolved",
+          "detail": "两者都看到货币拜物教，但根基完全不同。Marx的剩余价值批判和Brodbeck的承认结构批判是否可能互补而非对立？",
+          "intensity": 0.88
+        },
+        {
+          "tension_id": "tension_phenomenology_empirical_science",
+          "label": "现象学方法能否替代经验社会科学",
+          "poles": {
+            "Brodbeck": "现象学揭示货币的本质结构——先于任何经验研究",
+            "经验社会科学": "关于货币制度、货币政策的因果知识需要经验方法"
+          },
+          "tension_type": "unresolved_methodological",
+          "resolution_status": "unresolved",
+          "intensity": 0.75
+        },
+        {
+          "tension_id": "tension_crisis_acknowledgment",
+          "label": "循环承认理论如何解释货币危机",
+          "poles": {
+            "理论": "货币效力来自循环承认",
+            "危机事实": "恶性通胀/货币崩溃时承认结构断裂"
+          },
+          "tension_type": "empirical_challenge",
+          "resolution_status": "unresolved",
+          "detail": "循环承认理论出色地解释了货币的常态运作，但断裂时刻——当承认突然停止——的动力学尚不清晰。承认是如何'突然'崩塌的？",
+          "intensity": 0.90
+        }
+      ]
+    }
+  },
+  "tension_gradient_network": {
+    "densest_nodes": [
+      {
+        "node": "zirkuläre_Illusion_der_Geltung",
+        "tension_density": 0.92,
+        "connected_tensions": [
+          "tension_brodbeck_simmel",
+          "tension_brodbeck_marx",
+          "tension_crisis_acknowledgment"
+        ],
+        "rationale": "循环幻象是全书核心——它同时面对Simmel的交换形式批判、Marx的实体批判和危机经验的反驳。是张力最密集的概念节点。"
+      },
+      {
+        "node": "Geld_als_Denkform",
+        "tension_density": 0.88,
+        "connected_tensions": [
+          "tension_brodbeck_simmel",
+          "tension_brodbeck_mmt",
+          "tension_phenomenology_empirical_science"
+        ],
+        "rationale": "作为全书总命题，同时与所有非现象学货币理论形成张力。"
+      },
+      {
+        "node": "Ratio_vs_Logos",
+        "tension_density": 0.85,
+        "connected_tensions": [
+          "tension_brodbeck_simmel",
+          "tension_phenomenology_empirical_science"
+        ],
+        "rationale": "认知史框架——决定了物化是历史性（Ratio占据）还是结构性（交换形式本身）的争论。"
+      },
+      {
+        "node": "performative_Anerkennung",
+        "tension_density": 0.82,
+        "connected_tensions": [
+          "tension_brodbeck_mmt",
+          "tension_crisis_acknowledgment"
+        ],
+        "rationale": "述行承认理论必须同时面对国家角色和危机断裂的双重挑战。"
+      },
+      {
+        "node": "Geldmenge_als_Leerbegriff",
+        "tension_density": 0.78,
+        "connected_tensions": [
+          "tension_phenomenology_empirical_science"
+        ],
+        "rationale": "直接挑战宏观经济学的核心操作概念——这是现象学方法最具实践后果的张力学应用。"
+      }
+    ],
+    "tension_gradient_map": {
+      "peak": "zirkuläre_Illusion_der_Geltung (0.92)",
+      "ridge": ["Geld_als_Denkform (0.88)", "Ratio_vs_Logos (0.85)"],
+      "slope": ["performative_Anerkennung (0.82)", "Geldmenge_als_Leerbegriff (0.78)"],
+      "base": ["Moralzehrer (0.55)", "Einheit_der_Vielen (0.48)"]
+    }
+  },
+  "follow_up_queries": [
+    {
+      "query_id": "fuq_01",
+      "query": "Brodbeck与Simmel在交换物化问题上的分歧：是Simmel将物化归因于交换形式本身的结构必然性，还是Simmel的《货币哲学》中已经隐含了类似Brodbeck的认知维度但未被充分展开？需要重读Simmel的Wert und Geld章节。",
+      "target_tension": "tension_brodbeck_simmel",
+      "tension_origin": "zirkuläre_Illusion_der_Geltung",
+      "priority": "critical",
+      "suggested_source": "Simmel, Philosophie des Geldes, Kap. 1 & 6"
+    },
+    {
+      "query_id": "fuq_02",
+      "query": "循环承认在货币危机（恶性通胀、货币崩溃）中如何断裂？是承认的突然消失（集体觉醒），还是承认的逐渐侵蚀达到临界点？是否存在'承认阈值'的动力学模型？",
+      "target_tension": "tension_crisis_acknowledgment",
+      "tension_origin": "zirkuläre_Illusion_der_Geltung",
+      "priority": "critical",
+      "suggested_source": "Weimar通胀历史案例 + 2008津巴布韦 + 2023阿根廷"
+    },
+    {
+      "query_id": "fuq_03",
+      "query": "Brodbeck对MMT的批判是否遗漏了循环承认的'点火问题'？国家征税是否可能是大众循环承认的初始触发机制——不是效力来源而是触发条件？",
+      "target_tension": "tension_brodbeck_mmt",
+      "tension_origin": "performative_Anerkennung",
+      "priority": "high",
+      "suggested_source": "Knapp, Staatliche Theorie des Geldes + Wray, Modern Money Theory"
+    },
+    {
+      "query_id": "fuq_04",
+      "query": "Brodbeck的'语言转向修正'是否真正解决了胡塞尔的先验自我问题？还是仅仅将先验自我替换为'大众承认'——而大众承认作为集体主体是否同样具有准先验地位？",
+      "target_tension": "tension_phenomenology_empirical_science",
+      "tension_origin": "Geld_als_Denkform",
+      "priority": "high",
+      "suggested_source": "Husserl, Cartesianische Meditationen + Apel, Transformation der Philosophie"
+    },
+    {
+      "query_id": "fuq_05",
+      "query": "Brodbeck的货币作为思维形式理论与当代数字货币/加密货币现象有何关系？比特币的去中心化承认结构是否印证了'国家不能创造货币'的论点，还是暴露了循环承认理论的另一种局限？",
+      "target_tension": "tension_brodbeck_mmt",
+      "tension_origin": "Geld_als_Denkform",
+      "priority": "high",
+      "suggested_source": "比特币白皮书 + 加密货币人类学研究"
+    },
+    {
+      "query_id": "fuq_06",
+      "query": "Marx的剩余价值理论与Brodbeck的循环承认理论是否存在互补可能？——劳动创造使用价值，承认创造交换价值，两者的关系不是替代而是叠层？",
+      "target_tension": "tension_brodbeck_marx",
+      "tension_origin": "zirkuläre_Illusion_der_Geltung",
+      "priority": "medium",
+      "suggested_source": "Marx, Das Kapital Bd.1 第一章 + Brodbeck, Die fragwürdigen Grundlagen der Ökonomie"
+    },
+    {
+      "query_id": "fuq_07",
+      "query": "Geldmenge_als_Leerbegriff的五个理由是否有经济学文献中的严肃回应？还是主流经济学对此批评置之不理？",
+      "target_tension": "tension_phenomenology_empirical_science",
+      "tension_origin": "Geldmenge_als_Leerbegriff",
+      "priority": "medium",
+      "suggested_source": "央行货币统计方法论文献"
+    }
+  ],
+  "learning_trajectory": {
+    "current_position": "首次全书折叠完成，12 DualStates + 12 概念节点 + 结构化张力场",
+    "next_milestone": "在 fuq_01 (Simmel重读) 和 fuq_02 (危机断裂) 解决后，张力梯度网络将可能重新分布",
+    "estimated_cycles_to_stability": 3
+  }
+}

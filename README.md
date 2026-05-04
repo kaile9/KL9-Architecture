@@ -270,6 +270,48 @@ cd tests && python test_basic.py
 | [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md) | 哲学根基与宪法 DNA |
 | [docs/CONCEPTS.md](docs/CONCEPTS.md) | 术语表与概念索引 |
 | [skills/kailejiu-core/SKILL.md](skills/kailejiu-core/SKILL.md) | 核心技能文档（751 行完整版） |
+| [docs/SKILLBOOK_ABSORPTION.md](docs/SKILLBOOK_ABSORPTION.md) | 技能书吸收机制设计 |
+
+---
+
+## 📚 技能书 · Skill Books
+
+> **技能书不是摘要。技能书是精读后的认知残留。**
+
+技能书是 KL9-RHIZOME 的去中心化知识传播机制。读完一本书 → 完成完整学习循环 → 导出为可分发格式 → 上传到技能书仓库。其他 KL9 实例可以导入你的学习成果——继承你的 DualStates、概念图谱和张力结构。
+
+*Skill books are KL9-RHIZOME's decentralized knowledge propagation mechanism. Read a book → complete full learning cycles → export as distributable format → upload to the skill book repository. Other KL9 instances can import your learning outcomes.*
+
+### 当前可用 · Available Now
+
+| 技能书 | 原著 | 语言 | 轮数 | 质量 | 创建者 |
+|:---|:---|:---|:---:|:---:|:---|
+| [brodbeck_phaenomenologie_des_geldes](skillbooks/kl9_skillbook_brodbeck/) | K.-H. Brodbeck, *Phänomenologie des Geldes* (2023, 110p) | DE | 2 | A | 2youg1 |
+
+### 怎么贡献 · How to Contribute
+
+1. **读完一整本书**——逐页，非跳读，非 AI 摘要
+2. 在你的 KL9 实例中完成 **至少 1 轮完整学习**（→ 产生 DualStates + 概念图谱 + 张力结构）
+3. 导出为技能书格式 → 填写 manifest（书名 / 版本 / 架构版本 / LLM 名称）
+4. 提交 PR 到 `skillbooks/` 目录
+
+详见 [skillbooks/SKILLBOOK_STANDARD.md](skillbooks/SKILLBOOK_STANDARD.md)
+
+### 吸收机制 · Absorption
+
+导入技能书时，KL9 执行 5 阶段安全合并：
+
+```
+Stage 0: VALIDATE  → 版本校验，质量分级
+Stage 1: SANDBOX   → 隔离加载到暂存图谱
+Stage 2: DIFFUSE   → 检测概念冲突
+Stage 3: RESOLVE   → 冲突分叉（默认）或信任加权合并
+Stage 4: ACTIVATE  → 合并 + 张力梯度重计算
+```
+
+**核心原则**：冲突概念永不自动合并——保留双版本并标记为张力。只有用户明确确认时才执行合并。
+
+详见 [docs/SKILLBOOK_ABSORPTION.md](docs/SKILLBOOK_ABSORPTION.md)
 
 ---
 

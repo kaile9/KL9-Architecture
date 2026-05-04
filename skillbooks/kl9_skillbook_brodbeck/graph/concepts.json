@@ -1,0 +1,224 @@
+{
+  "graph_version": "3.0",
+  "session_id": "kl9_learning_brodbeck_2026-05-05",
+  "source": "Phänomenologie des Geldes, Brodbeck 2023",
+  "concept_nodes": [
+    {
+      "node_id": "concept_geld_als_denkform",
+      "label": "Geld_als_Denkform",
+      "definition": "货币不是物、功能、符号或量，而是一种思维形式——其存在在于其被思维",
+      "domain": "Phänomenologie_des_Geldes",
+      "source_dualstate": "ds_01_geld_als_form",
+      "initial_weight": 0.85,
+      "properties": {
+        "ontological_status": "Denkform, nicht Ding",
+        "key_contrast": "区别于名目论、金属论、功能论、数量论"
+      }
+    },
+    {
+      "node_id": "concept_performative_anerkennung",
+      "label": "performative_Anerkennung",
+      "definition": "货币的存在通过使用货币的行为（uno actu）被实施——承认不是信念，是行为",
+      "domain": "Phänomenologie_des_Geldes",
+      "source_dualstate": "ds_05_performative_anerkennung",
+      "initial_weight": 0.80,
+      "properties": {
+        "philosophical_root": "Austin/Searle 言语行为理论的货币化扩展",
+        "key_analogy": "父子关系、Hume统治/意见、Arendt权力/暴力"
+      }
+    },
+    {
+      "node_id": "concept_zirkulaere_illusion_der_geltung",
+      "label": "zirkuläre_Illusion_der_Geltung",
+      "definition": "货币效力的实质是集体产生并在循环中自我维持的幻象——每个人承认货币因为每个人承认货币",
+      "domain": "Phänomenologie_des_Geldes",
+      "source_dualstate": "ds_05_performative_anerkennung",
+      "initial_weight": 0.80,
+      "properties": {
+        "type": "kollektive Selbstreferenz",
+        "fragility_condition": "承认结构崩塌时货币失效"
+      }
+    },
+    {
+      "node_id": "concept_marktzutrittsschranke",
+      "label": "Marktzutrittsschranke",
+      "definition": "货币作为市场参与的准入障碍——必须拥有货币才能参与，支出货币即丧失准入资格",
+      "domain": "Phänomenologie_des_Geldes",
+      "source_dualstate": "ds_09_geld_als_eintrittskarte",
+      "initial_weight": 0.75,
+      "properties": {
+        "power_dimension": "Herrschaft — 准入控制即权力",
+        "paradox": "使用=失去，入场券的使用销毁入场券"
+      }
+    },
+    {
+      "node_id": "concept_geldsubjekt",
+      "label": "Geldsubjekt",
+      "definition": "货币主体——计算性、理性自利、孤立的现代性主体，由Ratio对Logos的占据产生",
+      "domain": "Phänomenologie_des_Geldes",
+      "source_dualstate": "ds_08_logos_und_ratio",
+      "initial_weight": 0.80,
+      "properties": {
+        "genealogy": "Descartes ego cogito → Homo oeconomicus",
+        "antithesis": "Logos-Subjekt (Vergemeinschaftung im Vernehmen)"
+      }
+    },
+    {
+      "node_id": "concept_gleich_geltung_gleich_gueltigkeit",
+      "label": "Gleich_Geltung_Gleich_Gültigkeit",
+      "definition": "等而效之/等而漠之——货币使一切等量化，从而抹平质的差异",
+      "domain": "Phänomenologie_des_Geldes",
+      "source_dualstate": "ds_01_geld_als_form",
+      "initial_weight": 0.75,
+      "properties": {
+        "double_edge": "Gleich-Geltung (联结) → Gleich-Gültigkeit (漠然)",
+        "ethical_implication": "Moralzehrer — 消耗质的差异"
+      }
+    },
+    {
+      "node_id": "concept_einheit_der_vielen",
+      "label": "Einheit_der_Vielen",
+      "definition": "多中之一——货币和语言共享的结构：将异质的'多'统一为可交换的'一'",
+      "domain": "Phänomenologie_des_Geldes",
+      "source_dualstate": "ds_07_das_eine_und_die_leerheit",
+      "initial_weight": 0.75,
+      "properties": {
+        "parallel_structure": "Geld : Waren :: Sprache : Gedanken",
+        "emptiness": "这个'一'本身是空洞的——śūnya"
+      }
+    },
+    {
+      "node_id": "concept_novum",
+      "label": "Novum",
+      "definition": "货币是逻辑和历史中的新事物——不可从非货币前提推导，任何推导都是循环",
+      "domain": "Phänomenologie_des_Geldes",
+      "source_dualstate": "ds_04_ableitungszirkel",
+      "initial_weight": 0.85,
+      "properties": {
+        "logical_status": "无法被还原的涌现属性",
+        "critique_targets": ["物物交换理论", "数学模型", "考古学推导", "功能推导", "交易成本推导"]
+      }
+    },
+    {
+      "node_id": "concept_geldmenge_als_leerbegriff",
+      "label": "Geldmenge_als_Leerbegriff",
+      "definition": "'货币量'不是自身同一的可测量实体，而是统计虚构——五个理由支持",
+      "domain": "Phänomenologie_des_Geldes",
+      "source_dualstate": "ds_10_geldmenge_als_leerbegriff",
+      "initial_weight": 0.75,
+      "properties": {
+        "target": "MV=PQ 恒等式和所有总量经济学",
+        "five_reasons": ["商品数量不确定", "耐用品难计入", "金融价格/数量不可分离", "劳动报酬难归入实物", "信用/贮藏/恐慌改变效果"]
+      }
+    },
+    {
+      "node_id": "concept_ratio_vs_logos",
+      "label": "Ratio_vs_Logos",
+      "definition": "逻各斯（联结性的言说-倾听）与比率（分离性的计算）的对抗——现代性的认知基础",
+      "domain": "Phänomenologie_des_Geldes",
+      "source_dualstate": "ds_08_logos_und_ratio",
+      "initial_weight": 0.80,
+      "properties": {
+        "logos": "Vernehmen, Gemeinschaft im Sprechen, Wahrheit im 'Du'",
+        "ratio": "Berechnung, ego cogito, isoliertes Selbst",
+        "historical_shift": "Ratio besetzt Logos → Moderne"
+      }
+    },
+    {
+      "node_id": "concept_moralzehrer",
+      "label": "Moralzehrer",
+      "definition": "货币经济消耗道德资源但自身不能产生道德——将人定价即将其物化",
+      "domain": "Phänomenologie_des_Geldes",
+      "source_dualstate": "ds_06_faktum_und_wert",
+      "initial_weight": 0.70,
+      "properties": {
+        "mechanism": "Faktum/Wert 的领域混淆",
+        "effect": "人被等同为机器和原材料——可替代、可计算"
+      }
+    },
+    {
+      "node_id": "concept_zins_als_institutionalisierte_geldgier",
+      "label": "Zins_als_institutionalisierte_Geldgier",
+      "definition": "利息不是客观经济规律（等待/风险/时间偏好），而是制度化的贪婪形式——G-G'",
+      "domain": "Phänomenologie_des_Geldes",
+      "source_dualstate": "ds_11_zins_als_institutionalisierte_geldgier",
+      "initial_weight": 0.78,
+      "properties": {
+        "aristotelian_root": "G-G' als widernatürlichste Form",
+        "critique": "等待、风险、时间偏好都不是客观因果关系",
+        "nuance": "生产信贷可能有功能性辩护；消费信贷是纯粹再分配"
+      }
+    }
+  ],
+  "genealogy_edges": [
+    {
+      "from": "Brodbeck",
+      "to": "Simmel",
+      "type": "genealogy",
+      "label": "frame_modified_by:social_form_evolution",
+      "detail": "继承Simmel货币作为社会化形式的基本洞见，但拒绝其将货币主要理解为交换物化——Brodbeck强调思维形式维度",
+      "tension_site": true
+    },
+    {
+      "from": "Brodbeck",
+      "to": "Hegel",
+      "type": "genealogy",
+      "label": "Phänomenologie_des_Geistes→Phänomenologie_des_Geldes",
+      "detail": "继承现象学方法的形式结构（意识经验的科学），但将Geist的自我运动替换为货币的循环式社会承认运动。Verstand/Vernunft区分映射到Ratio/Logos"
+    },
+    {
+      "from": "Brodbeck",
+      "to": "Husserl",
+      "type": "genealogy",
+      "label": "frame_modified_by:linguistic_turn_correction",
+      "detail": "继承epoché和intentio obliqua方法，但以语言转向修正胡塞尔的先验自我出发点——承认结构替代先验意识"
+    },
+    {
+      "from": "Brodbeck",
+      "to": "Aristoteles",
+      "type": "genealogy",
+      "label": "frame_transplant:three_forms_of_exchange",
+      "detail": "移植亚里士多德W-G-W'/G-W-G'/G-G'三形式分析框架，将其从伦理学批判提升为认知批判"
+    },
+    {
+      "from": "Brodbeck",
+      "to": "Marx",
+      "type": "genealogy",
+      "label": "irreconcilable:labor_substance_critique",
+      "detail": "拒绝马克思的劳动价值实体论——货币效力不来自凝结劳动，而来自循环承认。货币拜物教分析有共鸣但根基不同"
+    },
+    {
+      "from": "Brodbeck",
+      "to": "MMT",
+      "type": "genealogy",
+      "label": "irreconcilable:state_fiat_critique",
+      "detail": "拒绝MMT的国家货币论——国家只能塑造货币形式，不能创造货币本身。货币效力来自大众的循环承认，非来自征税权力"
+    }
+  ],
+  "tension_field_edges": [
+    {
+      "from": "Mainstream_Ökonomie",
+      "to": "Brodbeck",
+      "type": "irreconcilable",
+      "label": "money_as_quantity_vs_thoughtform",
+      "detail": "主流经济学：货币是可测量的外在于意识的总量M → Brodbeck：货币是思维形式，货币量是空洞概念",
+      "tension_intensity": 0.95
+    },
+    {
+      "from": "Nominalismus_Chartalism",
+      "to": "Brodbeck",
+      "type": "irreconcilable",
+      "label": "state_vs_public_recognition",
+      "detail": "名目论/MMT：货币效力来自国家/法律 → Brodbeck：国家只能塑造货币形式，效力来自大众循环承认",
+      "tension_intensity": 0.85
+    },
+    {
+      "from": "Metallismus",
+      "to": "Brodbeck",
+      "type": "irreconcilable",
+      "label": "intrinsic_vs_social_value",
+      "detail": "金属论：货币价值来自内在物质属性或劳动实体 → Brodbeck：价值是纯粹的社会循环幻象",
+      "tension_intensity": 0.90
+    }
+  ]
+}

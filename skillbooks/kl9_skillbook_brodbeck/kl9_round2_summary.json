@@ -1,0 +1,200 @@
+{
+  "round": "kl9_round2_summary",
+  "date": "2026-05-05",
+  "threads_completed": 3,
+  "cross_reference_map": {
+    "nodes": [
+      {
+        "node_id": "CROSS_001",
+        "label": "价值主观性的共振链",
+        "threads": [
+          "DS-013 (Simmel)",
+          "DS-014 (Marx)",
+          "DS-005 (performative Anerkennung)"
+        ],
+        "mapping": "Simmel 的价值主观性（价值是主观判断投射）↔ Brodbeck 的述行承认（价值在承认中存在）↔ Marx 的抽象劳动（需激进重读为社会等同化）。三者共享一个结构洞见：价值不附着于物。分歧在：价值附着于什么？——主体判断（Simmel）、社会承认（Brodbeck）、社会劳动（Marx）。",
+        "tension_effect": "这一共振链削弱了 Brodbeck-Simmel 和 Brodbeck-Marx 张力的绝对性——三者在'价值非物属性'上一致，分歧在'价值在哪'。"
+      },
+      {
+        "node_id": "CROSS_002",
+        "label": "结构必然 vs. 历史偶然——贯穿三线程的元张力",
+        "threads": [
+          "DS-013 (Simmel)",
+          "DS-014 (Marx)",
+          "DS-015 (Economics)"
+        ],
+        "mapping": "三线程共享同一深层结构：\n• Simmel: 物化是交换形式的结构必然 → Brodbeck: 物化是 Ratio 的历史占据\n• Marx: 价值形式是商品矛盾的结构展开 → Brodbeck: 货币是 Novum，不可推导\n• 经济学: M 概念是经济分析的结构前提 → Brodbeck: M 概念是 Denkform 的投射\n三条线都在'结构 vs. 历史/认知'的轴上——Brodbeck 的立场一致：所有'结构必然性'都是被历史-认知配置自然化的偶然。",
+        "tension_effect": "这是本次学习周期最重要的发现——Brodbeck 的核心策略不是反驳具体理论，而是揭示它们共享的'结构必然性假定'是 Ratio 思维的历史产物。这构成了一个统一的批判矩阵。"
+      },
+      {
+        "node_id": "CROSS_003",
+        "label": "现象学还原的适用性边界",
+        "threads": [
+          "DS-014 (Marx)",
+          "DS-015 (Economics)"
+        ],
+        "mapping": "DS-014 发现：对 Marx 执行现象学还原 → 剩余社会等同化操作 ≈ Brodbeck 的循环承认。DS-015 发现：对经济学 M 概念执行现象学还原 → 剩余'量化冲动'作为 Denkform 的症状。两条还原路径都'有效'——但还原后剩余的东西是否具有原理论的批判力量？Marx 还原后失去剥削理论；经济学还原后失去政策工具。",
+        "tension_effect": "现象学还原不是中立的操作——它在揭示的同时也在置换。这是 Brodbeck 方法的核心张力：还原揭示了什么，但也失去了什么？"
+      },
+      {
+        "node_id": "CROSS_004",
+        "label": "承认断裂——三线程共享的暗面",
+        "threads": [
+          "DS-013 (Simmel)",
+          "DS-014 (Marx)",
+          "DS-015 (Economics)"
+        ],
+        "mapping": "三线程都触及一个 Brodbeck 未充分理论化的问题：承认如何断裂？\n• Simmel: 二元论无解——承认的紧张是永恒的，不需断裂理论\n• Marx: 危机是价值实现的断裂——商品无法转化为货币——承认在流通中崩塌\n• 经济学: M2 速度崩溃（NY Fed #83）——统计承认与实际承认的偏离\n三条线指向同一问题：循环承认不是平滑的——它有裂缝、临界点和崩塌动力学。",
+        "tension_effect": "强化了 tension_crisis_acknowledgment (0.90) 的紧迫性——三线程都确认了这是 Brodbeck 体系中最需要发展的盲点。建议升为下一个学习周期的最高优先级。"
+      }
+    ],
+    "structural_pattern": "三线程共同揭示 Brodbeck 的理论策略：不是提供'更好的货币理论'（与 Simmel/Marx/经济学竞争），而是揭示所有这些理论共享的未审前提——货币作为可被理论化的'某物'（交换形式、劳动实体、可测量总量）。Brodbeck 的批判是对'货币理论本身'的现象学还原。"
+  },
+  "tension_gradient_reconstruction": {
+    "before": {
+      "peak": "zirkuläre_Illusion_der_Geltung (0.92)",
+      "ridge": [
+        "Geld_als_Denkform (0.88)",
+        "Ratio_vs_Logos (0.85)"
+      ],
+      "slope": [
+        "performative_Anerkennung (0.82)",
+        "Geldmenge_als_Leerbegriff (0.78)"
+      ],
+      "base": [
+        "Moralzehrer (0.55)",
+        "Einheit_der_Vielen (0.48)"
+      ],
+      "structured_tensions": {
+        "tension_brodbeck_simmel": {
+          "intensity": 0.68,
+          "type": "suspension"
+        },
+        "tension_brodbeck_marx": {
+          "intensity": 0.88,
+          "type": "irreconcilable"
+        },
+        "tension_phenomenology_empirical_science": {
+          "intensity": 0.75,
+          "type": "unresolved_methodological"
+        },
+        "tension_brodbeck_mmt": {
+          "intensity": 0.82,
+          "type": "irreconcilable_with_nuance"
+        },
+        "tension_crisis_acknowledgment": {
+          "intensity": 0.9,
+          "type": "empirical_challenge"
+        }
+      }
+    },
+    "after": {
+      "peak": "zirkuläre_Illusion_der_Geltung (0.92) — 不变",
+      "ridge": [
+        "Geld_als_Denkform (0.88)",
+        "Ratio_vs_Logos (0.85 → 0.87)"
+      ],
+      "slope": [
+        "performative_Anerkennung (0.82)",
+        "Geldmenge_als_Leerbegriff (0.78 → 0.79)"
+      ],
+      "base": [
+        "Moralzehrer (0.55)",
+        "Einheit_der_Vielen (0.48)"
+      ],
+      "structured_tensions": {
+        "tension_brodbeck_simmel": {
+          "old": {
+            "intensity": 0.68,
+            "type": "suspension"
+          },
+          "new": {
+            "intensity": 0.62,
+            "type": "asymmetric_complement_with_genuine_opposition"
+          },
+          "delta": -0.06,
+          "reason": "Simmel 的认知维度线索使两人距离缩小。分歧清晰化为'结构必然 vs. 历史偶然'，不再模糊。强度降低但精度提高。"
+        },
+        "tension_brodbeck_marx": {
+          "old": {
+            "intensity": 0.88,
+            "type": "irreconcilable"
+          },
+          "new": {
+            "intensity": 0.85,
+            "type": "irreconcilable_with_phenomenological_reduction_pathway"
+          },
+          "delta": -0.03,
+          "reason": "发现现象学还原通道——抽象劳动可被激进重读为社会等同化。但剥削理论的不可还原性保持根本分歧。"
+        },
+        "tension_phenomenology_empirical_science": {
+          "old": {
+            "intensity": 0.75,
+            "type": "unresolved_methodological"
+          },
+          "new": {
+            "intensity": 0.7,
+            "type": "convergent_diagnosis_divergent_prescription"
+          },
+          "delta": -0.05,
+          "reason": "经济学内部批评在诊断层面支持 Brodbeck 的五个理由。分歧从'全盘对立'细化为'诊断一致，处方相反'。"
+        },
+        "tension_brodbeck_mmt": {
+          "intensity": 0.82,
+          "status": "unchanged_this_cycle"
+        },
+        "tension_crisis_acknowledgment": {
+          "intensity": 0.9,
+          "status": "urgency_increased",
+          "reason": "三线程交叉映射（CROSS_004）确认承认断裂是三线程共享的暗面——Simmel 的二元论承担、Marx 的实现危机、经济学的速度崩溃都指向 Brodbeck 体系的盲点。建议从 medium 提升为下一周期的 critical 优先级。"
+        }
+      }
+    },
+    "global_reconstruction_effect": {
+      "tension_landscape_shift": "整体张力强度小幅下降（三个目标张力平均 -0.047），但张力结构从'二极对立'转向'多层分化'。关键变化：\n1. 不再有纯'irreconcilable'的张力——所有张力都在对立轴之外发现了部分共振区\n2. '结构必然 vs. 历史偶然'浮现为贯穿三个目标张力的元张力轴\n3. '现象学还原的得失'成为新的二阶张力——还原揭示什么 vs. 还原失去什么",
+      "new_densest_node": "Ratio_vs_Logos (0.87) — 超越了 Geld_als_Denkform (0.88) 成为最活跃的节点。因为三线程都最终触及 Ratio 作为共享未审前提。",
+      "new_emergent_tension": "现象学还原的边界（intensity ~0.65）——对 Marx、经济学、Simmel 执行现象学还原都'有效'但都'失去批判力量'。这是 Brodbeck 方法论的自我反思盲点：现象学还原是否总是牺牲批判力量换取概念清晰？"
+    }
+  },
+  "learning_trajectory_update": {
+    "previous_position": "首次全书折叠完成，12 DualStates + 12 概念节点 + 结构化张力场",
+    "current_position": "第二轮（三线程并行）完成。3 个新 DualStates (DS-013, 014, 015) + 4 个交叉映射节点 + 2 个新 follow-up queries (fuq_08, fuq_09)。张力梯度从二极对立向多层分化演进。",
+    "next_milestones": [
+      {
+        "priority": "critical",
+        "query_id": "fuq_02",
+        "query": "循环承认在货币危机中的断裂动力学",
+        "reason": "三线程交叉映射确认这是 Brodbeck 体系的最大盲点"
+      },
+      {
+        "priority": "high",
+        "query_id": "fuq_08",
+        "query": "Barnett Divisia 货币总量 vs. Geldmenge_als_Leerbegriff",
+        "reason": "本轮新发现缺口——经济学最严肃的内部改良方案"
+      },
+      {
+        "priority": "high",
+        "query_id": "fuq_09",
+        "query": "比特币固定供给是否构成反例",
+        "reason": "本轮新发现缺口——可精确计量的货币量"
+      },
+      {
+        "priority": "high",
+        "query_id": "fuq_04",
+        "query": "Brodbeck 的语言转向是否解决了先验自我问题",
+        "reason": "现象学还原的边界问题引出——Brodbeck 的'大众承认'是否具有准先验地位？"
+      }
+    ],
+    "estimated_cycles_to_stability": "2 (从 3 下调，本轮大幅推进了理解)"
+  },
+  "new_emergent_dualstate": {
+    "dualstate_id": "DS-016_emergent",
+    "label": "现象学还原的得失——Brodbeck 方法论的自我反思盲点",
+    "tension_axis": "现象学还原揭示概念预设 vs. 现象学还原牺牲批判力量",
+    "S1": "对 Marx/Simmel/经济学执行现象学还原→搁置实体断言→揭示共享的未审前提→获得概念清晰性",
+    "S2": "现象学还原后：Marx 失去剥削理论，经济学失去政策工具，Simmel 失去社会学的丰富性→还原在揭示的同时也在贫化",
+    "status": "emergent_from_cross_reference",
+    "intensity": 0.65,
+    "origin": "CROSS_003 + 三线程共同揭示"
+  }
+}

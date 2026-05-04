@@ -11,10 +11,13 @@
 - [ ] 完整的测试套件
 - [ ] CI (GitHub Actions)
 - [ ] Claude Code / Cursor 部署指南
+- [x] 技能书系统（Skill Book System）— 格式标准 + 吸收机制设计完成
 
 ## v0.3 (未来 · Future)
 - [ ] 真正的 TensionBus 去中心化运行时（不再依赖顺序编排）
+- [ ] 技能书导入器实现（SkillBookImporter）
 - [ ] 社区贡献的视角类型
+- [ ] 首个社区技能书
 - [ ] Web Demo
 
 ## 不变 · Immutable
