@@ -397,4 +397,14 @@ session_id: "uuid-123"
 ---
 
 *KL9-RHIZOME v2.0 — 基于 kailejiu-memory v1.0、CORE_CONCEPTS.md、rhizome_engine.py 改造*
+## 技能书导入响应 · Skillbook Import Behaviour
+
+导入技能书时，kailejiu-memory 的行为:
+
+1. **会话记录**: 导入操作作为 session 写入，field="skillbook_import", reasoning_type="absorption"
+2. **张力上下文**: 导入的概念可通过 retrieve_by_tension_context() 按原书 tension_type 检索
+3. **反馈关联**: 用户对导入概念的 like/dislike 反馈更新对应概念的 local_confidence
+
+---
+
 *改造日期: 2025-07*

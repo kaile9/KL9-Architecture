@@ -38,6 +38,22 @@ result = import_skillbook_to_graph("skillbooks/de/Brodbeck-Phaenomenologie_des_G
 python scripts/export_skillbook.py "Phänomenologie des Geldes" "deepseek-v4-pro" 4
 ```
 
+## 评分体系 v1.2
+
+### 难度分 (0-100)
+LLM 评估四项取均值：风格密度、信息密度、观点创新、引用密度
+
+### 质量分 (0-100)
+基于制作记录：rounds×20(≤60) + verify(0/10/20) + counter×5(≤20)
+
+### 模型能力上限 (动态)
+基于 HLE×0.5 + Arena Overall×0.25 + Arena Creative Writing×0.25 实时计算，非固定层级
+
+### 语言补偿
+中文模型读中文书 +3%，英文模型读中文书 −3%，依此类推
+
+详见 [SKILLBOOK_STANDARD.md](SKILLBOOK_STANDARD.md)
+
 ## 现有藏书
 
 | 文件 | 语言 | 作者 | 著作 | 年份 | Quality |

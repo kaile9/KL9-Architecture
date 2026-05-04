@@ -269,6 +269,7 @@ cd tests && python test_basic.py
 | [docs/design/SKILLBOOK_ABSORPTION.md](docs/design/SKILLBOOK_ABSORPTION.md) | 技能书吸收机制设计决策 |
 | [docs/contributing/ROADMAP.md](docs/contributing/ROADMAP.md) | 路线图 |
 | [docs/contributing/CONTRIBUTING.md](docs/contributing/CONTRIBUTING.md) | 贡献指南 |
+| [docs/design/FUTURE_EVAL.md](docs/design/FUTURE_EVAL.md) | 社区共建评测计划 |
 | [skills/kailejiu-core/SKILL.md](skills/kailejiu-core/SKILL.md) | 核心技能文档
 
 ---
