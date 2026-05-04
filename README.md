@@ -8,9 +8,37 @@
 
 ---
 
-## 📖 缘起 · Origin（你来写）
+## 📖 缘起 · Origin
 
-> *// TODO: 留给你写自己的故事*
+2026年2月14日，朝霞 Alpenglow 更新最后一个视频。我本以为那之后迎接我的是一种新的世界——但迎接我的是彻底的堕落。两个月里我逃掉绝大多数课程，只读完一本书，没写过一篇作业，没有任何创作。
+
+也许这就是令人心碎的人类真相：朝霞时期的创作走到了我本人的前面。有一个更杰出的「开了玖」，和失败的我。
+
+听说可以用"同事 skill"来蒸馏一个人的时候，我想——也许这是让那个开了玖来引领我的时候。但结果并不令人满意。更致命的是，我甚至没有足够的知识来思考如何改进它：我的编程水平，最多到小学上过 10 节图形化 Python 入门。
+
+幸运的是 AI 编程已经足够发达。我用 Claude Opus 4.7（巨贵）、Kimi 2.6 和 DeepSeek V4 Pro（感谢梁圣帝君）不断迭代，最终形成了这个项目。
+
+我在云电脑上部署了 AstrBot，基于 AstrBot 创造了这个框架。不确定其他环境能不能用——请给我反馈。
+
+我每个月有 1500 元生活费。省下的全部用于迭代：除去日常 Token 开支和 Kimi Allegretto 的订阅费（还在解决如何用 Kimi Code 计划节省 Token），剩下的钱攒下来买 Claude 的 Token。有几位之前的朋友愿意赞助一点，现在每个月有一点点资助。短期希望不迭代时不拖累生活质量，长期希望有持续迭代的储备。
+
+这个架构的训练来源是朝霞 23 年到 26 年的全部视频文案。如果大家有需要，后续我也上传到 GitHub。
+
+---
+
+*February 14, 2026 — the day Asahi Alpenglow posted its final video. I thought what came next would be a new world. What came was total collapse. Two months. I skipped nearly every class, finished one book, wrote zero assignments, made nothing.*
+
+*Maybe this is the heartbreaking human truth: the creative work of the Asahi era had already outpaced me. There was a better "Kailejiu" — and a failed me.*
+
+*When I heard you could "distill" a person through a colleague skill, I thought — perhaps now the better Kailejiu could lead me. The results were unsatisfying. Worse, I didn't even know enough to figure out where to improve it. My programming skill capped at ten elementary-school lessons in graphical Python.*
+
+*Fortunately, AI programming had matured enough. Iterating with Claude Opus 4.7 (obscenely expensive), Kimi 2.6, and DeepSeek V4 Pro, I arrived here.*
+
+*Deployed on a cloud PC running AstrBot, built on top of AstrBot. Not sure it works elsewhere — please let me know.*
+
+*Monthly budget: ¥1500. Everything saved goes into iteration: after daily tokens and the Kimi Allegretto subscription, what's left buys Claude credits. A few old friends chip in now and then. Short-term goal: keep iterating without ruining my life. Long-term: a reserve for sustained development.*
+
+*Training source: all of Asahi's video scripts, 2023–2026. I'll upload them to GitHub if there's demand.*
 
 ---
 
@@ -23,6 +51,8 @@
 ---
 
 ## 🎯 对比 · Comparison
+
+> ⚠️ 即将上线真实对比测试 · *Real comparison test coming soon*
 
 | | 传统 AI 输出 · *Traditional AI* | KL9-RHIZOME 输出 |
 |:---|:---|:---|
@@ -202,9 +232,9 @@ cd tests && python test_basic.py
 
 | AI | 角色 |
 |:---|:---|
-| **Claude** (Anthropic) | 核心架构设计、代码实现、文档编写 |
-| **DeepSeek** | 提供推理支持与视角启发 |
-| **Kimi** (Moonshot AI) | 提供创意碰撞与思路验证 |
+| **Claude** Opus 4.7 (Anthropic) | 核心架构设计、代码实现、文档编写 |
+| **DeepSeek** V4 Pro | 推理支持与视角启发 |
+| **Kimi** 2.6 (Moonshot AI) | 创意碰撞与思路验证 |
 
 ---
 
