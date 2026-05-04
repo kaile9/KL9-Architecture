@@ -286,7 +286,7 @@ cd tests && python test_basic.py
 
 | 技能书 | 原著 | 语言 | 轮数 | 质量 | 创建者 |
 |:---|:---|:---|:---:|:---:|:---|
-| [brodbeck_phaenomenologie_des_geldes](skillbooks/kl9_skillbook_brodbeck/) | K.-H. Brodbeck, *Phänomenologie des Geldes* (2023, 110p) | DE | 2 | A | 2youg1 |
+| [brodbeck_phaenomenologie_des_geldes](skillbooks/de/kl9_skillbook_brodbeck/) | K.-H. Brodbeck, *Phänomenologie des Geldes* (2023, 110p) | DE | 2 | A | 2youg1 |
 
 ### 怎么贡献 · How to Contribute
 
@@ -341,7 +341,7 @@ python scripts/export_skillbook.py "Phänomenologie des Geldes" "deepseek-v4-pro
 ```python
 from kl9_skillbook.bridge import import_skillbook_to_graph
 
-result = import_skillbook_to_graph("examples/brock_on_money.skillbook.json")
+result = import_skillbook_to_graph("skillbooks/de/brock_on_money.skillbook.json")
 print(result)
 # {
 #   'success': True,
@@ -370,7 +370,7 @@ perspective_a/b     ←── recalc ──       2-hop tension update
 
 ### 样本技能书 · Sample
 
-`examples/brock_on_money.skillbook.json` — 7 个布德克货币哲学概念，quality_tier=4，可立即导入测试。
+`skillbooks/de/brock_on_money.skillbook.json` — 7 个布德克货币哲学概念，quality_tier=4，可立即导入测试。
 
 ---
 
