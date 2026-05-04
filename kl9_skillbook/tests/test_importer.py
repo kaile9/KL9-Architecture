@@ -19,7 +19,8 @@ from kl9_skillbook.importer import import_skill_book
 from kl9_skillbook.scorer import (
     calculate_trust, classify_trust_level,
     estimate_difficulty, estimate_quality,
-    apply_language_bias, resolve_llm,
+    apply_language_bias, estimate_model_ceiling,
+    get_model_family, BENCHMARK_DATA,
 )
 
 
@@ -469,7 +470,7 @@ class TestScorer:
         # rounds: 3*20=60 → clipped to 60, verify: external=20, counter: 1*5=5 → 85
         assert abs(q - 85.0) < 0.01
 
-    # ── 语言偏差测试 · Language Bias ──
+    # ── 语言偏差测试 · Language Bias (动态 ceiling) ──
 
     def test_language_bias_zh_model_zh_book(self):
         """中文模型读中文书 +3%"""
@@ -483,13 +484,19 @@ class TestScorer:
         # claude is en family, zh book → -3% → 80 * 0.97 = 77.6
         assert abs(q - 77.6) < 0.01
 
-    def test_language_bias_cross_tier_protection(self):
-        """跨层级保护：DeepSeek(ceiling=92) +3% 不能超过 92"""
-        q = apply_language_bias(91.0, "deepseek-v4-pro", "zh")
-        # 91 * 1.03 = 93.73, but ceiling=92 → clamped to 92
-        assert abs(q - 92.0) < 0.01
+    def test_language_bias_cross_model_protection(self):
+        """跨模型保护：偏差调整后不能超过动态 ceiling。
 
-        # 但 Claude Opus 4.7 ceiling=100, so 98 * 1.03 = 100.94 → clamped to 100
+        deepseek-v4-pro: hle=46.0, gpqa=88.0, longbench=54.0
+        → combined=60.2 → ceiling=94.28
+        93 * 1.03 = 95.79 → clamped to 94.28
+        """
+        ceiling_dsv4 = estimate_model_ceiling("deepseek-v4-pro")
+        q = apply_language_bias(93.0, "deepseek-v4-pro", "zh")
+        assert abs(q - ceiling_dsv4) < 0.02
+        assert q < 93.0 * 1.03  # 确实被限制了
+
+        # Claude Opus 4.7 ceiling=100, 98*1.03=100.94 → clamped to 100
         q2 = apply_language_bias(98.0, "claude-opus-4.7", "en")
         assert abs(q2 - 100.0) < 0.01
 
@@ -509,26 +516,73 @@ class TestScorer:
         t3 = calculate_trust(50.0, 80.0)
         assert abs(t3 - 60.0) < 0.01  # 80 * 0.75 = 60
 
-    def test_resolve_llm_exact_match(self):
-        """精确匹配已知 LLM"""
-        info = resolve_llm("deepseek-v4-pro")
-        assert info["tier"] == 2
-        assert info["family"] == "zh"
-        assert info["ceiling"] == 92
+    # ── 动态 ceiling 测试 · Dynamic Ceiling ──
 
-    def test_resolve_llm_fuzzy_match(self):
-        """模糊匹配 LLM"""
-        info = resolve_llm("claude")
-        # "claude" 应该匹配到某个 known key
-        assert info["family"] == "en"
+    def test_estimate_model_ceiling_known_models(self):
+        """真实模型返回合理的 ceiling 值。"""
+        c = estimate_model_ceiling("claude-opus-4.7")
+        assert 95.0 <= c <= 100.0, f"Opus 4.7 ceiling={c}, expected 95-100"
 
-    def test_resolve_llm_unknown(self):
-        """未知 LLM 返回 neutral"""
-        info = resolve_llm("skynet-9000")
-        assert info["family"] == "neutral"
-        # neutral family → no bias applied
+        c = estimate_model_ceiling("deepseek-v4-pro")
+        assert 85.0 <= c <= 98.0, f"DeepSeek V4 Pro ceiling={c}, expected 85-98"
+
+        c = estimate_model_ceiling("kimi-k2.6")
+        assert 75.0 <= c <= 90.0, f"Kimi K2.6 ceiling={c}, expected 75-90"
+
+        c = estimate_model_ceiling("gpt-4o")
+        assert 55.0 <= c <= 70.0, f"GPT-4o ceiling={c}, expected 55-70"
+
+    def test_estimate_model_ceiling_ordering(self):
+        """验证 ceiling 排序合理：Opus 4.7 > DeepSeek V4 > Kimi K2.6 > GPT-4o"""
+        c_opus = estimate_model_ceiling("claude-opus-4.7")
+        c_dsv4 = estimate_model_ceiling("deepseek-v4-pro")
+        c_kimi = estimate_model_ceiling("kimi-k2.6")
+        c_gpt4o = estimate_model_ceiling("gpt-4o")
+
+        assert c_opus > c_dsv4 > c_kimi > c_gpt4o, \
+            f"Ordering failed: Opus={c_opus}, DSv4={c_dsv4}, Kimi={c_kimi}, GPT4o={c_gpt4o}"
+
+    def test_estimate_model_ceiling_unknown_model(self):
+        """未知模型回退到 ceiling=50。"""
+        c = estimate_model_ceiling("skynet-9000")
+        assert c == 50.0
+
+        c = estimate_model_ceiling("")
+        assert c == 50.0
+
+    def test_estimate_model_ceiling_fuzzy_match(self):
+        """模糊匹配能找到已知模型。"""
+        # "claude" 应该能匹配到某个 Claude 模型
+        c = estimate_model_ceiling("claude")
+        assert c > 50.0  # 不是未知默认值
+
+        # "deepseek" 应该能匹配
+        c = estimate_model_ceiling("deepseek")
+        assert c > 50.0
+
+    def test_get_model_family(self):
+        """模型族识别正确。"""
+        assert get_model_family("deepseek-v4-pro") == "zh"
+        assert get_model_family("claude-opus-4.7") == "en"
+        assert get_model_family("kimi-k2.6") == "zh"
+        assert get_model_family("gpt-4o") == "en"
+        assert get_model_family("skynet-9000") == "neutral"
+        assert get_model_family("") == "neutral"
+
+    def test_language_bias_neutral_family_unchanged(self):
+        """neutral 族模型不受语言偏差影响。"""
         q = apply_language_bias(80.0, "skynet-9000", "zh")
         assert abs(q - 80.0) < 0.01
+
+    def test_benchmark_data_consistency(self):
+        """BENCHMARK_DATA 中所有条目都有合理的结构。"""
+        for name, data in BENCHMARK_DATA.items():
+            assert isinstance(data, dict), f"{name}: not a dict"
+            for k in ("hle", "gpqa", "longbench"):
+                assert k in data, f"{name}: missing key {k}"
+                v = data[k]
+                if v is not None:
+                    assert 0.0 <= v <= 100.0, f"{name}.{k}={v} out of range"
 
 
 # ═══════════════════ Integration: import_skill_book (v1.1) ═══════════════════

@@ -1,26 +1,42 @@
 """Manifest validation for skillbook import protocol v1.1."""
 import time
 from .models import SkillBookManifest, ProductionRecord, DifficultyBreakdown
+from .scorer import BENCHMARK_DATA, get_model_family
 
-KNOWN_LLM = {
-    # Tier 1
-    "claude","claude-3","claude-3.5","claude-opus-4.7","claude-opus-4.5",
-    "gpt-4","gpt-4o","gpt-4-turbo","gpt-4.5",
-    "gemini","gemini-pro","gemini-2.5-pro",
-    # Tier 2
-    "deepseek","deepseek-v4-pro","deepseek-v3",
-    "claude-sonnet-4.6","claude-sonnet-4.5",
-    "gemini-2.0-flash",
-    "qwen","qwen-3-max",
-    # Tier 3
-    "kimi","kimi-2.6","qwen-3",
-    "llama","llama-3","llama-4",
-    "gpt-4o-mini","claude-haiku-4.5",
-    # Tier 4
-    "mistral",
-    # Generic
-    "anthropic","openai","google",
-}
+
+def _build_known_llm_set() -> set:
+    """从 BENCHMARK_DATA 动态生成已知 LLM 名称集合。
+
+    包含所有精确模型名 + 去版本后缀的系列名 + 常见别名。
+    """
+    known = set()
+
+    for name in BENCHMARK_DATA:
+        known.add(name.lower())
+        # 也加入去版本号的系列前缀 (如 "claude-opus", "deepseek-v4")
+        import re
+        # 匹配 "family-major.minor" 或 "family-major" 模式
+        base = re.sub(r'[-]?\d+(\.\d+)*$', '', name)
+        if base and base != name:
+            known.add(base.lower().strip('-'))
+        # 再往上剥一层 (如 "claude" from "claude-opus")
+        parts = name.split('-')
+        if len(parts) >= 1:
+            known.add(parts[0].lower())
+
+    # 常见别名
+    known.update({
+        "claude", "gpt", "gemini", "deepseek", "qwen", "kimi",
+        "llama", "mistral", "anthropic", "openai", "google",
+        "claude-3", "claude-3.5", "gpt-4", "gpt-4-turbo",
+        "gemini-pro", "gemini-2.0-flash",
+        "gpt-4o-mini", "qwen-3",
+    })
+
+    return known
+
+
+KNOWN_LLM = _build_known_llm_set()
 
 
 def validate_manifest(manifest_json: dict, current_version: str = "1.1"
