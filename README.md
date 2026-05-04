@@ -394,7 +394,7 @@ perspective_a/b     ←── recalc ──       2-hop tension update
 
 *No coding skills required: use & feedback / doc translation / tests / bug reports / ideas.*
 
-详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+详见 [CONTRIBUTING.md](docs/contributing/CONTRIBUTING.md)。
 
 ---
 
