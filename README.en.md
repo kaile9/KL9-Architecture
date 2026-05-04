@@ -1,145 +1,139 @@
-<p align="center">
-  <h1 align="center">KL9-RHIZOME</h1>
-  <h3 align="center">A dual-dialectical cognitive architecture that holds two irreconcilable perspectives from the very start</h3>
-  <h4 align="center">No synthesis. No third way. Just tension, fully expressed.</h4>
-</p>
+# KL9-RHIZOME
 
-<p align="center">
-  <a href="README.md">中文</a> · English
-</p>
+> **A cognitive protocol layer on top of LLMs**
+
+Enables AI to hold two irreconcilable perspectives from the very start — no synthesis, no third way.
+
+[中文](README.md)
 
 ---
 
-## 🧬 Origin Story
+## 📖 Origin
 
-> *A late-night thoughts project from a graduate-school exam candidate, turned into actual code.*
-
-In the fall of 2025, I was preparing for China's graduate-school entrance exam (the *kaoyan*) in sociology. My days were simple: math in the morning, English in the afternoon,专业课 (specialized courses) at night. But after those late-night study sessions — reading Foucault on discipline, Deleuze on the rhizome, Baudrillard on simulacra — I couldn't sleep.
-
-Not because of anxiety. Because these thinkers were at war in my head.
-
-Foucault says power is everywhere. Deleuze says difference is what's real. Baudrillard says the real is dead. None of them is *wrong* — but none of them can convince the others. And every day, the AI I was using gave me the same answer: "Both sides have their merits. A balanced approach is recommended."
-
-**That's not thinking. That's compromise disguised as wisdom.**
-
-So I started an "off-topic" project: Can we make an AI that doesn't just "see both sides" (stand on one side then pretend to stand on the other), but genuinely holds two irreconcilable perspectives from the very beginning — and **refuses to synthesize them**?
-
-KL9-RHIZOME grew out of that question. It's not an academic project. It's a late-night obsession that got taken seriously.
+> *// TODO: Write your story here*
 
 ---
 
 ## 🔍 TL;DR
 
-**KL9-RHIZOME is a cognitive operating system that runs on top of LLMs.** It's not another AI framework — it's a protocol. It defines how an AI should hold dual perspectives, manage structural tension, and refuse cheap reconciliation.
-
-It doesn't teach AI *what to do*. It teaches AI *how to exist*.
+**KL9-RHIZOME is not an AI framework — it's a cognitive protocol.** It defines how AI holds dual perspectives, manages tension, and refuses cheap reconciliation.
 
 ---
 
-## 🎯 Without KL9 vs With KL9
+## 🎯 Comparison
 
-| | Traditional AI | With KL9-RHIZOME |
-|---|---|---|
-| **User asks** | "Which is more valid — liberalism or communitarianism?" | Same question |
-| **AI answers** | "Both have merits... they can complement each other... balance is key" | ❌ **Synthesis** |
-| **KL9 answers** | — | "Liberalism's premise (the individual precedes society) is directly negated by communitarianism's premise (society precedes the individual). These premises cannot be reconciled — not because one is right and the other wrong, but because they don't speak from the same ground." |
-| **Reader feels** | Balanced, safe, uninspired | **Torn, unsettled, but thinking** |
+| | Traditional AI | KL9-RHIZOME |
+|:---|:---|:---|
+| User asks | "Which is more valid — X or Y?" | Same question |
+| AI answers | "Both have merits, balance is key" ❌ Synthesis | The premise of X is negated by Y's premise — they don't speak from the same ground |
+| Reader feels | Balanced, safe, uninspired | **Torn, unsettled, thinking** |
 
-**Core conviction:** Every question worth answering deeply contains an irreconcilable tension. The AI's job is not to dissolve it — it's to let it speak fully.
-
----
-
-## 🚀 Quick Start
-
-### As an Agent Skill (AstrBot / Claude Code / Cursor)
-
-```bash
-# Three steps:
-cp -r skills/kailejiu-core ~/.agents/skills/
-# Then tell your AI: "Activate kailejiu-core skill"
-# Then ask a hard question
-```
-
-### As a Python Library
-
-```python
-from kl9_core import dialogical_activation
-
-state = dialogical_activation("Does AI have consciousness?")
-# → DualState loaded: scientific perspective vs phenomenological perspective
-```
-
-### Minimal Example (30 seconds)
-
-```python
-from kl9_core.perspective_types import PERSPECTIVE_TYPES
-
-for pair in PERSPECTIVE_TYPES.recommended_dualities:
-    print(f"  {pair['perspective_A']}  ↔  {pair['perspective_B']}")
-    print(f"  Tension: {pair['tension']}")
-```
+**Core conviction:** Every question worth answering deeply contains an irreconcilable tension. The AI's job is not to dissolve it — but to let it speak fully.
 
 ---
 
-## 🧠 Core Concepts (Just 3)
+## 🧠 Core Concepts
 
 ### 1. DualState
-Load two equal, irreconcilable perspectives before reasoning begins. Not "stand on A then reflect on B" — hold both simultaneously.
+Load two equal, irreconcilable perspectives before reasoning begins — not "stand on A then reflect on B," but hold both simultaneously.
 
 ### 2. TensionBus
-Modules talk through an event bus. Decentralized — no central orchestrator needed.
+A decentralized event bus. No central orchestrator — any module subscribes to what it cares about.
 
-### 3. Suspension
-**Suspension ≠ resolution.** Tension stays as tension after being fully expressed. The reader should feel torn, not balanced.
+### 3. dual_fold
+Operates from both perspectives simultaneously; each fold identifies structural tension and evaluates whether genuine suspension has been reached.
 
----
+### 4. Suspension
+**Suspension ≠ resolution.** After tension is fully expressed, it stays as tension — not synthesized into "higher unity."
 
-## 📦 Modules
-
-| Module | Purpose | Lines |
-|:---|:---|:---:|
-| **kailejiu-core** | Cognitive initialization — DualState loading, Constitutional DNA | 751 |
-| **kailejiu-reasoner** | Perspective A — theoretical reasoning operations | 641 |
-| **kailejiu-soul** | Perspective B — embodied growth engine | 64+426 |
-| **kailejiu-graph** | Concept knowledge graph | 370 |
-| **kailejiu-research** | Dialogical theory activation | 511 |
-| **kailejiu-memory** | Persistent memory layer | 400 |
-| **kailejiu-learner** | Iterative dual learning | 573 |
-| **kailejiu-orchestrator** | 6-phase cognitive coordinator | 1114 |
-| **kailejiu-shared** | Shared infrastructure (11 modules, 2843 lines) | 173 |
+### 5. Constitutional DNA
+Five immutable principles: Dual Existence · Tension Suspension · Conceptual Dialogue · Structural Affect · Refusal of Closure. Rule-based audit engine, zero LLM cost.
 
 ---
 
 ## 🏗 Architecture
 
+### Nine Modules
+
+| Module | Role |
+|:---|:---|
+| **kailejiu-core** | Cognitive initialization: DualState loading, DNA declaration |
+| **kailejiu-reasoner** | Perspective A: theoretical reasoning |
+| **kailejiu-soul** | Perspective B: embodied growth engine |
+| **kailejiu-graph** | Concept knowledge graph (6 tension types × 7 dualities) |
+| **kailejiu-research** | Dialogical theory activation (conversation with thinkers) |
+| **kailejiu-memory** | Persistent memory (SQLite, all active, no archival gate) |
+| **kailejiu-learner** | Iterative dual learning (post-hoc optimization) |
+| **kailejiu-orchestrator** | 6-phase cognitive workflow coordinator |
+| **kailejiu-shared** | Shared infrastructure (11 modules, ~2843 lines) |
+
+### Tension Type System
+
+6 predefined tension types, each mapping to an irreconcilable dual perspective:
+
 ```
-                    ┌──────────────────────────┐
-                    │       TensionBus          │
-                    │   (Decentralized Event Bus)│
-                    └──────┬──────┬──────┬──────┘
-                           │      │      │
-              ┌────────────┘      │      └────────────┐
-              ▼                   ▼                   ▼
-      ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
-      │  kailejiu-   │   │  kailejiu-   │   │  kailejiu-   │
-      │   reasoner   │   │    soul      │   │    graph     │
-      │ (Perspective │   │ (Perspective │   │ (Knowledge   │
-      │   A Theory)  │   │   B Body)    │   │   Graph)     │
-      └──────────────┘   └──────────────┘   └──────────────┘
-              │                                      │
-              └──────────────┬──────────────┬────────┘
-                             ▼              ▼
-                     ┌────────────┐  ┌────────────┐
-                     │ kailejiu-  │  │ kailejiu-  │
-                     │  memory    │  │  learner   │
-                     └────────────┘  └────────────┘
+eternal_vs_finite     ← temporal.human  ↔  temporal.elf
+mediated_vs_real      ← existential.immediate  ↔  existential.mediated
+regression_vs_growth  ← social.regression  ↔  social.growth
+freedom_vs_security   ← political.freedom_focused  ↔  political.security_focused
+economic_vs_grotesque ← economic_grotesque.economic  ↔  economic_grotesque.grotesque
+truth_vs_slander      ← truth_construction.truth  ↔  truth_construction.slander
 ```
 
-**Design principles:**
-- **Decentralized:** No central brain — modules talk through TensionBus
-- **Any entry point:** Any module can be the activation entry
-- **Resilient:** Cut any node, the rest keep working
-- **Dual from the start:** Two irreconcilable perspectives coexist from the first moment
+### Event System （TensionBus）
+
+| Event | Trigger |
+|:---|:---|
+| `QueryEvent` | User query received |
+| `PerspectiveEvent` | DualState loaded |
+| `FoldEvent` | Each recursive fold completed |
+| `SuspensionEvent` | Suspension evaluation done |
+| `FoldCompleteEvent` | Full pipeline finished |
+
+### 6-Phase Pipeline
+
+```
+Phase 0: Detect dual nature
+Phase 1: Retrieve concepts
+Phase 2: Activate dialogues
+Phase 3: Recursive folding (dual_fold)
+Phase 4: Emergent style
+Phase 5: Generate response
+Phase 6: Emit completion event
+```
+
+---
+
+## 🚀 Quick Start
+
+### As an Agent Skill
+
+```bash
+cp -r skills/kailejiu-core ~/.agents/skills/
+# Then tell your AI: "Activate kailejiu-core"
+```
+
+### As a Python Library
+
+```python
+from kl9_core.perspective_types import PERSPECTIVE_TYPES, TENSION_TYPES
+from kl9_core.tension_bus import TensionBus
+from kl9_core.dual_fold import dual_fold
+
+# List available dualities
+for pair in PERSPECTIVE_TYPES.recommended_dualities:
+    print(f"{pair['perspective_A']} ↔ {pair['perspective_B']}")
+
+# Subscribe to events
+bus = TensionBus()
+bus.subscribe("QueryEvent", lambda e: print(f"Received: {e['data']}"))
+```
+
+### Quick Test
+
+```bash
+cd tests && python test_basic.py
+```
 
 ---
 
@@ -148,26 +142,28 @@ Modules talk through an event bus. Decentralized — no central orchestrator nee
 | Doc | Description |
 |:---|:---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Full architecture walkthrough |
-| [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md) | Philosophical foundations — Constitutional DNA |
+| [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md) | Philosophical foundations |
 | [docs/CONCEPTS.md](docs/CONCEPTS.md) | Concept glossary |
-| [docs/CONSTITUTIONAL_DNA.md](docs/CONSTITUTIONAL_DNA.md) | The 5 immutable principles |
-| [examples/astrbot.md](examples/astrbot.md) | Deploy in AstrBot |
-| [examples/claude-code.md](examples/claude-code.md) | Deploy in Claude Code |
+| [skills/kailejiu-core/SKILL.md](skills/kailejiu-core/SKILL.md) | Core skill documentation (751 lines) |
+
+---
+
+## 📦 Statistics
+
+| Category | Count |
+|:---|:---:|
+| Python modules | 13 |
+| Skills | 9 |
+| Total code lines | ~8,692 |
+| Tension types | 6 |
+| Recommended dualities | 7 |
+| Emergent styles | 4 |
 
 ---
 
 ## 🤝 Contributing
 
-**You don't need to write code to contribute.**
-
-| You can | How |
-|:---|:---|
-| 💬 **Use & report** | Ask KL9 a question, share your experience |
-| 📝 **Write docs** | Translate, simplify, expand |
-| 🧪 **Write tests** | Help us catch regressions |
-| 🐛 **Report bugs** | Open an issue |
-| 💡 **Suggest ideas** | How can DualState be better? |
-| 🌐 **Translate** | Help translate to other languages |
+No coding skills required: use & feedback / doc translation / tests / bug reports / ideas.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -176,10 +172,3 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## 📜 License
 
 MIT
-
----
-
-<p align="center">
-  <i>Started from a late-night exam prep session.</i><br>
-  <i>You are not looking for answers —<br>you are learning to hold questions better.</i>
-</p>
