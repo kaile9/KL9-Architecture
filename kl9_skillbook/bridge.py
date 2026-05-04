@@ -9,7 +9,7 @@ import os
 import time
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 # 确保可以导入 kl9_core
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -17,12 +17,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from kl9_core.graph_backend import (
     _get_conn, store_concept, create_edge, get_concept, DB_PATH,
 )
-from .models import ConceptNode, ConceptProvenance, SkillBookManifest
+from .models import ConceptNode, ConceptProvenance, SkillBookManifest, ProductionRecord
 from .importer import import_skill_book as _json_import
 from .importer import _load_concepts, _node_to_dict
 from .merger import merge_graphs
 from .matcher import detect_collisions
 from .tension import recalculate_tension_local
+from .scorer import estimate_difficulty, estimate_quality, calculate_trust, classify_trust_level
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -33,9 +34,12 @@ def export_graph_to_skillbook(
     output_path: str,
     manifest: dict,
     db_path: str = None,
+    production_record: Optional[ProductionRecord] = None,
 ) -> str:
     """
     将 SQLite 图谱导出为技能书 JSON 文件。
+
+    自动执行难度估计和质量评估（v1.1）。
 
     Args:
         output_path: 输出 JSON 文件路径
@@ -43,13 +47,13 @@ def export_graph_to_skillbook(
             skill_book_id, version, quality_tier, llm_source,
             kl9_version, created_timestamp, book_title
         db_path: SQLite 数据库路径，默认使用 graph_backend.DB_PATH
+        production_record: 制作记录（可选），若提供则自动计算质量分
 
     Returns:
         输出文件路径
     """
     # 使用指定的 db_path 或默认路径
     if db_path and db_path != DB_PATH:
-        # 需要临时替换 DB_PATH 或直接连接
         import sqlite3
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
@@ -77,15 +81,16 @@ def export_graph_to_skillbook(
         for e in edge_rows:
             edges_by_from.setdefault(e["from_id"], []).append(e["to_id"])
 
-        # 构建概念字典
+        # 构建概念字典和定义列表（用于难度估计）
         concepts: dict[str, dict] = {}
+        definitions: list[str] = []
+
         for r in rows:
             concept_id = r["id"]
-            # concept_id 格式: "concept:Name:Thinker" → 技能书使用原始名
-            # 保留完整 id 作为 skillbook 的 concept_id
+            definition = r["tier1_def"] or ""
             concepts[concept_id] = {
                 "name": r["name"],
-                "definition": r["tier1_def"] or "",
+                "definition": definition,
                 "perspective_a": r["perspective_a"] or "",
                 "perspective_b": r["perspective_b"] or "",
                 "tension_score": r["tension_score"] or 0.5,
@@ -94,19 +99,59 @@ def export_graph_to_skillbook(
                 "is_shadow": bool(r["is_shadow"]),
                 "shadow_of": r["shadow_of"] or "",
             }
+            if definition:
+                definitions.append(definition)
 
-        # 构建完整技能书
+        # ── v1.1: 自动难度评估 ──
+        book_title = manifest.get("book_title", "Unknown")
+        book_author = manifest.get("extra", {}).get("original_author",
+                    manifest.get("llm_source", "Unknown"))
+        diff_breakdown = estimate_difficulty(book_title, book_author, definitions)
+        difficulty = diff_breakdown.overall
+
+        # ── v1.1: 自动质量评估 ──
+        if production_record:
+            quality_score = estimate_quality(production_record)
+        else:
+            # Fallback: derive from quality_tier
+            quality_score = float(manifest.get("quality_tier", 4) * 20)
+
+        # ── v1.1: 信任计算 ──
+        trust = calculate_trust(difficulty, quality_score)
+        trust_level = classify_trust_level(trust)
+
+        # 构建完整技能书 manifest
         manifest_dict = {
             "skill_book_id": manifest.get("skill_book_id", ""),
-            "version": manifest.get("version", "1.0"),
+            "version": "1.1",  # v1.1
             "quality_tier": manifest.get("quality_tier", 4),
             "llm_source": manifest.get("llm_source", "unknown"),
             "kl9_version": manifest.get("kl9_version", "1.5.0"),
             "created_timestamp": manifest.get("created_timestamp", int(time.time())),
-            "book_title": manifest.get("book_title", "Exported SkillBook"),
+            "book_title": book_title,
             "concept_count": len(concepts),
             "extra": manifest.get("extra", {}),
+            # v1.1 新字段
+            "difficulty": round(difficulty, 1),
+            "quality_score": round(quality_score, 1),
+            "difficulty_breakdown": {
+                "style_density": diff_breakdown.style_density,
+                "info_density": diff_breakdown.info_density,
+                "viewpoint_novelty": diff_breakdown.viewpoint_novelty,
+                "citation_density": diff_breakdown.citation_density,
+                "overall": diff_breakdown.overall,
+            },
+            "_trust": round(trust, 1),
+            "_trust_level": trust_level,
         }
+
+        if production_record:
+            manifest_dict["production_record"] = {
+                "rounds_completed": production_record.rounds_completed,
+                "verification_method": production_record.verification_method,
+                "counter_perspectives": production_record.counter_perspectives,
+                "total_hours": production_record.total_hours,
+            }
 
         skillbook = {
             "manifest": manifest_dict,
@@ -137,20 +182,21 @@ def import_skillbook_to_graph(
 
     步骤:
     1. 加载技能书 JSON
-    2. 校验 manifest
-    3. 从 SQLite 加载现有概念作为 local
-    4. 碰撞检测 & 合并
-    5. 对每个概念调用 store_concept() 存入 nodes 表
-    6. 对每条边调用 create_edge()
-    7. 返回 {success, nodes_imported, nodes_bifurcated, warnings}
+    2. 校验 manifest (v1.1 with trust)
+    3. 信任评估 → reject 则返回 error
+    4. 从 SQLite 加载现有概念作为 local
+    5. 碰撞检测 & 合并
+    6. 对每个概念调用 store_concept() 存入 nodes 表
+    7. 对每条边调用 create_edge()
+    8. 返回 {success, trust, trust_level, ...}
 
     Args:
         skillbook_path: 技能书 JSON 文件路径
         db_path: SQLite 数据库路径，默认使用 graph_backend.DB_PATH
 
     Returns:
-        {success, nodes_imported, nodes_bifurcated, exact_collisions,
-         nearby_warnings, warnings}
+        {success, trust, trust_level, nodes_imported, nodes_bifurcated,
+         exact_collisions, nearby_warnings, warnings}
     """
     from .validator import validate_manifest
 
@@ -162,9 +208,22 @@ def import_skillbook_to_graph(
         return {"success": False, "error": f"FATAL: cannot load skillbook — {e}"}
 
     # 2. 校验 manifest
-    ok, manifest, warnings = validate_manifest(sb.get("manifest", {}), "1.0")
+    ok, manifest, warnings = validate_manifest(sb.get("manifest", {}), "1.1")
     if not ok:
         return {"success": False, "error": f"Manifest validation FAILED: {warnings}"}
+
+    # ── 步骤 2.5: 信任评估 (v1.1) ──
+    trust = calculate_trust(manifest.difficulty, manifest.quality_score)
+    trust_level = classify_trust_level(trust)
+
+    if trust_level == "reject":
+        return {
+            "success": False,
+            "error": f"Trust too low ({trust:.1f}%), import rejected. "
+                     f"Difficulty={manifest.difficulty}, Quality={manifest.quality_score}",
+            "trust": round(trust, 1),
+            "trust_level": trust_level,
+        }
 
     # 3. 从 SQLite 加载现有活跃概念
     conn = _get_conn() if db_path is None else _get_conn_for_path(db_path)
@@ -307,6 +366,8 @@ def import_skillbook_to_graph(
         "exact_collisions": len(report.exact_collisions),
         "nearby_warnings": len(report.nearby_warnings),
         "warnings": all_warnings,
+        "trust": round(trust, 1),
+        "trust_level": trust_level,
     }
 
 

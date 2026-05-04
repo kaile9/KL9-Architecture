@@ -1,4 +1,4 @@
-"""Tests for KL9-RHIZOME skillbook absorption protocol v1.0."""
+"""Tests for KL9-RHIZOME skillbook absorption protocol v1.1."""
 
 import json
 import os
@@ -10,17 +10,46 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from kl9_skillbook.models import ConceptNode, ConceptProvenance, CollisionReport
+from kl9_skillbook.models import ConceptNode, ConceptProvenance, CollisionReport, ProductionRecord
 from kl9_skillbook.validator import validate_manifest
 from kl9_skillbook.matcher import levenshtein_ratio, detect_collisions
 from kl9_skillbook.merger import merge_graphs
 from kl9_skillbook.tension import get_subgraph, recalculate_tension_local
 from kl9_skillbook.importer import import_skill_book
+from kl9_skillbook.scorer import (
+    calculate_trust, classify_trust_level,
+    estimate_difficulty, estimate_quality,
+)
 
 
 # ═══════════════════════ helpers ═══════════════════════
 
 def _make_skillbook_json(manifest_overrides=None, concepts=None):
+    manifest = {
+        "skill_book_id": "test_book",
+        "version": "1.1",
+        "quality_tier": 4,
+        "difficulty": 50.0,
+        "quality_score": 60.0,
+        "llm_source": "claude",
+        "kl9_version": "0.1.0",
+        "created_timestamp": int(time.time()),
+        "book_title": "Test Book",
+        "concept_count": len(concepts) if concepts else 0,
+        "production_record": {
+            "rounds_completed": 2,
+            "verification_method": "spot-check",
+            "counter_perspectives": [],
+            "total_hours": 10.0,
+        },
+    }
+    if manifest_overrides:
+        manifest.update(manifest_overrides)
+    return {"manifest": manifest, "concepts": concepts or {}}
+
+
+def _make_skillbook_json_v10(manifest_overrides=None, concepts=None):
+    """Build a v1.0 format skillbook for backward compat testing."""
     manifest = {
         "skill_book_id": "test_book",
         "version": "1.0",
@@ -92,6 +121,71 @@ class TestValidateManifest:
             "concept_count": 5,
         })
         assert ok and m is not None and m.quality_tier == 3
+
+    def test_valid_v11(self):
+        ok, m, w = validate_manifest({
+            "version": "1.1", "quality_tier": 3, "llm_source": "claude",
+            "skill_book_id": "b1", "kl9_version": "0.1",
+            "created_timestamp": 1700000000, "book_title": "T",
+            "concept_count": 5,
+            "difficulty": 60.0, "quality_score": 75.0,
+            "production_record": {
+                "rounds_completed": 2,
+                "verification_method": "spot-check",
+                "counter_perspectives": ["A", "B"],
+                "total_hours": 15.0,
+            },
+        })
+        assert ok and m is not None
+        assert m.difficulty == 60.0
+        assert m.quality_score == 75.0
+        assert m.production_record is not None
+        assert m.production_record.rounds_completed == 2
+
+    def test_v11_missing_difficulty(self):
+        ok, m, w = validate_manifest({
+            "version": "1.1", "quality_tier": 3,
+            "quality_score": 75.0,
+        })
+        assert not ok
+        assert "difficulty" in w[0].lower()
+
+    def test_v11_difficulty_out_of_range(self):
+        ok, m, w = validate_manifest({
+            "version": "1.1", "quality_tier": 3,
+            "difficulty": 150, "quality_score": 75.0,
+        })
+        assert not ok
+
+    def test_v11_missing_quality_score(self):
+        ok, m, w = validate_manifest({
+            "version": "1.1", "quality_tier": 3,
+            "difficulty": 50.0,
+        })
+        assert not ok
+        assert "quality_score" in w[0].lower()
+
+    def test_v11_missing_production_record_warning(self):
+        ok, m, w = validate_manifest({
+            "version": "1.1", "quality_tier": 3,
+            "difficulty": 50.0, "quality_score": 75.0,
+        })
+        assert ok
+        assert any("production_record" in x.lower() for x in w)
+
+    def test_v11_production_rounds_invalid_warning(self):
+        ok, m, w = validate_manifest({
+            "version": "1.1", "quality_tier": 3,
+            "difficulty": 50.0, "quality_score": 75.0,
+            "production_record": {
+                "rounds_completed": 0,
+                "verification_method": "none",
+                "counter_perspectives": [],
+                "total_hours": 1.0,
+            },
+        })
+        assert ok
+        assert any("rounds_completed" in x.lower() for x in w)
 
     def test_missing_version(self):
         ok, m, w = validate_manifest({"quality_tier": 3})
@@ -271,7 +365,111 @@ class TestTension:
         assert "d" not in result
 
 
-# ═══════════════════ Integration: import_skill_book ═══════════════════
+# ═══════════════════ v1.1 Scorer ═══════════════════
+
+class TestScorer:
+    def test_calculate_trust_basic(self):
+        """trust = quality * (1 - difficulty/200)"""
+        t = calculate_trust(50.0, 80.0)
+        assert abs(t - 60.0) < 0.01  # 80 * 0.75 = 60
+
+    def test_calculate_trust_zero_difficulty(self):
+        t = calculate_trust(0.0, 100.0)
+        assert abs(t - 100.0) < 0.01
+
+    def test_calculate_trust_high_difficulty(self):
+        t = calculate_trust(180.0, 100.0)
+        assert t >= 0.0  # 100 * (1 - 180/200) = 100 * 0.1 = 10, clipped
+
+    def test_calculate_trust_clamp_to_100(self):
+        t = calculate_trust(0.0, 150.0)
+        assert t == 100.0
+
+    def test_calculate_trust_clamp_to_0(self):
+        t = calculate_trust(200.0, 0.0)
+        assert t == 0.0
+
+    def test_classify_full(self):
+        assert classify_trust_level(95.0) == "full"
+        assert classify_trust_level(90.0) == "full"
+
+    def test_classify_supplementary(self):
+        assert classify_trust_level(89.9) == "supplementary"
+        assert classify_trust_level(60.0) == "supplementary"
+
+    def test_classify_selective(self):
+        assert classify_trust_level(59.9) == "selective"
+        assert classify_trust_level(30.0) == "selective"
+
+    def test_classify_reject(self):
+        assert classify_trust_level(29.9) == "reject"
+        assert classify_trust_level(0.0) == "reject"
+
+    def test_estimate_difficulty_returns_valid(self):
+        result = estimate_difficulty(
+            "Test Book", "Test Author",
+            ["Definition of concept A that is somewhat long and complex.",
+             "Another definition, shorter.",
+             "A third concept with a very elaborate and philosophical definition."],
+        )
+        assert 0 <= result.style_density <= 100
+        assert 0 <= result.info_density <= 100
+        assert 0 <= result.viewpoint_novelty <= 100
+        assert result.citation_density == 50.0  # neutral default
+        assert abs(result.overall - (result.style_density + result.info_density +
+                result.viewpoint_novelty + result.citation_density) / 4) < 0.1
+
+    def test_estimate_difficulty_empty(self):
+        result = estimate_difficulty("Empty", "Nobody", [])
+        assert result.style_density == 30.0
+        assert result.overall >= 0
+
+    def test_estimate_quality_basic(self):
+        pr = ProductionRecord(
+            rounds_completed=2,
+            verification_method="spot-check",
+            counter_perspectives=["A", "B"],
+            total_hours=15.0,
+        )
+        q = estimate_quality(pr)
+        # rounds: 2*20=40, verify: spot-check=10, counter: 2*5=10 → 60
+        assert abs(q - 60.0) < 0.01
+
+    def test_estimate_quality_max(self):
+        pr = ProductionRecord(
+            rounds_completed=4,
+            verification_method="full-reread",
+            counter_perspectives=["A", "B", "C", "D", "E"],
+            total_hours=100.0,
+        )
+        q = estimate_quality(pr)
+        # rounds: min(4*20,60)=60, verify: full-reread=20, counter: min(5*5,20)=20 → 100
+        assert abs(q - 100.0) < 0.01
+
+    def test_estimate_quality_minimum(self):
+        pr = ProductionRecord(
+            rounds_completed=1,
+            verification_method="none",
+            counter_perspectives=[],
+            total_hours=1.0,
+        )
+        q = estimate_quality(pr)
+        # rounds: 1*20=20, verify: 0, counter: 0 → 20
+        assert abs(q - 20.0) < 0.01
+
+    def test_estimate_quality_external_verify(self):
+        pr = ProductionRecord(
+            rounds_completed=3,
+            verification_method="external",
+            counter_perspectives=["X"],
+            total_hours=30.0,
+        )
+        q = estimate_quality(pr)
+        # rounds: 3*20=60 → clipped to 60, verify: external=20, counter: 1*5=5 → 85
+        assert abs(q - 85.0) < 0.01
+
+
+# ═══════════════════ Integration: import_skill_book (v1.1) ═══════════════════
 
 class TestImportSkillBook:
     def test_empty_local_all_imported(self, tmp_path):
@@ -294,11 +492,60 @@ class TestImportSkillBook:
         assert result["success"] is True
         assert result["nodes_added"] == 3
         assert result["nodes_bifurcated"] == 0
+        assert "trust" in result
+        assert "trust_level" in result
 
         with open(local_path) as f:
             saved = json.load(f)
         assert len(saved["concepts"]) == 3
         assert saved["meta"]["global_tension_stale"] is True
+
+    def test_trust_reject(self, tmp_path):
+        """Scenario: trust < 30 → import rejected."""
+        local_path = tmp_path / "local_graph.json"
+        sb_path = tmp_path / "skillbook.json"
+
+        sb = _make_skillbook_json(
+            manifest_overrides={
+                "difficulty": 95.0,   # very hard
+                "quality_score": 10.0, # very poor quality
+            },
+            concepts={
+                "x": {"name": "X", "definition": "D", "perspective_a": "A",
+                      "perspective_b": "B", "tension_score": 0.5, "edges": []},
+            },
+        )
+        _write_json(sb_path, sb)
+        _write_json(local_path, {"meta": {}, "concepts": {}})
+
+        result = import_skill_book(str(local_path), str(sb_path))
+        assert result["success"] is False
+        assert "rejected" in result["error"].lower()
+        assert result["trust"] < 30
+        assert result["trust_level"] == "reject"
+
+    def test_trust_full_absorption(self, tmp_path):
+        """Scenario: trust >= 90 → full absorption."""
+        local_path = tmp_path / "local_graph.json"
+        sb_path = tmp_path / "skillbook.json"
+
+        sb = _make_skillbook_json(
+            manifest_overrides={
+                "difficulty": 10.0,   # easy
+                "quality_score": 95.0, # excellent
+            },
+            concepts={
+                "x": {"name": "X", "definition": "D", "perspective_a": "A",
+                      "perspective_b": "B", "tension_score": 0.5, "edges": []},
+            },
+        )
+        _write_json(sb_path, sb)
+        _write_json(local_path, {"meta": {}, "concepts": {}})
+
+        result = import_skill_book(str(local_path), str(sb_path))
+        assert result["success"] is True
+        assert result["trust"] >= 90
+        assert result["trust_level"] == "full"
 
     def test_exact_collision_bifurcation(self, tmp_path):
         """Scenario 2: same name → shadow node."""
@@ -416,11 +663,11 @@ class TestImportSkillBook:
         assert result["nodes_bifurcated"] == 1
 
     def test_manifest_fatal_missing_quality(self, tmp_path):
-        """Scenario 6: missing quality_tier → FATAL."""
+        """Scenario 6: missing quality_tier in v1.0 → FATAL."""
         sb_path = tmp_path / "skillbook.json"
         local_path = tmp_path / "local_graph.json"
         _write_json(local_path, {"meta": {}, "concepts": {}})
-        _write_json(sb_path, _make_skillbook_json(
+        _write_json(sb_path, _make_skillbook_json_v10(
             manifest_overrides={"quality_tier": None}, concepts={}))
         with pytest.raises(ValueError, match="quality_tier"):
             import_skill_book(str(local_path), str(sb_path))
@@ -528,3 +775,57 @@ class TestImportSkillBook:
         result = import_skill_book(str(local_path), str(sb_path))
         assert result["success"] is False
         assert "FATAL" in result.get("error", "")
+
+    # ── v1.1 新测试 ──
+
+    def test_trust_present_in_result(self, tmp_path):
+        """v1.1: import result includes trust and trust_level."""
+        local_path = tmp_path / "local_graph.json"
+        sb_path = tmp_path / "skillbook.json"
+
+        _write_json(local_path, {"meta": {}, "concepts": {}})
+        _write_json(sb_path, _make_skillbook_json(concepts={
+            "x": {"name": "X", "definition": "D", "perspective_a": "A",
+                  "perspective_b": "B", "tension_score": 0.5, "edges": []},
+        }))
+        result = import_skill_book(str(local_path), str(sb_path), current_version="1.1")
+        assert result["success"] is True
+        assert "trust" in result
+        assert "trust_level" in result
+
+    def test_backward_compat_v10_quality_tier(self, tmp_path):
+        """v1.0 quality_tier=3 maps to quality_score=60."""
+        local_path = tmp_path / "local_graph.json"
+        sb_path = tmp_path / "skillbook.json"
+
+        _write_json(local_path, {"meta": {}, "concepts": {}})
+        sb = _make_skillbook_json_v10(
+            manifest_overrides={"quality_tier": 3},
+            concepts={"x": {"name": "X", "definition": "D", "perspective_a": "A",
+                            "perspective_b": "B", "tension_score": 0.5, "edges": []}},
+        )
+        _write_json(sb_path, sb)
+
+        result = import_skill_book(str(local_path), str(sb_path), current_version="1.0")
+        assert result["success"] is True
+        # quality_tier=3 → quality_score=60, difficulty=0 → trust=60*(1-0/200)=60
+        assert result["trust_level"] == "supplementary"  # 60 → supplementary
+        assert "trust" in result
+
+    def test_backward_compat_v10_high_quality(self, tmp_path):
+        """v1.0 quality_tier=5 maps to quality_score=100 → high trust."""
+        local_path = tmp_path / "local_graph.json"
+        sb_path = tmp_path / "skillbook.json"
+
+        _write_json(local_path, {"meta": {}, "concepts": {}})
+        sb = _make_skillbook_json_v10(
+            manifest_overrides={"quality_tier": 5},
+            concepts={"x": {"name": "X", "definition": "D", "perspective_a": "A",
+                            "perspective_b": "B", "tension_score": 0.5, "edges": []}},
+        )
+        _write_json(sb_path, sb)
+
+        result = import_skill_book(str(local_path), str(sb_path), current_version="1.0")
+        assert result["success"] is True
+        # quality_tier=5 → quality_score=100, difficulty=0 → trust=100 → full
+        assert result["trust_level"] == "full"

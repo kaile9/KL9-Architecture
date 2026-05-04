@@ -296,16 +296,43 @@ cd tests && python test_basic.py
 
 详见 [skillbooks/SKILLBOOK_STANDARD.md](skillbooks/SKILLBOOK_STANDARD.md)
 
-### 吸收机制 · Absorption
+### 双维度评分 · Dual-Dimension Scoring (v1.1)
 
-导入技能书时，KL9 执行 5 阶段安全合并：
+v1.1 引入双维度评分体系，为每个技能书评估：
+
+| 维度 | 范围 | 评估方式 |
+|:---|:--:|------|
+| **难度** (difficulty) | 0-100 | LLM 四维评估（风格/信息/创新/引用密度），取均值 |
+| **质量** (quality) | 0-100 | 基于制作记录的客观算法（轮数+验证+反视角） |
+
+### 信任模型 · Trust Model
 
 ```
-Stage 0: VALIDATE  → 版本校验，质量分级
-Stage 1: SANDBOX   → 隔离加载到暂存图谱
-Stage 2: DIFFUSE   → 检测概念冲突
-Stage 3: RESOLVE   → 冲突分叉（默认）或信任加权合并
-Stage 4: ACTIVATE  → 合并 + 张力梯度重计算
+trust = quality × (1 — difficulty / 200)
+```
+
+*直觉：高质量提升信任，高难度降低信任。*
+
+| 信任分 | 策略 | 行为 |
+|:--:|:--:|------|
+| ≥90% | **完整吸收** (full) | 全部概念直接导入 |
+| 60-90% | **补充学习** (supplementary) | 导入后标注需交叉验证 |
+| 30-60% | **选择性提取** (selective) | 仅采纳高置信度概念 |
+| <30% | **拒绝** (reject) | 导入终止 |
+
+列表视图只显示难度分，质量分在 manifest 内部。详见 [skillbooks/SKILLBOOK_STANDARD.md](skillbooks/SKILLBOOK_STANDARD.md)。
+
+### 吸收机制 · Absorption
+
+导入技能书时，KL9 执行信任评估 + 5 阶段安全合并：
+
+```
+Stage 0: TRUST     → 信任评估（<30% 直接拒绝）
+Stage 1: VALIDATE  → 版本校验，双维度评分校验
+Stage 2: SANDBOX   → 隔离加载到暂存图谱
+Stage 3: DIFFUSE   → 检测概念冲突
+Stage 4: RESOLVE   → 冲突分叉（默认）或信任加权合并
+Stage 5: ACTIVATE  → 合并 + 张力梯度重计算
 ```
 
 **核心原则**：冲突概念永不自动合并——保留双版本并标记为张力。只有用户明确确认时才执行合并。
@@ -383,7 +410,7 @@ perspective_a/b     ←── recalc ──       2-hop tension update
 | 张力类型 | 6 |
 | 推荐二重组 | 7 |
 | 涌现风格 | 4 |
-| 技能书格式版本 | 1.0 |
+| 技能书格式版本 | 1.1 |
 
 ---
 

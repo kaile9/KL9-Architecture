@@ -6,6 +6,8 @@ from .validator import validate_manifest
 from .matcher import detect_collisions
 from .merger import merge_graphs
 from .tension import recalculate_tension_local
+from .scorer import calculate_trust, classify_trust_level
+
 
 def _node_from_dict(cid: str, data: dict) -> ConceptNode:
     p = data.get("provenance")
@@ -23,6 +25,7 @@ def _node_from_dict(cid: str, data: dict) -> ConceptNode:
         shadow_of=data.get("shadow_of"),
     )
 
+
 def _node_to_dict(n: ConceptNode) -> dict:
     d = dict(name=n.name, definition=n.definition,
              perspective_a=n.perspective_a, perspective_b=n.perspective_b,
@@ -36,22 +39,39 @@ def _node_to_dict(n: ConceptNode) -> dict:
                                import_timestamp=n.provenance.import_timestamp)
     return d
 
+
 def _load_concepts(raw: dict) -> dict[str, ConceptNode]:
     return {cid: _node_from_dict(cid, data) for cid, data in raw.items()}
 
+
 def import_skill_book(local_graph_path: str, skill_book_path: str,
-                      current_version: str = "1.0") -> dict[str, Any]:
-    """9-step pipeline: load→validate→load local→namespace→detect→merge→tension→stale→persist."""
+                      current_version: str = "1.1") -> dict[str, Any]:
+    """9-step pipeline: load→validate→trust→load local→namespace→detect→merge→tension→stale→persist."""
     # 1. Load skillbook
     try:
         with open(skill_book_path, "r", encoding="utf-8") as f:
             sb = json.load(f)
     except (json.JSONDecodeError, FileNotFoundError) as e:
         return {"success": False, "error": f"FATAL: cannot load skillbook — {e}"}
+
     # 2. Validate manifest
     ok, manifest, warnings = validate_manifest(sb.get("manifest", {}), current_version)
     if not ok:
         raise ValueError(f"Manifest validation FAILED: {warnings}")
+
+    # ── 步骤 2.5: 信任评估 (v1.1) ──
+    trust = calculate_trust(manifest.difficulty, manifest.quality_score)
+    trust_level = classify_trust_level(trust)
+
+    if trust_level == "reject":
+        return {
+            "success": False,
+            "error": f"Trust too low ({trust:.1f}%), import rejected. "
+                     f"Difficulty={manifest.difficulty}, Quality={manifest.quality_score}",
+            "trust": round(trust, 1),
+            "trust_level": trust_level,
+        }
+
     # 3. Load local
     if os.path.exists(local_graph_path):
         with open(local_graph_path, "r", encoding="utf-8") as f:
@@ -60,6 +80,7 @@ def import_skill_book(local_graph_path: str, skill_book_path: str,
         meta = lr.get("meta", {})
     else:
         local, meta = {}, {}
+
     # 4. Namespace imported concepts
     imported: dict[str, ConceptNode] = {}
     now = int(time.time())
@@ -73,11 +94,14 @@ def import_skill_book(local_graph_path: str, skill_book_path: str,
     if manifest.concept_count != len(imported):
         warnings.append(f"WARNING: manifest concept_count={manifest.concept_count} "
                         f"but actual={len(imported)}")
+
     # 5. Detect collisions
     report = detect_collisions(local, imported)
     prov = ConceptProvenance(book_id, manifest.quality_tier, manifest.llm_source, now)
+
     # 6. Merge
     merged = merge_graphs(local, imported, report, prov)
+
     # 7. Recalculate tension
     affected: set[str] = set()
     for lid, iid in report.exact_collisions:
@@ -94,10 +118,16 @@ def import_skill_book(local_graph_path: str, skill_book_path: str,
     for nid, t in new_t.items():
         if nid in merged:
             merged[nid].tension_score = t
+
     # 8. Mark stale
     meta["global_tension_stale"] = True
     meta["last_import"] = {"skill_book_id": manifest.skill_book_id,
                            "timestamp": now, "version": current_version}
+    # Store trust info in meta
+    meta["last_trust"] = {"trust": round(trust, 1), "trust_level": trust_level,
+                          "difficulty": manifest.difficulty,
+                          "quality_score": manifest.quality_score}
+
     # 9. Persist
     out = {"meta": meta, "concepts": {cid: _node_to_dict(n) for cid, n in merged.items()}}
     with open(local_graph_path, "w", encoding="utf-8") as f:
@@ -113,10 +143,14 @@ def import_skill_book(local_graph_path: str, skill_book_path: str,
             nodes_added=report.nodes_added,
             nodes_bifurcated=report.nodes_bifurcated,
             warnings=report.warnings + warnings,
+            trust=round(trust, 1),
+            trust_level=trust_level,
         ), f, ensure_ascii=False, indent=2)
     return dict(success=True, nodes_added=report.nodes_added,
                 nodes_bifurcated=report.nodes_bifurcated,
                 exact_collisions=len(report.exact_collisions),
                 nearby_warnings=len(report.nearby_warnings),
                 warnings=report.warnings + warnings,
-                collision_report_path=rp)
+                collision_report_path=rp,
+                trust=round(trust, 1),
+                trust_level=trust_level)

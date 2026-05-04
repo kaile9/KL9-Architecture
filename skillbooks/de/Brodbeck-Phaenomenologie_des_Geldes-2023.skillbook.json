@@ -1,13 +1,31 @@
 {
   "manifest": {
     "skill_book_id": "brodbeck_phaenomenologie_des_geldes",
-    "version": "1.0",
+    "version": "1.1",
     "quality_tier": 4,
     "llm_source": "deepseek-v4-pro",
     "kl9_version": "1.5.0",
     "created_timestamp": 1746403200,
     "book_title": "Phänomenologie des Geldes — K.-H. Brodbeck (2023)",
     "concept_count": 7,
+    "difficulty": 68,
+    "quality_score": 75,
+    "production_record": {
+      "rounds_completed": 2,
+      "verification_method": "spot-check",
+      "counter_perspectives": [
+        "马克思货币理论",
+        "Simmel货币哲学"
+      ],
+      "total_hours": 20.0
+    },
+    "difficulty_breakdown": {
+      "style_density": 72,
+      "info_density": 65,
+      "viewpoint_novelty": 78,
+      "citation_density": 57,
+      "overall": 68
+    },
     "extra": {
       "original_author": "Karl-Heinz Brodbeck",
       "original_year": 2023,
