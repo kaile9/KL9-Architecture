@@ -2,6 +2,8 @@
 
 > **在 LLM 之上运行的认知协议层** · *A cognitive protocol layer on top of LLMs*
 
+实测有效提升社科学术能力。
+
 ---
 
 ## 📖 缘起 · Origin
