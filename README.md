@@ -266,11 +266,10 @@ cd tests && python test_basic.py
 
 | 文档 | 内容 |
 |:---|:---|
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 全局架构详解 |
-| [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md) | 哲学根基与宪法 DNA |
-| [docs/CONCEPTS.md](docs/CONCEPTS.md) | 术语表与概念索引 |
-| [skills/kailejiu-core/SKILL.md](skills/kailejiu-core/SKILL.md) | 核心技能文档（751 行完整版） |
-| [docs/SKILLBOOK_ABSORPTION.md](docs/SKILLBOOK_ABSORPTION.md) | 技能书吸收机制设计 |
+| [docs/design/SKILLBOOK_ABSORPTION.md](docs/design/SKILLBOOK_ABSORPTION.md) | 技能书吸收机制设计决策 |
+| [docs/contributing/ROADMAP.md](docs/contributing/ROADMAP.md) | 路线图 |
+| [docs/contributing/CONTRIBUTING.md](docs/contributing/CONTRIBUTING.md) | 贡献指南 |
+| [skills/kailejiu-core/SKILL.md](skills/kailejiu-core/SKILL.md) | 核心技能文档
 
 ---
 
@@ -284,9 +283,9 @@ cd tests && python test_basic.py
 
 ### 当前可用 · Available Now
 
-| 技能书 | 原著 | 语言 | 轮数 | 质量 | 创建者 |
-|:---|:---|:---|:---:|:---:|:---|
-| [Brodbeck-Phaenomenologie_des_Geldes-2023](skillbooks/de/Brodbeck-Phaenomenologie_des_Geldes-2023.skillbook.json) | DE | Brodbeck | Phänomenologie des Geldes (2023) | 4 |
+| 技能书 | 语言 | 作者 | 著作 | 质量 |
+|:---|:--:|------|------|:--:|
+| [Brodbeck-Phaenomenologie_des_Geldes-2023](skillbooks/de/Brodbeck-Phaenomenologie_des_Geldes-2023.skillbook.json) | DE | K.-H. Brodbeck | Phänomenologie des Geldes (2023) | 4 |
 
 ### 怎么贡献 · How to Contribute
 
@@ -311,7 +310,7 @@ Stage 4: ACTIVATE  → 合并 + 张力梯度重计算
 
 **核心原则**：冲突概念永不自动合并——保留双版本并标记为张力。只有用户明确确认时才执行合并。
 
-详见 [docs/SKILLBOOK_ABSORPTION.md](docs/SKILLBOOK_ABSORPTION.md)
+详见 [docs/design/SKILLBOOK_ABSORPTION.md](docs/design/SKILLBOOK_ABSORPTION.md)
 
 ---
 
