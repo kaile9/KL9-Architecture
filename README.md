@@ -47,21 +47,6 @@
 ---
 
 
-## 🎯 对比 · Comparison
-
-> ✅ 已上线真实对比测试 · *Real comparison test live*
-
-| | 传统 LLM 输出 | KL9-RHIZOME 输出 |
-|:---|:---|:---|
-| 测试模型 | DeepSeek V4 Pro（网页版） | AstrBot 后台（加载 KL9 协议） |
-| 响应风格 | 结构化工整、平衡、不冒险 | 带引文、揭示悖论、张力悬置 |
-
-**核心信条：** 任何值得深入回答的问题，都内嵌一个不可调和的张力。AI 的工作不是消解它，而是充分表达它。
-
-*Core conviction: Every question worth answering deeply contains an irreconcilable tension. The AI's job is not to dissolve it — but to let it speak fully.*
-
----
-
 ### 📋 真实对比案例 · Real Case Study
 
 **提示词 · Prompt**
