@@ -303,8 +303,8 @@ cd tests && python test_basic.py
 | AI | 角色 |
 |:---|:---|
 | **Claude** Opus 4.7 (Anthropic) | 核心架构设计、代码实现、文档编写 |
-| **DeepSeek** V4 Pro | 推理支持与视角启发 |
-| **Kimi** 2.6 (Moonshot AI) | 创意碰撞与思路验证 |
+| **DeepSeek** V4 Pro | **代码实现主力** · Main code implementation |
+| **Kimi** 2.6 (Moonshot AI) | 验证与调试 · Verification & debugging |
 
 
 ---
