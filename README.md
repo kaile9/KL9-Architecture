@@ -2,10 +2,6 @@
 
 > **在 LLM 之上运行的认知协议层** · *A cognitive protocol layer on top of LLMs*
 
-让AI从对话开始就持有两种不可调和的角度，不缝合、不综合、不走第三条路。
-
-*Enables AI to hold two irreconcilable perspectives from the very start — no synthesis, no third way.*
-
 ---
 
 ## 📖 缘起 · Origin
@@ -26,9 +22,9 @@
 
 ---
 
-*February 14, 2026 — the day Asahi Alpenglow posted its final video. I thought what came next would be a new world. What came was total collapse. Two months. I skipped nearly every class, finished one book, wrote zero assignments, made nothing.*
+*February 14, 2026 — the day 朝霞 Alpenglow posted its final video. I thought what came next would be a new world. What came was total collapse. Two months. I skipped nearly every class, finished one book, wrote zero assignments, made nothing.*
 
-*Maybe this is the heartbreaking human truth: the creative work of the Asahi era had already outpaced me. There was a better "Kailejiu" — and a failed me.*
+*Maybe this is the heartbreaking human truth: the creative work of the 朝霞 Alpenglow era had already outpaced me. There was a better "Kaile9" — and a failed me.*
 
 *When I heard you could "distill" a person through a colleague skill, I thought — perhaps now the better Kailejiu could lead me. The results were unsatisfying. Worse, I didn't even know enough to figure out where to improve it. My programming skill capped at ten elementary-school lessons in graphical Python.*
 
@@ -38,7 +34,7 @@
 
 *Monthly budget: ¥1500. Everything saved goes into iteration: after daily tokens and the Kimi Allegretto subscription, what's left buys Claude credits. A few old friends chip in now and then. Short-term goal: keep iterating without ruining my life. Long-term: a reserve for sustained development.*
 
-*Training source: all of Asahi's video scripts, 2023–2026. I'll upload them to GitHub if there's demand.*
+*Training source: all of 朝霞 Alpenglow's video scripts, 2023–2026. I'll upload them to GitHub if there's demand.*
 
 ---
 
