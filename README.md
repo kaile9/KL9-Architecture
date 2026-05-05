@@ -1,4 +1,4 @@
-# KL9-RHIZOME
+# KL9-RHIZOME · 9R-1.5 · 9R-1.5
 
 > **在 LLM 之上运行的认知协议层** · *A cognitive protocol layer on top of LLMs*
 
@@ -92,7 +92,7 @@
 
 ---
 
-#### KL9-RHIZOME 响应 · KL9-RHIZOME Response（AstrBot 后台）
+#### KL9-RHIZOME · 9R-1.5 响应 · KL9-RHIZOME Response（AstrBot 后台）
 
 > **算法管理的劳动控制：数字泰勒主义的连续与断裂**
 >

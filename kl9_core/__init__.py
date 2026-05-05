@@ -1,3 +1,10 @@
+"""KL9-RHIZOME v9R-1.5 · 核心运行时 · Core Runtime"""
+
+from kl9_core.version import MARKETING_VERSION, SEMVER, MAJOR, MINOR, PATCH
+
+__version__ = SEMVER
+__marketing_version__ = MARKETING_VERSION
+
 """
 KL9-RHIZOME v1.5 共享基础设施层 — 统一导出
 =============================================

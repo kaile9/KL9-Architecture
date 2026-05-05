@@ -1,4 +1,4 @@
-# KL9-RHIZOME 技能书规范 · Skill Book Standard v1.2
+# KL9-RHIZOME 技能书规范 · Skill Book Standard 9R-1.5
 
 > 纯规范文档。使用指南见 [skillbooks/README.md](README.md)。
 

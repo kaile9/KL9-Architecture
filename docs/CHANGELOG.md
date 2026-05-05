@@ -1,3 +1,23 @@
+## [9R-1.5] (1.5.0) — 2026-05-05
+
+### 架构重构
+- 统一版本号命名：9R-1.5（9=开了玖, R=RHIZOME, 1.5=版本号）
+- 清理旧 kailejiu-* 架构，保留 kl9_* 新架构
+- 恢复核心模块到 kl9_core/（12 模块，~5236 行）
+- 修复所有硬编码路径，确保跨环境可移植
+
+### 新增
+- kl9_core/version.py：版本常量与解析
+- quickstart.py：一键启动脚本
+- kl9_core/health.py：健康检查框架
+
+### 修复
+- 删除 63 个无关 AstrBot skill 目录
+- 删除 9 个重复核心文件
+- 修复 c8c807e 误提交导致的文件丢失/篡改
+
+---
+
 # Changelog
 
 All notable changes to KL9-RHIZOME will be documented in this file.

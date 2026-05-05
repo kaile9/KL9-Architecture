@@ -1,4 +1,4 @@
-# KL9-RHIZOME 技能书库 · Skill Book Library
+# KL9-RHIZOME 技能书库 · 9R-1.5 · Skill Book Library
 
 > 技能书不是摘要。技能书是精读后的认知残留。
 > *A skill book is not a summary. It is the cognitive residue of deep reading.*
