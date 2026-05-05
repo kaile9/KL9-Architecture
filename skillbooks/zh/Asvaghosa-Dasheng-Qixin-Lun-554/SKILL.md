@@ -1,5 +1,5 @@
 ---
-name: dasheng-qixin-lun
+name: Asvaghosa-Dasheng-Qixin-Lun-554
 description: |
   KL9-RHIZOME · 理论参考技能书 — 《大乘起信論》(Mahāyāna-śraddhotpāda-śāstra)。
   提供「一心二門三大」的如來藏思想框架，
@@ -15,11 +15,12 @@ description: |
 |:---|:---|
 | **梵名** | Mahāyāna-śraddhotpāda-śāstra |
 | **略稱** | 《起信論》 |
-| **作者** | 傳為馬鳴菩薩（Aśvaghoṣa）所造；學界多認為係真諦（Paramārtha）在中國撰述 |
-| **譯者** | 梁·真諦三藏（499–569） |
+| **作者** | ~Aśvaghoṣa（傳馬鳴菩薩造；學界多認為係真諦在中國撰述） |
+| **譯者** | 梁·真諦三藏（Paramārtha, 499–569） |
+| **年份** | ~554 CE（真諦譯經年份；梵文原典不存，作者歸屬不可查） |
 | **收錄** | 《大正新脩大藏經》第 32 冊，第 1666 號 |
 | **語言** | 漢文（文言）；梵文原典不存 |
-| **定位** | 大乘佛教如來藏系綱領性論書；法性宗（真常唯心系）奠基文本 |
+| **定位** | 大乘佛教如來藏系綱領性論書；法性宗奠基文本 |
 
 ---
 
@@ -137,7 +138,7 @@ description: |
 - 佛教哲學的現代詮釋（如牟宗三的康德對話）
 - 一切法的根源問題（Allbegründung）
 
-激活方式：`kailejiu-research` 的 `activate_theories(query)` 中，若 query 匹配上述領域，調用 `dasheng-qixin-lun` 的 Dialogical Activation。
+激活方式：`kailejiu-research` 的 `activate_theories(query)` 中，若 query 匹配上述領域，調用 `Asvaghosa-Dasheng-Qixin-Lun-554` 的 Dialogical Activation。
 
 建議的視角對（供 `perspective_types.py` 的 `RECOMMENDED_DUALITIES`）：
 

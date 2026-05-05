@@ -15,11 +15,11 @@
 skillbooks/
 ├── de/                          ← 德语原著
 │   ├── Brodbeck-Phaenomenologie_des_Geldes-2023.skillbook.json
-│   └── phaenomenologie-des-geldes/SKILL.md
+│   └── Brodbeck-Phaenomenologie_des_Geldes-2023/SKILL.md
 ├── en/                          ← 英语原著
 ├── fr/                          ← 法语原著
 ├── zh/                          ← 中文原著
-│   └── dasheng-qixin-lun/SKILL.md
+│   └── Asvaghosa-Dasheng-Qixin-Lun-554/SKILL.md
 ├── other/                       ← 其他语言
 ├── README.md
 └── SKILLBOOK_STANDARD.md        ← 技能书格式规范 v1.1
@@ -40,8 +40,8 @@ result = import_skillbook_to_graph("skillbooks/de/Brodbeck-Phaenomenologie_des_G
 
 在 `dialogical_activation` 中通过技能名引用：
 ```
-@skillbook:dasheng-qixin-lun → 加载 skillbooks/zh/dasheng-qixin-lun/SKILL.md
-@skillbook:phaenomenologie-des-geldes → 加载 skillbooks/de/phaenomenologie-des-geldes/SKILL.md
+@skillbook:Brodbeck-Phaenomenologie_des_Geldes-2023 → 加载 skillbooks/de/Brodbeck-Phaenomenologie_des_Geldes-2023/SKILL.md
+@skillbook:Asvaghosa-Dasheng-Qixin-Lun-554 → 加载 skillbooks/zh/Asvaghosa-Dasheng-Qixin-Lun-554/SKILL.md
 ```
 
 ---
@@ -69,5 +69,5 @@ HLE×0.5 + Arena Overall×0.25 + Arena Creative Writing×0.25
 | 格式 | 文件 | 语言 | 作者 | 著作 | 年份 |
 |------|------|:--:|------|------|:--:|
 | JSON | `de/Brodbeck-Phaenomenologie_des_Geldes-2023.skillbook.json` | DE | Brodbeck | Phänomenologie des Geldes | 2023 |
-| SKILL.md | `de/phaenomenologie-des-geldes/SKILL.md` | DE | Brodbeck | Phänomenologie des Geldes | 2023 |
-| SKILL.md | `zh/dasheng-qixin-lun/SKILL.md` | ZH | 馬鳴 (傳) | 大乘起信論 | ~554 |
+| SKILL.md | `de/Brodbeck-Phaenomenologie_des_Geldes-2023/SKILL.md` | DE | Brodbeck | Phänomenologie des Geldes | 2023 |
+| SKILL.md | `zh/Asvaghosa-Dasheng-Qixin-Lun-554/SKILL.md` | ZH | ~Aśvaghoṣa | 大乘起信論 | ~554 |

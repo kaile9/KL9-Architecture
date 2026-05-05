@@ -1,5 +1,5 @@
 ---
-name: phaenomenologie-des-geldes
+name: Brodbeck-Phaenomenologie_des_Geldes-2023
 description: |
   KL9-RHIZOME · 理论参考技能书 — Karl-Heinz Brodbeck《Phänomenologie des Geldes》(2014/2023)。
   提供 Geld als Denkform（金钱作为思维形式）的现象学框架，
@@ -120,7 +120,7 @@ Brodbeck 将贪婪（Geldgier）不理解为心理现象，而理解为货币形
 - 经济思想的认识论前提
 - Vergesellschaftung 的两种原初形式（语言 + 货币）
 
-激活方式：`kailejiu-research` 的 `activate_theories(query)` 中，若 query 匹配上述领域，调用 `phaenomenologie-des-geldes` 的 Dialogical Activation。
+激活方式：`kailejiu-research` 的 `activate_theories(query)` 中，若 query 匹配上述领域，调用 `Brodbeck-Phaenomenologie_des_Geldes-2023` 的 Dialogical Activation。
 
 ---
 
