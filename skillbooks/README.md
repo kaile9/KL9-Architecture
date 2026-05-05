@@ -147,6 +147,7 @@ trust = quality_adjusted × (1 − difficulty / 200)    → [0, 100]
 | 语言 | 著作 | 作者 | 年份 | 格式 |
 |:--:|------|------|:--:|------|
 | DE | [Phänomenologie des Geldes](de/Brodbeck-Phaenomenologie_des_Geldes-2023/SKILL.md) | Brodbeck | 2023 | 螺旋递归，货币现象学 |
+| FR | [Les mots et les choses](fr/Foucault-Les-Mots-et-les-Choses-1966/SKILL.md) | Foucault | 1966 | épistémè 考古学，人之死 |
 | ZH | [大乘起信論](zh/Asvaghosa-Dasheng-Qixin-Lun-554/SKILL.md) | ~Aśvaghoṣa | ~554 | 一心二門，如來藏框架 |
 
 ---
