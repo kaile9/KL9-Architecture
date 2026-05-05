@@ -103,7 +103,7 @@ def validate_manifest(manifest_json: dict, current_version: str = "1.1"
 
     # ── unknown fields ──
     known = {"skill_book_id","version","quality_tier","llm_source",
-             "kl9_version","created_timestamp","book_title","book_language","concept_count","extra",
+             "kl9_version","created_timestamp","book_title","book_language","book_author","book_year","concept_count","extra",
              "difficulty","quality_score","production_record","difficulty_breakdown"}
     unk = set(manifest_json) - known
     if unk:
@@ -142,7 +142,9 @@ def validate_manifest(manifest_json: dict, current_version: str = "1.1"
         kl9_version=manifest_json.get("kl9_version",""),
         created_timestamp=ts,
         book_title=manifest_json.get("book_title",""),
-        book_language=manifest_json.get("book_language",""),
+        book_language=manifest_json.get("book_language","") or manifest_json.get("extra",{}).get("language",""),
+        book_author=manifest_json.get("book_author","") or manifest_json.get("extra",{}).get("original_author",""),
+        book_year=manifest_json.get("book_year",0) or manifest_json.get("extra",{}).get("original_year",0),
         concept_count=cc,
         extra=manifest_json.get("extra",{}),
         difficulty=difficulty if is_v11 else 0.0,

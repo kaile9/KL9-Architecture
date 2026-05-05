@@ -33,6 +33,9 @@ Author-Title-Year.skillbook.json
     "kl9_version":       "1.5.0",
     "created_timestamp": 1746403200,
     "book_title":        "Phänomenologie des Geldes — K.-H. Brodbeck (2023)",
+    "book_author":       "Karl-Heinz Brodbeck",
+    "book_year":         2023,
+    "book_language":     "de",
 
     // ═══ 双维度评分 (v1.1) ═══
     "difficulty":         68,        // 0-100, 原著阅读难度
@@ -100,6 +103,9 @@ Author-Title-Year.skillbook.json
 | `llm_source` | ✅ | string | 学习使用的 LLM |
 | `kl9_version` | ✅ | string | 兼容的最低 KL9 版本 |
 | `book_title` | ✅ | string | 完整书名 |
+| `book_author` | ✅ | string | 作者名（原著语言） |
+| `book_year` | ✅ | int | 出版年份 |
+| `book_language` | ✅ | string | 原文语言 (`de`/`en`/`fr`/`zh`/`other`) |
 | `concept_count` | ✅ | int | 概念数量 |
 | `created_timestamp` | ✅ | int | Unix 时间戳 |
 | `production_record` | ⚠️ | object | **v1.1 强烈建议** — 制作记录 |
@@ -164,6 +170,42 @@ quality = min(rounds_completed × 20, 60)          // 轮数最多贡献 60 分
 | 40-60 | 3 | ≥2 轮，含反视角，张力清晰 |
 | 60-80 | 4 | ≥3 轮，交叉验证，定义精确 |
 | 80-100 | 5 | ≥3 轮 + 二手文献验证 + 反视角充分展开 |
+
+---
+
+## 模型能力评估 · Model Capability Assessment (v1.1)
+
+KL9 使用**三源聚合**评估 LLM 模型的技能书生成能力上限（ceiling）：
+
+```
+arena_norm = min(100, (arena_elo − 1200) / 3.0)
+cw_norm    = min(100, (cw_elo    − 1200) / 3.0)
+combined   = HLE × 0.50 + arena_norm × 0.25 + cw_norm × 0.25
+ceiling    = min(100, combined × 1.15 + 15)
+```
+
+| 来源 | 权重 | 说明 |
+|------|:--:|------|
+| **HLE** (Humanity's Last Exam) | 50% | 极限推理能力，前 50 模型跨度最广 |
+| **Arena Overall Elo** (LMSYS Chatbot Arena) | 25% | 人类偏好投票，综合写作/对话质量 |
+| **Arena Creative Writing Elo** | 25% | 子榜——最接近"哲学文本生成质量"的代理指标 |
+
+语言补偿 ±3% 在 quality_score 上叠加后，以模型 ceiling 为上限（跨模型不反超）。
+
+> ⚠️ **声明**: 此为启发式代理系统。基准分数不直接测量技能书质量。参见 `docs/design/` 中关于未来评测方案的讨论。
+
+## 原文失传的处理 · Lost Originals
+
+部分古籍（如《大乘起信論》）梵文/巴利文原本已不可考，现存最早版本为中文译本。此时以**现存最早完整版本**的语言作为 `book_language`，并在 `extra` 中注明：
+
+```jsonc
+"extra": {
+  "language_note": "梵文原本已佚失，现存最早完整版本为真諦譯漢文本(554 CE)",
+  "lost_original": "Sanskrit"
+}
+```
+
+这不是"向译入语言回译"，而是**承认既有事实**——现存最早的认知残留本就是中文。
 
 ---
 

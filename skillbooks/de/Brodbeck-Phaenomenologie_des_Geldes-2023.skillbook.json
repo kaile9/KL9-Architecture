@@ -33,7 +33,10 @@
       "field": "经济哲学 / Wirtschaftsphilosophie",
       "pages": 110,
       "learning_cycles": 2
-    }
+    },
+    "book_language": "de",
+    "book_author": "Karl-Heinz Brodbeck",
+    "book_year": 2023
   },
   "concepts": {
     "geld_als_denkform": {
@@ -42,7 +45,11 @@
       "perspective_a": "先验认知结构：货币作为康德的知性范畴，使经济经验成为可能",
       "perspective_b": "社会历史产物：货币形式诞生于具体的历史交换实践中，非先天给定",
       "tension_score": 0.75,
-      "edges": ["wirtschaft_als_geldwirtschaft", "innere_geldform", "geld_und_universalitaet"],
+      "edges": [
+        "wirtschaft_als_geldwirtschaft",
+        "innere_geldform",
+        "geld_und_universalitaet"
+      ],
       "local_confidence": 0.9,
       "is_shadow": false
     },
@@ -51,8 +58,12 @@
       "definition": "经济在其本质上是货币经济，而非从物物交换演化而来的中性交换系统。传统经济学关于「货币起源于物物交换不便」的叙事是一种回溯性幻觉。货币支付流在逻辑上先于商品交换，货币创造了「经济」这一概念域本身。",
       "perspective_a": "货币循环本体论：支付流—收入流构成经济的基本实在，商品交换为派生现象",
       "perspective_b": "劳动价值论残余：即使货币中介，价值根源仍在生产领域的劳动过程中",
-      "tension_score": 0.80,
-      "edges": ["geld_als_denkform", "marxsche_wertform_brodbeck", "reziprozitaet_und_geld"],
+      "tension_score": 0.8,
+      "edges": [
+        "geld_als_denkform",
+        "marxsche_wertform_brodbeck",
+        "reziprozitaet_und_geld"
+      ],
       "local_confidence": 0.85,
       "is_shadow": false
     },
@@ -61,8 +72,11 @@
       "definition": "货币的内在形式包含三个结构性环节：(1) 价值尺度——将质的差异还原为量的连续统；(2) 流通手段——在支付行为中实际转移购买力；(3) 价值储藏——将当下的购买力悬置为未来的可能性。三者并非功能分类，而是同一货币逻辑的三种显现方式，构成一个不可分割的形式统一体。",
       "perspective_a": "形式先于功能：货币的三个「功能」只是内在形式的三种展开样式，非可分离的工具属性",
       "perspective_b": "功能分化史：货币形式在历史中经历了从统一到分化的过程（如价值储藏独立化为金融资产）",
-      "tension_score": 0.70,
-      "edges": ["geld_als_denkform", "geld_und_zeitlichkeit"],
+      "tension_score": 0.7,
+      "edges": [
+        "geld_als_denkform",
+        "geld_und_zeitlichkeit"
+      ],
       "local_confidence": 0.9,
       "is_shadow": false
     },
@@ -72,7 +86,11 @@
       "perspective_a": "货币作为时间的量化：将不可逆的生命时间转化为可交换、可累积的量",
       "perspective_b": "时间作为货币的界限：任何货币计算都无法真正取消时间的不确定性与不可逆性",
       "tension_score": 0.85,
-      "edges": ["innere_geldform", "reziprozitaet_und_geld", "geld_und_universalitaet"],
+      "edges": [
+        "innere_geldform",
+        "reziprozitaet_und_geld",
+        "geld_und_universalitaet"
+      ],
       "local_confidence": 0.85,
       "is_shadow": false
     },
@@ -81,9 +99,12 @@
       "definition": "布德克对马克思价值形式分析的解读：马克思在《资本论》第一章中揭示了价值形式的四个阶段（简单、展开、一般、货币形式），但未能彻底摆脱「价值实体」（抽象劳动）的形而上学预设。布德克主张以货币形式取代价值实体作为起点：不是因为有价值才成为货币，而是因为在货币形式中事物才显现为「有价值的」。",
       "perspective_a": "马克思—布德克连续性：价值形式分析已隐含货币的现象学优先性，布德克是激进化的马克思",
       "perspective_b": "布德克—马克思断裂：取消价值实体等于取消马克思批判理论的根基——剥削与剩余价值概念",
-      "tension_score": 0.90,
-      "edges": ["wirtschaft_als_geldwirtschaft", "geld_und_universalitaet"],
-      "local_confidence": 0.80,
+      "tension_score": 0.9,
+      "edges": [
+        "wirtschaft_als_geldwirtschaft",
+        "geld_und_universalitaet"
+      ],
+      "local_confidence": 0.8,
       "is_shadow": false
     },
     "reziprozitaet_und_geld": {
@@ -91,8 +112,11 @@
       "definition": "互惠性与货币之间存在张力。礼物经济中的互惠（Mauss）以无法清算的债务维持社会纽带，而货币经济以精确清算消除人际债务。货币将质性的互惠义务转化为量性的债权—债务关系，这既是社会关系的解放（摆脱人身依附），也是社会关系的异化（纽带被合同替代）。货币支付既是对互惠的精确完成，也是对互惠的彻底取消。",
       "perspective_a": "货币作为解放：从人身依附的互惠义务中解放个体，使交换在非人格化基础上展开",
       "perspective_b": "货币作为异化：将社会纽带还原为可清算的量，消解了礼物经济中人与人的有机联系",
-      "tension_score": 0.80,
-      "edges": ["wirtschaft_als_geldwirtschaft", "geld_und_zeitlichkeit"],
+      "tension_score": 0.8,
+      "edges": [
+        "wirtschaft_als_geldwirtschaft",
+        "geld_und_zeitlichkeit"
+      ],
       "local_confidence": 0.85,
       "is_shadow": false
     },
@@ -102,7 +126,11 @@
       "perspective_a": "货币作为普遍中介：使异质世界成为可理解、可操作的整体",
       "perspective_b": "货币作为普遍暴力：将所有独特价值强行纳入单一尺度，取消质的差异",
       "tension_score": 0.85,
-      "edges": ["geld_als_denkform", "marxsche_wertform_brodbeck", "geld_und_zeitlichkeit"],
+      "edges": [
+        "geld_als_denkform",
+        "marxsche_wertform_brodbeck",
+        "geld_und_zeitlichkeit"
+      ],
       "local_confidence": 0.85,
       "is_shadow": false
     }
