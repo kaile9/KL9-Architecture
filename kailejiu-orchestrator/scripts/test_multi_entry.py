@@ -16,7 +16,7 @@ import os
 import time
 import uuid
 
-SHARED_LIB = "/AstrBot/data/skills/kailejiu-shared/lib"
+SHARED_LIB = "os.path.join(os.path.dirname(__file__), "../../kailejiu-shared/lib")"
 sys.path.insert(0, SHARED_LIB)
 
 from tension_bus import (
@@ -190,7 +190,7 @@ def test_5_soul_guidance_flow():
     """测试：soul 风格引导在 emergent 前生效"""
     test_header("5. Soul 风格引导验证")
 
-    sys.path.insert(0, "/AstrBot/data/skills/kailejiu-soul/scripts")
+    sys.path.insert(0, "os.path.join(os.path.dirname(__file__), "..")/kailejiu-soul/scripts")
     import soul_core as SOUL
 
     # 检查 soul 状态
@@ -221,11 +221,11 @@ def test_6_full_pipeline_with_soul():
     """测试：完整管道 (orchestrator + soul + learner)"""
     test_header("6. 完整管道 (orchestrator + soul)")
 
-    sys.path.insert(0, "/AstrBot/data/skills/kailejiu-orchestrator/scripts")
+    sys.path.insert(0, "os.path.join(os.path.dirname(__file__), "..")/kailejiu-orchestrator/scripts")
     import importlib.util
     spec = importlib.util.spec_from_file_location(
         "koordinator",
-        "/AstrBot/data/skills/kailejiu-orchestrator/scripts/koordinator.py"
+        "os.path.join(os.path.dirname(__file__), "..")/kailejiu-orchestrator/scripts/koordinator.py"
     )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -240,7 +240,7 @@ def test_6_full_pipeline_with_soul():
     print(f"  ✓ mode: {result['mode']}")
 
     # 检查 soul 是否被更新
-    sys.path.insert(0, "/AstrBot/data/skills/kailejiu-soul/scripts")
+    sys.path.insert(0, "os.path.join(os.path.dirname(__file__), "..")/kailejiu-soul/scripts")
     import soul_core as SOUL
     from importlib import reload
     reload(SOUL)

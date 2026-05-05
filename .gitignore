@@ -29,3 +29,7 @@ Thumbs.db
 .op_count
 learner_state.json
 .coverage
+
+# Python runtime
+*.pyc
+*.log

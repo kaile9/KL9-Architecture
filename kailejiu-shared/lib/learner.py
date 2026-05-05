@@ -13,7 +13,7 @@ from typing import Optional, List, Dict
 import graph_backend as GB
 import memory as MEM
 
-__file__ = __file__ if '__file__' in dir() else '/AstrBot/data/skills/kailejiu-shared/lib/learner.py'
+__file__ = __file__ if '__file__' in dir() else 'os.path.join(os.path.dirname(__file__), "../../kailejiu-shared/lib")/learner.py'
 
 parent = Path(__file__).parent
 STATE_FILE = parent.parent / 'storage' / 'learner_state.json'
