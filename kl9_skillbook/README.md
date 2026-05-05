@@ -50,4 +50,4 @@ result = import_skillbook_to_graph("skillbooks/de/Brodbeck-Phaenomenologie_des_G
 
 > 当前藏书均为 SKILL.md 格式。`.skillbook.json` 用于概念级图谱导入。
 
-详见 [skillbooks/README.md](../skillbooks/README.md)。
+详见 [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)。

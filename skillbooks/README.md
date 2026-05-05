@@ -27,7 +27,7 @@ skillbooks/{语言}/{Author-Title-Year}/SKILL.md
 | Title | 原著书名（空格用 `_`） | `Phaenomenologie_des_Geldes` |
 | Year | 出版/译经年份 | `2023` `~554`（`~`=争议） |
 
-完整规范见 **[SKILLBOOK_STANDARD.md](SKILLBOOK_STANDARD.md)**。
+完整规范见 **[docs/SKILLBOOK.md](../docs/SKILLBOOK.md)**。
 
 ---
 
@@ -163,7 +163,7 @@ trust = quality_adjusted × (1 − difficulty / 200)    → [0, 100]
 
 1. 读完一整本书——逐页，非跳读
 2. 在 KL9 实例中完成 ≥1 轮学习
-3. 按 [SKILLBOOK_STANDARD.md](SKILLBOOK_STANDARD.md) 撰写 SKILL.md
+3. 按 [docs/SKILLBOOK.md](../docs/SKILLBOOK.md) 撰写 SKILL.md
 4. 提交 PR 到对应语言目录
 
 禁止：AI 摘要/二手文献产生、伪造制作记录、多书合并。

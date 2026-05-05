@@ -304,25 +304,33 @@ python -c "import sys; sys.path.insert(0, 'kl9_skillbook'); from importer import
 
 ---
 
-## 📚 深入阅读 · Further Reading
+## 📚 文档 · Documentation
 
 | 文档 | 内容 |
 |:---|:---|
-| [skillbooks/README.md](skillbooks/README.md) | 技能书库使用指南 + 评分体系 + 现有藏书 |
-| [skillbooks/SKILLBOOK_STANDARD.md](skillbooks/SKILLBOOK_STANDARD.md) | 技能书格式规范 v1.2 |
-| [docs/design/SKILLBOOK_ABSORPTION.md](docs/design/SKILLBOOK_ABSORPTION.md) | 技能书吸收机制设计决策 |
-| [docs/design/FUTURE_EVAL.md](docs/design/FUTURE_EVAL.md) | 社区共建评测计划 |
-| [docs/contributing/ROADMAP.md](docs/contributing/ROADMAP.md) | 路线图 |
-| [docs/contributing/CONTRIBUTING.md](docs/contributing/CONTRIBUTING.md) | 贡献指南 |
-| [kl9_core/README.md](kl9_core/README.md) | 核心技能文档
+| [docs/GUIDE.md](docs/GUIDE.md) | 开发指南：贡献方式、AI代理指南、路线图、版本历史 |
+| [docs/SKILLBOOK.md](docs/SKILLBOOK.md) | 技能书系统完整规范：格式标准、吸收协议、评分体系、社区评测 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 系统架构详解：九层模块、张力类型、事件系统、认知流程、设计决策 |
+| [CHANGELOG.md](CHANGELOG.md) | 版本变更日志 |
+| [LICENSE](LICENSE) | MIT 许可协议 |
 
 ---
 
 ## 📚 技能书 · Skill Books
 
-技能书是 KL9-RHIZOME 的去中心化知识传播机制：读完一本书 → 完成学习循环 → 导出 → 其他实例导入。支持双维度评分（难度+质量）、语言偏差补偿、信任分级吸收。详见 **[skillbooks/README.md](skillbooks/README.md)** 和 **[skillbooks/SKILLBOOK_STANDARD.md](skillbooks/SKILLBOOK_STANDARD.md)**。
+技能书是 KL9-RHIZOME 的去中心化知识传播机制：读完一本书 → 完成学习循环 → 导出 → 其他实例导入。支持双维度评分（难度+质量）、语言偏差补偿、信任分级吸收。详见 **[docs/SKILLBOOK.md](docs/SKILLBOOK.md)**。
 
-*Skill books are KL9-RHIZOME's decentralized knowledge propagation mechanism. Dual-dimension scoring, language bias compensation, trust-gated absorption. See **[skillbooks/README.md](skillbooks/README.md)** & **[skillbooks/SKILLBOOK_STANDARD.md](skillbooks/SKILLBOOK_STANDARD.md)**.*
+*Skill books are KL9-RHIZOME's decentralized knowledge propagation mechanism. Dual-dimension scoring, language bias compensation, trust-gated absorption. See **[docs/SKILLBOOK.md](docs/SKILLBOOK.md)**.*
+
+---
+
+## 🤝 贡献 · Contributing
+
+不会写代码也能贡献：使用反馈 / 文档翻译 / 测试用例 / Bug 汇报 / 想法建议。
+
+*No coding skills required: use & feedback / doc translation / tests / bug reports / ideas.*
+
+详见 [docs/GUIDE.md](docs/GUIDE.md)。
 
 ---
 
@@ -338,16 +346,6 @@ python -c "import sys; sys.path.insert(0, 'kl9_skillbook'); from importer import
 | 涌现风格 | 4 |
 | 技能书 | 3 |
 | 版本 | 9R-1.5 (1.5.0) |
-
----
-
-## 🤝 贡献 · Contributing
-
-不会写代码也能贡献：使用反馈 / 文档翻译 / 测试用例 / Bug 汇报 / 想法建议。
-
-*No coding skills required: use & feedback / doc translation / tests / bug reports / ideas.*
-
-详见 [CONTRIBUTING.md](docs/contributing/CONTRIBUTING.md)。
 
 ---
 
