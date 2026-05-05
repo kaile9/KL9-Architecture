@@ -1,5 +1,6 @@
 ---
 name: Brodbeck-Phaenomenologie_des_Geldes-2023
+generating_model: deepseek-v4-pro
 description: |
   KL9-RHIZOME · 理论参考技能书 — Karl-Heinz Brodbeck《Phänomenologie des Geldes》(2014/2023)。
   提供 Geld als Denkform（金钱作为思维形式）的现象学框架，

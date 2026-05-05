@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "created": "2026-05-01",
+  "last_updated": "2026-05-01",
+  "concept_count": 6,
+  "quote_source_count": 4,
+  "verify_queue_count": 0,
+  "concepts": {
+    "0001-simulacra": {
+      "file": "concepts/0001-simulacra.md",
+      "last_updated": "2026-05-01"
+    },
+    "0002-spiritual-life-of-power": {
+      "file": "concepts/0002-spiritual-life-of-power.md",
+      "last_updated": "2026-05-01"
+    },
+    "0003-paternal-law": {
+      "file": "concepts/0003-paternal-law.md",
+      "last_updated": "2026-05-01"
+    },
+    "0004-fallacy": {
+      "file": "concepts/0004-fallacy.md",
+      "last_updated": "2026-05-01"
+    },
+    "0005-social-father-failure": {
+      "file": "concepts/0005-social-father-failure.md",
+      "last_updated": "2026-05-01"
+    },
+    "0006-anti-redemption": {
+      "file": "concepts/0006-anti-redemption.md",
+      "last_updated": "2026-05-01"
+    }
+  },
+  "quote_sources": {},
+  "verify_queue": []
+}

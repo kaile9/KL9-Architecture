@@ -1,5 +1,6 @@
 ---
-name: foucault-les-mots-et-les-choses
+name: Foucault-Les_Mots_et_les_Choses-1966
+generating_model: kimi-2.6
 description: |
   KL9-RHIZOME · 理论参考技能书 — Michel Foucault《Les mots et les choses — Une archéologie des sciences humaines》(1966)。
   提供「épistémè」考古学方法论框架，

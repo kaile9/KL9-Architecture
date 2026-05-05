@@ -33,6 +33,7 @@ skillbooks/{语言}/{Author-Title-Year}/SKILL.md
 ---
 name: Author-Title-Year
 description: 一句话 + 一段话描述，标注可被 kailejiu-research 征用
+generating_model: 生成时使用的 LLM 模型 ID
 ---
 
 # 书名 — 作者
@@ -129,6 +130,7 @@ trust = quality_adjusted × (1 − difficulty/200)    → [0,100]
 | `verification_method` | ✅ | string | `none` / `spot-check` / `full-reread` / `external` |
 | `counter_perspectives` | ✅ | list[str] | 反视角列表 |
 | `total_hours` | ✅ | float | 投入小时数 |
+| `generating_model` | ✅ | string | 生成时使用的 LLM 模型 ID，如 `deepseek-v4-pro`、`kimi-2.6` |
 
 ---
 
@@ -141,6 +143,7 @@ trust = quality_adjusted × (1 − difficulty/200)    → [0,100]
 - [ ] 文件命名符合 `Author-Title-Year/SKILL.md`
 - [ ] 放入正确语言目录
 - [ ] 不可查字段已标记 `~` 或 `?`
+- [ ] 已标注 `generating_model`（生成时使用的 LLM 模型 ID）
 
 ---
 

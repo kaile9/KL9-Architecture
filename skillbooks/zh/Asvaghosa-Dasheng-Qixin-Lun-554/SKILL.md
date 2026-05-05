@@ -1,5 +1,6 @@
 ---
 name: Asvaghosa-Dasheng-Qixin-Lun-554
+generating_model: deepseek-v4-pro
 description: |
   KL9-RHIZOME · 理论参考技能书 — 《大乘起信論》(Mahāyāna-śraddhotpāda-śāstra)。
   提供「一心二門三大」的如來藏思想框架，
