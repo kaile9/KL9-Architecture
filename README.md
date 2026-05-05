@@ -266,10 +266,12 @@ cd tests && python test_basic.py
 
 | 文档 | 内容 |
 |:---|:---|
+| [skillbooks/README.md](skillbooks/README.md) | 技能书库使用指南 + 评分体系 + 现有藏书 |
+| [skillbooks/SKILLBOOK_STANDARD.md](skillbooks/SKILLBOOK_STANDARD.md) | 技能书格式规范 v1.2 |
 | [docs/design/SKILLBOOK_ABSORPTION.md](docs/design/SKILLBOOK_ABSORPTION.md) | 技能书吸收机制设计决策 |
+| [docs/design/FUTURE_EVAL.md](docs/design/FUTURE_EVAL.md) | 社区共建评测计划 |
 | [docs/contributing/ROADMAP.md](docs/contributing/ROADMAP.md) | 路线图 |
 | [docs/contributing/CONTRIBUTING.md](docs/contributing/CONTRIBUTING.md) | 贡献指南 |
-| [docs/design/FUTURE_EVAL.md](docs/design/FUTURE_EVAL.md) | 社区共建评测计划 |
 | [skills/kailejiu-core/SKILL.md](skills/kailejiu-core/SKILL.md) | 核心技能文档
 
 ---
@@ -292,7 +294,7 @@ cd tests && python test_basic.py
 | 张力类型 | 6 |
 | 推荐二重组 | 7 |
 | 涌现风格 | 4 |
-| 技能书格式版本 | 1.1 |
+| 技能书格式版本 | 1.2 |
 
 ---
 
