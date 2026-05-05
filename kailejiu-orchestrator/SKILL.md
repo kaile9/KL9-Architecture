@@ -418,7 +418,7 @@ class FoldCompleteEvent(TensionBusEvent):
 
 ```python
 import sys
-sys.path.insert(0, '/AstrBot/data/skills/kailejiu-shared/lib')
+sys.path.insert(0, '<KL9-RHIZOME_DIR>/skills/kailejiu-shared/lib')
 import graph_backend as GB          # 保留：理论激活的数据源
 import memory as MEM                # 保留：会话记录
 import learner as L                 # 保留：学习模块

@@ -328,7 +328,7 @@ def create_genealogy_edge(
 
 ## 数据库
 
-`/AstrBot/data/skills/kailejiu-shared/storage/graph.db`（SQLite，与 v1 兼容）
+`<KL9-RHIZOME_DIR>/skills/kailejiu-shared/storage/graph.db`（SQLite，与 v1 兼容）
 
 v3 新增/变更表：
 - `edge_labels`：所有已涌现的开放边标签及其首次出现的张力上下文和时间戳
@@ -367,4 +367,16 @@ rhizome_engine._suspension_resolve()                       # v3 新增
 ---
 
 *KL9-RHIZOME v3.0 — 基于 kailejiu-graph v2.0、Phase 2 集成需求、悬置态设计改造*
+## 技能书导入响应 · Skillbook Import Behaviour
+
+当技能书被导入时，kailejiu-graph 层的行为:
+
+1. **概念注入**: 新概念通过 bridge.py → store_concept() 写入 nodes 表，保留 provenance 元数据
+2. **边重建**: imported concept 的 edges 通过 create_edge() 写入 edges 表
+3. **影子节点**: 碰撞概念创建 `__shadow_` 节点，is_shadow=1，与主节点互连
+4. **检索增强**: 新概念自动加入 dialogical_retrieval 的候选池，按 tension_resonance 排序
+5. **谱系记录**: 导入操作写入 genealogy 表，source_dialogue 标注来源技能书
+
+---
+
 *改造日期: 2025-07*

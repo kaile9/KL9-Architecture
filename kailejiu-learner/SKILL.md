@@ -376,7 +376,7 @@ def get_lean_summary() -> dict:
 def _load_difficulty_spectrum():
     """从持久化存储加载当前 DifficultySpectrum。"""
     import json
-    state_path = "/AstrBot/data/skills/kailejiu-shared/storage/learner_state.json"
+    state_path = "<KL9-RHIZOME_DIR>/skills/kailejiu-shared/storage/learner_state.json"
     try:
         with open(state_path, 'r') as f:
             data = json.load(f)
@@ -398,7 +398,7 @@ def _load_difficulty_spectrum():
 def _load_dual_states_stats() -> dict:
     """从持久化存储加载 DualState 统计。"""
     import json
-    state_path = "/AstrBot/data/skills/kailejiu-shared/storage/learner_state.json"
+    state_path = "<KL9-RHIZOME_DIR>/skills/kailejiu-shared/storage/learner_state.json"
     try:
         with open(state_path, 'r') as f:
             data = json.load(f)
@@ -508,7 +508,7 @@ report = L.get_learner_report()
 
 ## 数据库
 
-`/AstrBot/data/skills/kailejiu-shared/storage/learner_state.json`（与 v1 兼容）
+`<KL9-RHIZOME_DIR>/skills/kailejiu-shared/storage/learner_state.json`（与 v1 兼容）
 
 v2 新增字段：
 ```json
