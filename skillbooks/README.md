@@ -40,19 +40,21 @@ skillbooks/{语言}/{Author-Title-Year}/SKILL.md
 提交 PR 到 skillbooks/{语言}/ 目录
 ```
 
-### 导入技能书 · Importing a Skill Book
+### 使用技能书 · Using a Skill Book
 
 ```
-检测到 @skillbook: 引用
+kailejiu-research 检测到 @skillbook: 引用
     ↓
-加载 SKILL.md → kailejiu-research 征用
+加载 skillbooks/{语言}/{Author-Title-Year}/SKILL.md
     ↓
-dialogical_activation → DualState 构建
+dialogical_activation → 理论框架注入 → DualState 构建
     ↓
 概念图谱自动融合（碰撞分叉 / 近似合并 / 张力重算）
     ↓
 信任评估 → full(≥90%) / supplementary(60-90%) / selective(30-60%) / reject(<30%)
 ```
+
+> `.skillbook.json` 格式（概念级图谱导入）由 `kl9_skillbook/bridge.py` 支持，当前藏书均为 SKILL.md 格式。
 
 ---
 
