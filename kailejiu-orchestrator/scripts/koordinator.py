@@ -40,14 +40,17 @@ import soul_core as SOUL
 
 # ── 加载 TensionBus subscriber（自注册设计）──────────────────────────────────────
 # ── subscriber 显式加载 ──────────────────────────────────────
-# Import from sibling skill directories (kailejiu-* naming)
+# Import from sibling skill directories
 # Add parent directory to path for sibling imports
 _PARENT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 if _PARENT_DIR not in sys.path:
     sys.path.insert(0, _PARENT_DIR)
 
-from kailejiu_graph.scripts import subscriber as graph_subscriber
-from kailejiu_learner.scripts import subscriber as learner_subscriber
+# kailejiu-graph and kailejiu-learner use hyphen names, import via sys.path
+sys.path.insert(0, os.path.join(_PARENT_DIR, 'kailejiu-graph', 'scripts'))
+import subscriber as graph_subscriber
+sys.path.insert(0, os.path.join(_PARENT_DIR, 'kailejiu-learner', 'scripts'))
+import subscriber as learner_subscriber
 
 
 
