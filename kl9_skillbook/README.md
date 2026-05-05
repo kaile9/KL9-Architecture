@@ -65,6 +65,6 @@ trust = quality_adjusted × (1 − difficulty/200)
 
 ```python
 from kl9_skillbook.bridge import import_skillbook_to_graph
-result = import_skillbook_to_graph("skillbooks/de/Brodbeck-xxx-2023.skillbook.json")
+result = import_skillbook_to_graph("skillbooks/de/Brodbeck-Phaenomenologie_des_Geldes-2023/SKILL.md")
 # → {success, nodes_added, trust, trust_level, ...}
 ```

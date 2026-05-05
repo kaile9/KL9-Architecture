@@ -14,6 +14,6 @@
 
 我们正在征集社区评测数据，验证不同模型生成技能书的质量。Fork [KL9-Architecture](https://github.com/kaile9/KL9-Architecture)，读一本书，生成一本技能书，提交 PR。
 
-现有技能书：`skillbooks/de/Brodbeck-Phaenomenologie_des_Geldes-2023.skillbook.json`
+现有技能书：`skillbooks/de/Brodbeck-Phaenomenologie_des_Geldes-2023/SKILL.md`
 
 > "一场真实的阅读。一次真实的折叠。其他都是噪音。"

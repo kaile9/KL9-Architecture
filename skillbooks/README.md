@@ -14,7 +14,6 @@
 ```
 skillbooks/
 ├── de/                          ← 德语原著
-│   ├── Brodbeck-Phaenomenologie_des_Geldes-2023.skillbook.json
 │   └── Brodbeck-Phaenomenologie_des_Geldes-2023/SKILL.md
 ├── en/                          ← 英语原著
 ├── fr/                          ← 法语原著
@@ -33,7 +32,7 @@ skillbooks/
 
 ```python
 from kl9_skillbook.bridge import import_skillbook_to_graph
-result = import_skillbook_to_graph("skillbooks/de/Brodbeck-Phaenomenologie_des_Geldes-2023.skillbook.json")
+result = import_skillbook_to_graph("skillbooks/de/Brodbeck-Phaenomenologie_des_Geldes-2023/SKILL.md")
 ```
 
 ### 征用 SKILL.md（kailejiu-research）
@@ -68,6 +67,5 @@ HLE×0.5 + Arena Overall×0.25 + Arena Creative Writing×0.25
 
 | 格式 | 文件 | 语言 | 作者 | 著作 | 年份 |
 |------|------|:--:|------|------|:--:|
-| JSON | `de/Brodbeck-Phaenomenologie_des_Geldes-2023.skillbook.json` | DE | Brodbeck | Phänomenologie des Geldes | 2023 |
 | SKILL.md | `de/Brodbeck-Phaenomenologie_des_Geldes-2023/SKILL.md` | DE | Brodbeck | Phänomenologie des Geldes | 2023 |
 | SKILL.md | `zh/Asvaghosa-Dasheng-Qixin-Lun-554/SKILL.md` | ZH | ~Aśvaghoṣa | 大乘起信論 | ~554 |
