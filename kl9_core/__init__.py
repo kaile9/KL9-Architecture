@@ -8,7 +8,7 @@ lib/ 下模块使用平级导入（目录在 sys.path 上即可），
 导入方式：
 
     import sys
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    sys.path.insert(0, 'os.path.dirname(os.path.abspath(__file__))')
     from lib_init import TensionBus, DualState, GraphBackend, ...
 
 注意：为避免包内模块的平级导入冲突，

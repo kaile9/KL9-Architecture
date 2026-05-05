@@ -62,17 +62,6 @@ CREATE TABLE IF NOT EXISTS genealogy (
 """
 
 
-# v1.5 新增列迁移 — skillbook 吸收协议
-_SKILLBOOK_MIGRATIONS = [
-    "ALTER TABLE nodes ADD COLUMN perspective_a TEXT DEFAULT ''",
-    "ALTER TABLE nodes ADD COLUMN perspective_b TEXT DEFAULT ''",
-    "ALTER TABLE nodes ADD COLUMN tension_score REAL DEFAULT 0.5",
-    "ALTER TABLE nodes ADD COLUMN local_confidence REAL DEFAULT 1.0",
-    "ALTER TABLE nodes ADD COLUMN is_shadow INTEGER DEFAULT 0",
-    "ALTER TABLE nodes ADD COLUMN shadow_of TEXT DEFAULT ''",
-]
-
-
 def _get_conn():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -85,12 +74,6 @@ def _get_conn():
                 conn.execute(stmt)
             except sqlite3.OperationalError:
                 pass
-    # v1.5 skillbook 吸收协议 — 静默列迁移
-    for stmt in _SKILLBOOK_MIGRATIONS:
-        try:
-            conn.execute(stmt)
-        except sqlite3.OperationalError:
-            pass
     conn.commit()
     return conn
 
@@ -286,46 +269,26 @@ def store_concept(
     thinker: str = "",
     work: str = "",
     field: str = "",
-    perspective_a: str = "",       # v1.5 新增
-    perspective_b: str = "",       # v1.5 新增
-    tension_score: float = 0.5,    # v1.5 新增
-    local_confidence: float = 1.0, # v1.5 新增
-    is_shadow: bool = False,       # v1.5 新增
-    shadow_of: str = "",           # v1.5 新增
-    explicit_id: str = "",         # v1.5 新增: 覆盖自动生成的 concept_id
 ) -> str:
     """存储概念。返回 concept_id。"""
     conn = _get_conn()
     try:
-        if explicit_id:
-            concept_id = explicit_id
-        else:
-            concept_id = f"concept:{name}:{thinker}" if thinker else f"concept:{name}:"
+        concept_id = f"concept:{name}:{thinker}" if thinker else f"concept:{name}:"
         now = datetime.now().isoformat()
 
         existing = conn.execute("SELECT id FROM nodes WHERE id = ?", (concept_id,)).fetchone()
         if existing:
             conn.execute(
                 "UPDATE nodes SET tier1_def=?, tier2_def=?, tier3_def=?, "
-                "field=?, work=?, last_used=?, "
-                "perspective_a=?, perspective_b=?, tension_score=?, "
-                "local_confidence=?, is_shadow=?, shadow_of=? "
-                "WHERE id=?",
-                (tier1, tier2, tier3, field, work, now,
-                 perspective_a, perspective_b, tension_score,
-                 local_confidence, int(is_shadow), shadow_of,
-                 concept_id)
+                "field=?, work=?, last_used=? WHERE id=?",
+                (tier1, tier2, tier3, field, work, now, concept_id)
             )
         else:
             conn.execute(
                 "INSERT INTO nodes (id, label, name, tier1_def, tier2_def, tier3_def, "
-                "field, thinker, work, created_at, last_used, "
-                "perspective_a, perspective_b, tension_score, "
-                "local_confidence, is_shadow, shadow_of) "
-                "VALUES (?, 'Concept', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (concept_id, name, tier1, tier2, tier3, field, thinker, work, now, now,
-                 perspective_a, perspective_b, tension_score,
-                 local_confidence, int(is_shadow), shadow_of)
+                "field, thinker, work, created_at, last_used) "
+                "VALUES (?, 'Concept', ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (concept_id, name, tier1, tier2, tier3, field, thinker, work, now, now)
             )
 
         conn.commit()
