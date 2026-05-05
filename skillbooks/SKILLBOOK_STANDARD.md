@@ -32,7 +32,7 @@ skillbooks/{语言}/{Author-Title-Year}/SKILL.md
 ```yaml
 ---
 name: Author-Title-Year
-description: 一句话 + 一段话描述，标注可被 kailejiu-research 征用
+description: 一句话 + 一段话描述，标注可被 kl9_research 征用
 generating_model: 生成时使用的 LLM 模型 ID
 ---
 
@@ -67,7 +67,7 @@ generating_model: 生成时使用的 LLM 模型 ID
 ---
 
 激活方式说明（末尾）：
-激活方式：`kailejiu-research` 通过 `dialogical_activation` 征用。
+激活方式：`kl9_research` 通过 `dialogical_activation` 征用。
 ```
 
 ---

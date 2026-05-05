@@ -3,7 +3,7 @@
 
 # 确保 kl9_core 在 Python 路径中
 import sys
-sys.path.insert(0, '../kailejiu-shared/lib')
+sys.path.insert(0, '../kl9_core')
 
 from perspective_types import PERSPECTIVE_TYPES, TENSION_TYPES
 

@@ -182,15 +182,15 @@
 
 | 模块 | 角色 | 行数 |
 |:---|:---|:---:|
-| **kailejiu-core** | 认知初始化：加载 DualState，声明 DNA | 751 |
-| **kailejiu-reasoner** | Perspective A：理论视角运算 | 641 |
-| **kailejiu-soul** | Perspective B：具身成长引擎 | 64+426 |
-| **kailejiu-graph** | 概念知识图谱（6 张力类型 × 7 二重组） | 370 |
-| **kailejiu-research** | 对话式理论激活（与思想家对话而非检索） | 511 |
-| **kailejiu-memory** | 持久记忆层（SQLite，全活跃无归档） | 400 |
-| **kailejiu-learner** | 迭代双面学习（事后优化） | 573 |
-| **kailejiu-orchestrator** | 6 阶段认知流程协调 | 1114 |
-| **kailejiu-shared** | 共享基础设施（11 模块，~2843 行） | 173 |
+| **kl9_core** | 认知初始化：加载 DualState，声明 DNA | 751 |
+| **kl9_reasoner** | Perspective A：理论视角运算 | 641 |
+| **kl9_soul** | Perspective B：具身成长引擎 | 64+426 |
+| **kl9_graph** | 概念知识图谱（6 张力类型 × 7 二重组） | 370 |
+| **kl9_research** | 对话式理论激活（与思想家对话而非检索） | 511 |
+| **kl9_memory** | 持久记忆层（SQLite，全活跃无归档） | 400 |
+| **kl9_learner** | 迭代双面学习（事后优化） | 573 |
+| **kl9_orchestrator** | 6 阶段认知流程协调 | 1114 |
+| **kl9_core** | 共享基础设施（11 模块，~2843 行） | 173 |
 
 ### 张力类型系统 · Tension Type System
 
@@ -234,16 +234,14 @@ Phase 6: FoldCompleteEvent     触发完成事件
 ### 作为 Agent Skill 使用 · As an Agent Skill
 
 ```bash
-cp -r skills/kailejiu-core ~/.agents/skills/
-# 然后告诉 AI："请激活 kailejiu-core"
-# Then tell your AI: "Activate kailejiu-core"
+cp -r skills/kl9_core ~/.agents/skills/
 ```
 
 ### 作为 Python 库 · As a Python Library
 
 ```python
-from kailejiu_shared.lib.perspective_types import PERSPECTIVE_TYPES, TENSION_TYPES
-from kailejiu_shared.lib.tension_bus import TensionBus
+from kl9_core.perspective_types import PERSPECTIVE_TYPES, TENSION_TYPES
+from kl9_core.tension_bus import TensionBus
 
 # 查看可用视角对 / List available dualities
 for pair in PERSPECTIVE_TYPES.recommended_dualities:
@@ -272,7 +270,7 @@ cd tests && python test_basic.py
 | [docs/design/FUTURE_EVAL.md](docs/design/FUTURE_EVAL.md) | 社区共建评测计划 |
 | [docs/contributing/ROADMAP.md](docs/contributing/ROADMAP.md) | 路线图 |
 | [docs/contributing/CONTRIBUTING.md](docs/contributing/CONTRIBUTING.md) | 贡献指南 |
-| [skills/kailejiu-core/SKILL.md](skills/kailejiu-core/SKILL.md) | 核心技能文档
+| [skills/kl9_core/SKILL.md](skills/kl9_core/SKILL.md) | 核心技能文档
 
 ---
 

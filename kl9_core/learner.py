@@ -1,5 +1,5 @@
 """
-kailejiu-learner
+kl9_learner
 RLHF + curriculum learning + synthetic query generation.
 Works entirely on local SQLite data — no external model dependency.
 """
@@ -13,7 +13,7 @@ from typing import Optional, List, Dict
 import graph_backend as GB
 import memory as MEM
 
-__file__ = __file__ if '__file__' in dir() else '<KL9-RHIZOME_DIR>/skills/kailejiu-shared/lib/learner.py'
+__file__ = __file__ if '__file__' in dir() else __file__
 
 parent = Path(__file__).parent
 STATE_FILE = parent.parent / 'storage' / 'learner_state.json'

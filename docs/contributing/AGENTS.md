@@ -16,7 +16,7 @@ KL9-RHIZOME is a dual-dialectical cognitive architecture for LLMs. It makes AI h
 ## How to Test
 ```bash
 cd /KL9-RHIZOME
-python -c "import sys; sys.path.insert(0, \"kailejiu-shared/lib\"); from perspective_types import PERSPECTIVE_TYPES; print('OK:', len(PERSPECTIVE_TYPES.tension_types), 'tension types')"
+python -c "import sys; sys.path.insert(0, \"kl9_core\"); from perspective_types import PERSPECTIVE_TYPES; print('OK:', len(PERSPECTIVE_TYPES.tension_types), 'tension types')"
 ```
 
 ## Architecture

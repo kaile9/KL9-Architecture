@@ -33,7 +33,7 @@
 | `docs/design/SKILLBOOK_ABSORPTION.md` | ✅ 存在 |
 | `docs/contributing/ROADMAP.md` | ✅ 存在 |
 | `docs/contributing/CONTRIBUTING.md` | ✅ 存在 |
-| `skills/kailejiu-core/SKILL.md` | ✅ 存在 |
+| `kl9_core/README.md` | ✅ 存在 |
 | `skillbooks/SKILLBOOK_STANDARD.md` | ✅ 存在 |
 
 **结论**: 无断裂链接。
