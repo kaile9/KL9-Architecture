@@ -270,7 +270,7 @@ cd tests && python test_basic.py
 | [docs/design/FUTURE_EVAL.md](docs/design/FUTURE_EVAL.md) | 社区共建评测计划 |
 | [docs/contributing/ROADMAP.md](docs/contributing/ROADMAP.md) | 路线图 |
 | [docs/contributing/CONTRIBUTING.md](docs/contributing/CONTRIBUTING.md) | 贡献指南 |
-| [skills/kl9_core/SKILL.md](skills/kl9_core/SKILL.md) | 核心技能文档
+| [kl9_core/README.md](kl9_core/README.md) | 核心技能文档
 
 ---
 
