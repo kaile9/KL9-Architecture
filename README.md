@@ -242,8 +242,8 @@ cp -r skills/kailejiu-core ~/.agents/skills/
 ### 作为 Python 库 · As a Python Library
 
 ```python
-from kl9_core.perspective_types import PERSPECTIVE_TYPES, TENSION_TYPES
-from kl9_core.tension_bus import TensionBus
+from kailejiu_shared.lib.perspective_types import PERSPECTIVE_TYPES, TENSION_TYPES
+from kailejiu_shared.lib.tension_bus import TensionBus
 
 # 查看可用视角对 / List available dualities
 for pair in PERSPECTIVE_TYPES.recommended_dualities:

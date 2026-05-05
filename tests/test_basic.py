@@ -1,7 +1,7 @@
 """基础测试 / Basic tests — 任何人都能跑，不需要 mock"""
 
 import sys
-sys.path.insert(0, '../kl9_core')
+sys.path.insert(0, '../kailejiu-shared/lib')
 
 from perspective_types import PERSPECTIVE_TYPES, TENSION_TYPES
 from tension_bus import TensionBus

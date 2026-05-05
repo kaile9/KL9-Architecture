@@ -6,9 +6,9 @@ KL9-RHIZOME V1.5 Coordinator — 新入口。
 import sys, time, uuid
 from typing import Optional
 
-SHARED_LIB = "os.path.join(os.path.dirname(__file__), "../../kailejiu-shared/lib")"
+SHARED_LIB = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "kailejiu-shared", "lib")
 sys.path.insert(0, SHARED_LIB)
-    SKILLS_ROOT = "os.path.join(os.path.dirname(__file__), "..")"
+    SKILLS_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)))
     if SKILLS_ROOT not in sys.path:
         sys.path.insert(0, SKILLS_ROOT)
 
@@ -33,13 +33,19 @@ import learner as L
 import routing as ROUTE
 
 # ── 灵魂模块 ──────────────────────────────────────────────────────
-SOUL_SCRIPTS = "os.path.join(os.path.dirname(__file__), "..")/kailejiu-soul/scripts"
+SOUL_SCRIPTS = os.path.join(os.path.dirname(os.path.dirname(__file__)), "kailejiu-soul", "scripts")
 if SOUL_SCRIPTS not in sys.path:
     sys.path.insert(0, SOUL_SCRIPTS)
 import soul_core as SOUL
 
 # ── 加载 TensionBus subscriber（自注册设计）──────────────────────────────────────
 # ── subscriber 显式加载 ──────────────────────────────────────
+# Import from sibling skill directories (kailejiu-* naming)
+# Add parent directory to path for sibling imports
+_PARENT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+if _PARENT_DIR not in sys.path:
+    sys.path.insert(0, _PARENT_DIR)
+
 from kailejiu_graph.scripts import subscriber as graph_subscriber
 from kailejiu_learner.scripts import subscriber as learner_subscriber
 

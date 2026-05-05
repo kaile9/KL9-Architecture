@@ -16,7 +16,7 @@ import os
 import time
 import uuid
 
-SHARED_LIB = "os.path.join(os.path.dirname(__file__), "../../kailejiu-shared/lib")"
+SHARED_LIB = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "kailejiu-shared", "lib")
 sys.path.insert(0, SHARED_LIB)
 
 from tension_bus import (
