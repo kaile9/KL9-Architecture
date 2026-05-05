@@ -1,19 +1,22 @@
-# kl9_skillbook — 技能书吸收协议 v1.2 (Skill Book Absorption Protocol)
+# kl9_skillbook — 技能书吸收协议 · 9R-1.5 (Skill Book Absorption Protocol)
 
-KL9 实例学习成果的导入/导出/评分引擎。碰撞分叉、张力局部重算、三源动态评分。
+KL9-RHIZOME 9R-1.5 实例学习成果的导入/导出/评分引擎。碰撞分叉、张力局部重算、三源动态评分。
 
-## 模块 · Modules
+**版本**：9R-1.5 (semver: 1.5.0)  
+**命名**：9=开了玖, R=RHIZOME, 1.5=大版本.小版本
 
-| 模块 | 职责 |
-|------|------|
-| `models.py` | ConceptNode, SkillBookManifest, ProductionRecord, DifficultyBreakdown |
-| `validator.py` | Manifest 校验 (FATAL/WARNING) + v1.0/v1.1 向后兼容 |
-| `matcher.py` | Levenshtein 相似度 + 三档碰撞分类 (exact ≥95% / nearby 70-95%) |
-| `merger.py` | 核心合并：近似合并定义、碰撞分叉影子节点、无冲突新增 |
-| `tension.py` | 2-hop 子图张力局部重算 |
-| `scorer.py` | HLE+Arena 三源聚合 + 语言偏差 ±3% + 信任公式 |
-| `importer.py` | 9步导入流水线 (JSON 后端) |
-| `bridge.py` | SQLite ↔ JSON 双向桥接 |
+## 模块 · Modules（8）
+
+| 模块 | 职责 | 代码行数 |
+|------|------|:---:|
+| `models.py` | ConceptNode, SkillBookManifest, ProductionRecord, DifficultyBreakdown | 95 |
+| `validator.py` | Manifest 校验 (FATAL/WARNING) + v1.0/v1.1 向后兼容 | 189 |
+| `matcher.py` | Levenshtein 相似度 + 三档碰撞分类 (exact ≥95% / nearby 70-95%) | 65 |
+| `merger.py` | 核心合并：近似合并定义、碰撞分叉影子节点、无冲突新增 | 96 |
+| `tension.py` | 2-hop 子图张力局部重算 | 43 |
+| `scorer.py` | HLE+Arena 三源聚合 + 语言偏差 ±3% + 信任公式 | 501 |
+| `importer.py` | 9步导入流水线 (JSON 后端) | 208 |
+| `bridge.py` | SQLite ↔ JSON 双向桥接 | 488 |
 
 ## 导入流水线 · Import Pipeline
 

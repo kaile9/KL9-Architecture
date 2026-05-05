@@ -1,6 +1,8 @@
-# KL9-RHIZOME · 9R-1.5 · 9R-1.5
+# KL9-RHIZOME · 9R-1.5
 
 > **在 LLM 之上运行的认知协议层** · *A cognitive protocol layer on top of LLMs*
+> 
+> 版本命名：9R-1.5 = 开了玖(9) + RHIZOME(R) + 大版本(1).小版本(5)
 
 实测有效提升社科学术能力。
 
@@ -231,17 +233,38 @@ Phase 6: FoldCompleteEvent     触发完成事件
 
 ## 🚀 快速开始 · Quick Start
 
-### 作为 Agent Skill 使用 · As an Agent Skill
+### 一键启动 · One-Click Start
 
 ```bash
-cp -r skills/kl9_core ~/.agents/skills/
+python3 quickstart.py
+```
+
+自动检测环境（AstrBot / OpenClaw / Standalone），初始化数据库，运行健康检查。
+
+### 版本信息 · Version
+
+```bash
+python3 quickstart.py --version
+# KL9-RHIZOME 9R-1.5 (semver: 1.5.0)
+```
+
+### 健康检查 · Health Check
+
+```bash
+python3 -c "import sys; sys.path.insert(0, 'kl9_core'); from health import HealthCheck; hc = HealthCheck(); print(hc.report())"
 ```
 
 ### 作为 Python 库 · As a Python Library
 
 ```python
-from kl9_core.perspective_types import PERSPECTIVE_TYPES, TENSION_TYPES
-from kl9_core.tension_bus import TensionBus
+import sys
+sys.path.insert(0, 'kl9_core')
+
+from perspective_types import PERSPECTIVE_TYPES, TENSION_TYPES
+from tension_bus import TensionBus
+from version import MARKETING_VERSION, SEMVER
+
+print(f"KL9-RHIZOME {MARKETING_VERSION} ({SEMVER})")
 
 # 查看可用视角对 / List available dualities
 for pair in PERSPECTIVE_TYPES.recommended_dualities:
@@ -252,10 +275,31 @@ bus = TensionBus()
 bus.subscribe("QueryEvent", lambda e: print(f"收到: {e['data']}"))
 ```
 
+### 本地加载到 OpenClaw · Load into OpenClaw
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/kaile9/KL9-Architecture.git
+
+# 2. 进入目录
+cd KL9-Architecture
+
+# 3. 运行快速启动（自动检测 OpenClaw）
+python3 quickstart.py
+
+# 4. 或手动注册为 OpenClaw 插件
+cp -r kl9_core $OPENCLAW_HOME/plugins/kl9-rhizome/
+cp -r kl9_skillbook $OPENCLAW_HOME/plugins/kl9-rhizome/
+```
+
 ### 30 秒测试 · Quick Test
 
 ```bash
+# 基础测试
 cd tests && python test_basic.py
+
+# 技能书系统测试
+python -c "import sys; sys.path.insert(0, 'kl9_skillbook'); from importer import import_skillbook; print('OK')"
 ```
 
 ---
@@ -286,13 +330,14 @@ cd tests && python test_basic.py
 
 | 类别 | 数量 |
 |:---|:---:|
-| Python 模块 | 14 |
-| Skills | 9 |
-| 代码总行数 | ~9,200 |
+| Python 核心模块 | 12 |
+| 技能书系统模块 | 8 |
+| 代码总行数 | ~5,236 |
 | 张力类型 | 6 |
 | 推荐二重组 | 7 |
 | 涌现风格 | 4 |
-| 技能书格式版本 | 1.2 |
+| 技能书 | 3 |
+| 版本 | 9R-1.5 (1.5.0) |
 
 ---
 
