@@ -198,20 +198,20 @@ When in doubt, prefer keeping architectural integrity over convenience. This pro
 
 ---
 
-### 🔜 9R-1.6 (近期 · Upcoming)
+### 📋 9R-2.0 路线图 (当前)
 
 #### 测试与 CI
 - [ ] 完整测试套件（覆盖率 > 80%）
 - [ ] CI (GitHub Actions)：lint + 单元测试 + 健康检查
-- [ ] `pip install kl9-core` PyPI 发布
+- [ ] `pip install n9r20-core` PyPI 发布
 
-#### 真正的去中心化运行时
+#### 运行时优化
 - [ ] TensionBus 异步事件循环（替代当前顺序编排）
 - [ ] 模块热插拔（无需重启即可加载新 skill/reasoner）
 - [ ] 分布式实例间 TensionBus 桥接
 
 #### 技能书生态
-- [ ] 技能书质量评测社区计划落地（详见 SKILLBOOK.md § 社区评测）
+- [ ] 技能书质量评测社区计划落地
 - [ ] 首个社区贡献的技能书（非 kaile9 本人制作）
 - [ ] 技能书导入冲突的 Web 确认界面
 - [ ] 语义距离碰撞检测（接入嵌入模型）
@@ -256,14 +256,34 @@ When in doubt, prefer keeping architectural integrity over convenience. This pro
 | 层级 | 含义 | 示例 |
 |:---|:---|:---|
 | 大版本 (9R-**X**.y) | 架构级变更，可能不向后兼容 | 9R-2.0 |
-| 小版本 (9R-x.**Y**) | 功能增量，向后兼容 | 9R-1.6 |
-| 语义版本 (x.y.z) | 标准 semver，用于 PyPI | 1.6.0 |
+| 小版本 (9R-x.**Y**) | 功能增量，向后兼容 | 9R-2.1 |
+| 语义版本 (x.y.z) | 标准 semver，用于 PyPI | 2.1.0 |
 
 大版本升级时，上一大版本最新小版本归档到 `archive/v{X}/`。
 
 ---
 
 ## 5. 版本历史 · Release History
+
+### [9R-2.0] (2.0.0) — 2026-05-06 — N9R20Framework 认知架构
+
+#### 架构重构
+- 升级至 N9R20Framework 认知架构
+- 模块命名从 `kl9_*` 迁移至 `n9r20_*`
+- 版本号升级：9R-1.5 → 9R-2.0（semver: 1.5.0 → 2.0.0）
+- 旧架构完整归档至 `archive/9R-1.5/`
+- 新架构核心模块：n9r20_core/（~12 模块）+ n9r20_skillbook/（~8 模块）
+
+#### 新增
+- n9r20_core/n9r20_structures.py：核心数据结构
+- n9r20_core/n9r20_tension_bus.py：事件总线
+- n9r20_core/n9r20_adaptive_router.py：自适应路由
+- n9r20_core/n9r20_dual_reasoner.py：双视角推理
+- n9r20_core/n9r20_compression_core.py：四模压缩引擎
+- n9r20_core/n9r20_semantic_graph.py：概念图谱
+- n9r20_core/n9r20_memory_learner.py：记忆学习
+- n9r20_core/n9r20_llm_evaluator.py：LLM 评估器
+- docs/FRAMEWORK.md, DEPLOY.md, TEST_REPORT.md 等
 
 ### [9R-1.5] (1.5.0) — 2026-05-05 — 技能书吸收协议
 

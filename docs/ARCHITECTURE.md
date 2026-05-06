@@ -210,7 +210,7 @@ truth_vs_slander      ← truth_construction.truth  ↔  truth_construction.slan
 - 任意模块可订阅它关心的事件
 - 发布/订阅模式，松耦合
 
-> **注意**: 当前运行时仍使用顺序编排。真正的异步去中心化是 9R-1.6 的目标。
+> **注意**: 当前运行时仍使用顺序编排。真正的异步去中心化是未来版本的目标。
 
 ---
 
@@ -347,7 +347,7 @@ def compute_fold_depth(query_complexity, concept_density, tension_count):
 
 1. **可预测性** — 调试和推理更容易
 2. **AstrBot 兼容** — 当前主要部署环境是 AstrBot，同步模式更稳定
-3. **逐步演进** — 9R-1.6 将引入真正的异步事件循环
+3. **逐步演进** — 未来版本将引入真正的异步事件循环
 
 ### 为什么 Constitutional DNA 是不可变的？
 
@@ -364,7 +364,7 @@ def compute_fold_depth(query_complexity, concept_density, tension_count):
 1. **零依赖** — 不需要下载 embedding 模型
 2. **可解释** — 编辑距离是透明可验证的
 3. **足够** — 对于概念名称匹配，Levenshtein 在 95%+ 准确率场景下表现良好
-4. **未来** — 9R-1.6 将引入语义距离作为补充
+4. **未来** — 未来版本将引入语义距离作为补充
 
 ---
 
