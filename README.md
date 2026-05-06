@@ -54,9 +54,9 @@
 
 **提示词 · Prompt**
 
-> 你是一位劳动社会学研究者，研究方向为平台经济中的算法管理与劳动过程理论。请严格使用中文进行严谨的学术分析：对零工平台的算法管理机制进行系统性分析，探讨论评分、派单和动态定价如何重组劳动控制，并评估其与经典泰勒制科学管理的连续性与断裂。一千字以内。
+> 你是一位劳动社会学研究者，研究方向为平台经济中的算法管理与劳动过程理论。请严格使用中文进行严谨的学术分析：对零工平台的算法管理机制进行系统性分析，探讨论评分、派单和动态定价如何重组劳动控制，并评估其与经典泰勒制科学管理的连续性与断裂。简要回答。
 
-*You are a labor sociology researcher studying algorithmic management in the platform economy. Conduct a rigorous academic analysis in Chinese: systematically analyze the algorithmic management mechanisms of gig platforms — how scoring, dispatch, and dynamic pricing restructure labor control — and evaluate their continuity and rupture with classical Taylorist scientific management. Within 1000 words.*
+*You are a labor sociology researcher studying algorithmic management in the platform economy. Conduct a rigorous academic analysis in Chinese: systematically analyze the algorithmic management mechanisms of gig platforms — how scoring, dispatch, and dynamic pricing restructure labor control — and evaluate their continuity and rupture with classical Taylorist scientific management. In short.*
 
 ---
 
