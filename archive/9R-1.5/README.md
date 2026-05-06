@@ -1,10 +1,10 @@
-# KL9-RHIZOME · 9R-2.0
+# KL9-RHIZOME · 9R-1.5
 
 > **在 LLM 之上运行的认知协议层** · *A cognitive protocol layer on top of LLMs*
->
-> 版本命名：9R-2.0 = 开了玖(9) + RHIZOME(R) + 大版本(2).小版本(0)
+> 
+> 版本命名：9R-1.5 = 开了玖(9) + RHIZOME(R) + 大版本(1).小版本(5)
 
-实测有效提升社科学术能力。9R-2.0 基于 **N9R20Framework** 认知架构运行，模块命名从 `kl9_*` 迁移至 `n9r20_*`。
+实测有效提升社科学术能力。
 
 ---
 
@@ -38,7 +38,7 @@
 
 *Monthly budget: ¥1500. Everything saved goes into iteration: after daily tokens and the Kimi Allegretto subscription, what's left buys Claude credits. A few old friends chip in now and then. Short-term goal: keep iterating without ruining my life. Long-term: a reserve for sustained development.*
 
-*Training source: all of 朝霞 Alpenglow's video scripts, 2023–2026. Available at [KL9-writings](https://github.com/kaile9/KL9-writings).*
+*Training source: all of 朝霞 Alpenglow's video scripts, 2023–2026. I'll upload them to GitHub if there's demand.*
 
 ---
 
@@ -49,6 +49,7 @@
 *Not another AI framework — a protocol for how AI holds dual perspectives, manages tension, and refuses cheap synthesis.*
 
 ---
+
 
 ### 📋 真实对比案例 · Real Case Study
 
@@ -93,41 +94,21 @@
 
 ---
 
-#### KL9-RHIZOME · 9R-2.0 响应 · KL9-RHIZOME Response（AstrBot 后台）
+#### KL9-RHIZOME · 9R-1.5 响应 · KL9-RHIZOME Response（AstrBot 后台）
 
-> **算法管理的劳动控制逻辑：连续性、断裂与重组**
+> **算法管理的劳动控制：数字泰勒主义的连续与断裂**
 >
-> ### 一、问题意识
+> 算法管理常被称作"数字泰勒主义"，但这一命名遮蔽的差异与其揭示的连续性同等重要。以下从评分、派单与动态定价三重机制切入，辩析其与经典科学管理的继承与质变。
 >
-> 零工平台的算法管理并非凭空出现的技术奇观，而是劳动控制史上一次有历史脉络的形态重组。以布雷弗曼（Braverman）的去技能化命题与布洛维（Burawoy）的制造同意理论为分析坐标，可以识别出三种核心机制——评分、派单与动态定价——如何在数字基础设施之上，以新的语法重写泰勒制的基本文法。
+> 评分机制将消费者纳入管理回路，实现了监督的去中心化与泛化。泰勒依靠工头在场监视，平台则将控制权外包给用户——五星评价、接单率、投诉率构成不间断的量化凝视。每一次服务即一次考核，考核者与被考核者的边界消融（Rosenblat & Stark, 2016）。
 >
-> ### 二、三种机制的运作逻辑
+> 派单算法实现了劳动指挥的自动化。泰勒通过时间-动作研究将劳动分解为标准化单元，算法将此逻辑推向极致：路线规划、订单分配、任务序列均由系统实时计算。"构想与执行的分离"（Braverman, 1974）被激进化——不仅工人与管理者分离，管理者本身也被代码替代。
 >
-> **评分系统**是分布式声誉治理机制。平台将传统管理者的考核职能外包给消费者，使劳动者持续暴露于不对称的评价关系之中。低评分触发降单乃至封号，构成隐性纪律惩罚。劳动者为维护评分，必须进行情绪劳动与行为自我规训。这与霍赫希尔德（Hochschild）论及的情感商品化形成呼应——差别在于惩罚机制已从管理层转移至匿名消费者，控制的主体被稀释、被无形化。
+> 动态定价构成算法化的激励-惩罚装置。泰勒的差别计件工资制以可预期的价目表激励产出，而平台的高峰溢价、绩效分级使报酬在工人无法预知的算法逻辑中浮动。剩余价值提取不再仅靠劳动强化，更依赖信息不对称与风险转嫁（Cini, 2023）。
 >
-> **派单算法**是时空资源分配的核心权力装置。平台以"优化匹配效率"为名，独占了任务分配的决策权。劳动者无法选择订单类型、区域与时段，只能在算法划定的参数内被动响应。罗森布拉特与斯塔克（Rosenblat & Stark, 2016）对优步司机的研究揭示，平台通过信息不对称——隐藏目的地、预测推送——系统性地引导劳动者做出"自愿"服从算法意图的行为选择。这是一种以弹性之名实施的指令性控制。
+> 连续与断裂。连续性显而易见：任务分解、标准化、绩效量化——泰勒制核心原则在算法管理中被完整继承并被技术强化。断裂则更为根本。其一，控制主体从人到代码：泰勒的工头在场可见，算法则是不可申诉的黑箱。其二，监控突破车间边界：GPS追踪与行为数据采集使劳动监控全域化。其三，劳动身份从雇员滑向"独立承包商"：平台将固定成本与社会保障责任外部化，实现了泰勒未曾设想的"无雇佣的剥削"。其四，"自主性悖论"——工人名义上享有灵活性，实则被算法激励与惩罚系统性地规训（Wood et al., 2019）。
 >
-> **动态定价**（surge pricing）将薪酬决定权完全收归算法。传统集体谈判或固定工资协议被实时价格信号所取代。高峰溢价在表面上赋予劳动者"逐利自由"，实质上是用价格信号替代指令，将劳动力的时空配置转化为劳动者的"自主决策"——劳动者在追逐高价的过程中，无意识地完成了平台所需要的产能调配。斯尔尼塞克（Srnicek）将此概括为平台资本主义对行为数据的汲取逻辑：定价既是激励，也是监控工具。
->
-> ### 三、与泰勒制的连续性
->
-> 布雷弗曼将泰勒制的核心概括为"构想与执行的分离"。算法管理将这一分离推进至极致：构想（路线规划、定价策略、任务匹配逻辑）完全由平台工程师与算法模型承担，劳动者仅保留执行功能。此为第一重连续性。
->
-> 第二重连续性在于监控的全面化。泰勒借助秒表实施时间-动作研究，算法管理则通过GPS轨迹、接单响应时长、客户评分实现近实时监控，监控密度超越任何科学管理时代的物理可能。
->
-> ### 四、结构性断裂
->
-> 然而，算法管理并非泰勒制的数字升级版，两者之间存在三处根本断裂。
->
-> **其一，雇佣关系的消解。** 泰勒制在标准雇佣合同框架内实施控制，劳动者享有（至少名义上的）劳动保护。零工平台通过"独立承包商"分类，将控制与责任剥离：行使控制权而不承担雇主义务，将经营风险转嫁给劳动者，形成法律意义上的控制-责任悖论。
->
-> **其二，同意机制的重构。** 泰勒制依赖组织纪律与物质激励；算法管理则援引市场意识形态——"自由接单、灵活工作"——以自主性话语掩盖结构性强制，实现布洛维所谓"同意的制造"，但生产装置已由工厂车间迁移至手机App界面，博弈空间被大幅压缩。
->
-> **其三，控制的不透明性。** 科学管理标榜程序的客观可见，劳动者知晓规则。算法则以"黑箱"形式运作，规则随时可被单方修改而不予告知，形成系统性信息不对称。这种不透明性既消解了集体行动的靶向对象，也制造了芬克宾纳（Fincham）意义上的"算法权威效应"——将人为决策自然化为技术必然。
->
-> ### 五、简短结论
->
-> 零工平台的算法管理是泰勒制劳动控制逻辑的延伸，而非断裂——它继承了构想与执行分离、全程监控、行为标准化的核心基因；但通过雇佣关系法律形式的消解、市场意识形态的意识形态包裹与黑箱算法的不透明性，完成了对劳动控制方式的实质性重组。其理论意义在于：劳动过程理论需要在平台经济语境中修订其分析范畴，尤其是"雇主"边界与"同意"机制的操作化定义，方能回应当代劳动关系的新型支配结构。
+> 算法管理不是泰勒制的数字复刻，而是劳动控制在数字条件下的质变：控制更深——从行为到数据的全息捕捉；更隐蔽——以技术中立性遮蔽权力关系；更彻底——劳动者不仅失去对劳动过程的控制，也失去了理解控制机制的可能性。此即数字泰勒主义的核心矛盾：效率叙事下的权力重构。
 
 ---
 
@@ -135,43 +116,39 @@
 
 | 维度 | 传统 LLM | KL9-RHIZOME |
 |:---|:---|:---|
-| 结构 | 分节罗列，教科书式 | 论证驱动，层层递进（问题意识→机制→连续→断裂→结论） |
-| 引用 | 无 | 6 处学术引文（Braverman 1974 / Burawoy / Hochschild / Rosenblat & Stark 2016 / Srnicek / Fincham） |
-| 理论框架 | 隐含 | 明确以布雷弗曼-布洛维为坐标，霍赫希尔德、斯尔尼塞克、芬克宾纳为辅助 |
-| 结论 | 分别总结连续性与断裂 | 揭示核心悖论——控制-责任悖论、自主性悖论、算法权威效应 |
-| 语言 | 中性、安全 | 精确、有锋芒（"无雇佣的剥削""不可申诉的黑箱""意识形态包裹"） |
-| 句式特征 | 概括性陈述 | 优先"不是 X，而是 Y"，矛盾点悬停不下结论 |
+| 结构 | 分节罗列，教科书式 | 论证驱动，层层递进 |
+| 引用 | 无 | 4 处学术引文（Rosenblat & Stark 2016 / Braverman 1974 / Cini 2023 / Wood et al. 2019） |
+| 结论 | 分别总结连续性与断裂 | 揭示核心悖论——"效率叙事下的权力重构" |
+| 语言 | 中性、安全 | 精确、有锋芒（"无雇佣的剥削""不可申诉的黑箱"） |
 
----
+
 
 ### 📊 运行数据 · Runtime Stats
 
-截至 2026-05-06，在 DeepSeek V4 Pro 上累计处理 **~6.0 亿 tokens**，
+截至 2026-05-02，在 DeepSeek V4 Pro 上累计处理 **~5.9 亿 tokens**，
 输入 Prompt Caching 命中率稳定在 **~95%**。
 
-*As of May 6, 2026: ~600M tokens processed on DeepSeek V4 Pro with a ~95% input cache hit rate.*
+*As of May 2, 2026: ~592M tokens processed on DeepSeek V4 Pro with a ~95% input cache hit rate.*
 
 | 指标 | 数值 |
 |:---|:---:|
-| 累计处理 tokens | ~600,000,000 |
-| 输入（命中缓存） | ~490,000,000 |
-| 输入（未命中缓存） | ~23,000,000 |
-| 输出 | ~5,000,000 |
+| 累计处理 tokens | ~591,855,153 |
+| 输入（命中缓存） | 484,950,784 |
+| 输入（未命中缓存） | 22,786,180 |
+| 输出 | 4,763,077 |
 | **输入缓存命中率** | **~95%** |
 
 ![DeepSeek V4 Pro Cache Hit Rate](assets/cache-hit-rate.png)
 
----
-
 ## 🧠 核心概念 · Core Concepts
 
-### 1. N9R20DualState（双视角状态）
+### 1. DualState（双视角状态）
 
 推理开始前加载两个平等的、不可调和的角度。非"先站 A 再反思 B"，而是**同时持有 A 与 B**。
 
 *Load two equal, irreconcilable perspectives before reasoning begins — not "stand on A then reflect on B," but hold both simultaneously.*
 
-### 2. N9R20TensionBus（张力总线）
+### 2. TensionBus（张力总线）
 
 各模块通过事件总线松耦合对话。无中央调度器，任意模块可订阅它关心的事件。
 
@@ -203,20 +180,19 @@
 
 ## 🏗 架构 · Architecture
 
-### N9R20Framework 模块 · N9R20 Modules
+### 九层模块 · Nine Modules
 
 | 模块 | 角色 | 行数 |
 |:---|:---|:---:|
-| **n9r20_core** | 认知初始化：加载 DualState，声明 DNA | ~751 |
-| **n9r20_structures** | 核心数据结构：DualState, Tension, Perspective, RoutingDecision, CompressedOutput | ~120 |
-| **n9r20_tension_bus** | 事件总线：发布订阅、张力路由、会话隔离 | ~60 |
-| **n9r20_adaptive_router** | 自适应路由：文本类型检测、难度评估、压缩预算分配 | ~50 |
-| **n9r20_dual_reasoner** | 双视角推理：A/B 同时运算、矛盾悬停 | ~40 |
-| **n9r20_compression_core** | 四模压缩引擎：Construct → Deconstruct → Validate → Interrupt | ~60 |
-| **n9r20_semantic_graph** | 概念图谱：术语节点管理、关系边追踪 | ~40 |
-| **n9r20_memory_learner** | 记忆学习：SQLite 持久化、技能记录 | ~60 |
-| **n9r20_llm_evaluator** | LLM 评估器：难度评估、fold 预算分配 | ~40 |
-| **n9r20_skillbook** | 技能书系统：去中心化知识传播、双维度评分、信任分级吸收 | ~8 |
+| **kl9_core** | 认知初始化：加载 DualState，声明 DNA | 751 |
+| **kl9_reasoner** | Perspective A：理论视角运算 | 641 |
+| **kl9_soul** | Perspective B：具身成长引擎 | 64+426 |
+| **kl9_graph** | 概念知识图谱（6 张力类型 × 7 二重组） | 370 |
+| **kl9_research** | 对话式理论激活（与思想家对话而非检索） | 511 |
+| **kl9_memory** | 持久记忆层（SQLite，全活跃无归档） | 400 |
+| **kl9_learner** | 迭代双面学习（事后优化） | 573 |
+| **kl9_orchestrator** | 6 阶段认知流程协调 | 1114 |
+| **kl9_core** | 共享基础设施（11 模块，~2843 行） | 173 |
 
 ### 张力类型系统 · Tension Type System
 
@@ -269,30 +245,34 @@ python3 quickstart.py
 
 ```bash
 python3 quickstart.py --version
-# KL9-RHIZOME 9R-2.0 (semver: 2.0.0)
+# KL9-RHIZOME 9R-1.5 (semver: 1.5.0)
 ```
 
 ### 健康检查 · Health Check
 
 ```bash
-python3 -c "import sys; sys.path.insert(0, 'n9r20_core'); from n9r20_structures import N9R20DualState; print('OK')"
+python3 -c "import sys; sys.path.insert(0, 'kl9_core'); from health import HealthCheck; hc = HealthCheck(); print(hc.report())"
 ```
 
 ### 作为 Python 库 · As a Python Library
 
 ```python
 import sys
-sys.path.insert(0, 'n9r20_core')
+sys.path.insert(0, 'kl9_core')
 
-from n9r20_structures import N9R20DualState, N9R20Perspective, FoldDepth
-from n9r20_tension_bus import N9R20TensionBus
+from perspective_types import PERSPECTIVE_TYPES, TENSION_TYPES
+from tension_bus import TensionBus
 from version import MARKETING_VERSION, SEMVER
 
 print(f"KL9-RHIZOME {MARKETING_VERSION} ({SEMVER})")
 
+# 查看可用视角对 / List available dualities
+for pair in PERSPECTIVE_TYPES.recommended_dualities:
+    print(f"{pair['perspective_A']} ↔ {pair['perspective_B']}")
+
 # 订阅事件 / Subscribe to events
-bus = N9R20TensionBus()
-bus.subscribe("QueryEvent", lambda e: print(f"收到: {e.payload}"))
+bus = TensionBus()
+bus.subscribe("QueryEvent", lambda e: print(f"收到: {e['data']}"))
 ```
 
 ### 本地加载到 OpenClaw · Load into OpenClaw
@@ -308,18 +288,18 @@ cd KL9-Architecture
 python3 quickstart.py
 
 # 4. 或手动注册为 OpenClaw 插件
-cp -r n9r20_core $OPENCLAW_HOME/plugins/n9r20-rhizome/
-cp -r n9r20_skillbook $OPENCLAW_HOME/plugins/n9r20-rhizome/
+cp -r kl9_core $OPENCLAW_HOME/plugins/kl9-rhizome/
+cp -r kl9_skillbook $OPENCLAW_HOME/plugins/kl9-rhizome/
 ```
 
 ### 30 秒测试 · Quick Test
 
 ```bash
 # 基础测试
-cd tests && python n9r20_test_router.py
+cd tests && python test_basic.py
 
 # 技能书系统测试
-python -c "import sys; sys.path.insert(0, 'n9r20_skillbook'); from n9r20_skillbook import import_skillbook; print('OK')"
+python -c "import sys; sys.path.insert(0, 'kl9_skillbook'); from importer import import_skillbook; print('OK')"
 ```
 
 ---
@@ -330,9 +310,7 @@ python -c "import sys; sys.path.insert(0, 'n9r20_skillbook'); from n9r20_skillbo
 |:---|:---|
 | [docs/GUIDE.md](docs/GUIDE.md) | 开发指南：贡献方式、AI代理指南、路线图、版本历史 |
 | [docs/SKILLBOOK.md](docs/SKILLBOOK.md) | 技能书系统完整规范：格式标准、吸收协议、评分体系、社区评测 |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 系统架构详解：N9R20模块、张力类型、事件系统、认知流程、设计决策 |
-| [docs/FRAMEWORK.md](docs/FRAMEWORK.md) | N9R20Framework 认知架构规范 |
-| [docs/DEPLOY.md](docs/DEPLOY.md) | 部署指南 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 系统架构详解：九层模块、张力类型、事件系统、认知流程、设计决策 |
 | [CHANGELOG.md](CHANGELOG.md) | 版本变更日志 |
 | [LICENSE](LICENSE) | MIT 许可协议 |
 
@@ -367,7 +345,7 @@ python -c "import sys; sys.path.insert(0, 'n9r20_skillbook'); from n9r20_skillbo
 | 推荐二重组 | 7 |
 | 涌现风格 | 4 |
 | 技能书 | 3 |
-| 版本 | 9R-2.0 (2.0.0) |
+| 版本 | 9R-1.5 (1.5.0) |
 
 ---
 
@@ -383,9 +361,11 @@ python -c "import sys; sys.path.insert(0, 'n9r20_skillbook'); from n9r20_skillbo
 | **DeepSeek** V4 Pro | **代码实现主力** · Main code implementation |
 | **Kimi** 2.6 (Moonshot AI) | 验证与调试 · Verification & debugging |
 
+
 ---
 
 *中英双语版由 DeepSeek V4 Pro 辅助创作 · Bilingual version co-created with DeepSeek V4 Pro*
+
 
 ---
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-KL9-RHIZOME 9R-2.0 · Quick Start
+KL9-RHIZOME 9R-1.5 · Quick Start
 ================================
 一键启动脚本，自动检测环境、安装依赖、初始化数据库、验证健康状态。
 
@@ -21,8 +21,8 @@ import argparse
 from pathlib import Path
 
 # ── 版本常量 ──────────────────────────────────────────────
-MARKETING_VERSION = "9R-2.0"
-SEMVER = "2.0.0"
+MARKETING_VERSION = "9R-1.5"
+SEMVER = "1.5.0"
 
 # ── 环境检测 ──────────────────────────────────────────────
 def detect_environment() -> str:
@@ -59,20 +59,20 @@ def setup_paths(env: str) -> Path:
     
     if env == "openclaw":
         # OpenClaw 插件模式：使用相对路径
-        n9r20_core = script_dir / "n9r20_core"
-        n9r20_skillbook = script_dir / "n9r20_skillbook"
+        kl9_core = script_dir / "kl9_core"
+        kl9_skillbook = script_dir / "kl9_skillbook"
     elif env == "astrbot":
         # AstrBot 模式：复制到 skills 目录
         astrbot_skills = Path("/AstrBot/data/skills")
-        n9r20_core = astrbot_skills / "n9r20_core"
-        n9r20_skillbook = astrbot_skills / "n9r20_skillbook"
+        kl9_core = astrbot_skills / "kl9_core"
+        kl9_skillbook = astrbot_skills / "kl9_skillbook"
     else:
         # 独立模式
-        n9r20_core = script_dir / "n9r20_core"
-        n9r20_skillbook = script_dir / "n9r20_skillbook"
+        kl9_core = script_dir / "kl9_core"
+        kl9_skillbook = script_dir / "kl9_skillbook"
     
     # 添加到 sys.path
-    for p in [str(n9r20_core), str(n9r20_skillbook), str(script_dir)]:
+    for p in [str(kl9_core), str(kl9_skillbook), str(script_dir)]:
         if p not in sys.path:
             sys.path.insert(0, p)
     
@@ -83,12 +83,13 @@ def init_database(project_root: Path) -> Path:
     """初始化 SQLite 数据库"""
     data_dir = project_root / "data"
     data_dir.mkdir(exist_ok=True)
-    db_path = data_dir / "n9r20.db"
+    db_path = data_dir / "kl9.db"
     
-    # 导入 n9r20_memory_learner 创建 schema
+    # 导入 graph_backend 创建 schema
     try:
-        from n9r20_memory_learner import N9R20MemoryLearner
-        learner = N9R20MemoryLearner(str(db_path))
+        import graph_backend as GB
+        # 首次连接会自动创建表
+        # Database path uses kl9_core/graph_backend.py default
         print(f"  ✓ Database initialized: {db_path}")
         return db_path
     except Exception as e:
@@ -99,9 +100,10 @@ def init_database(project_root: Path) -> Path:
 def test_core_modules() -> dict[str, bool]:
     """测试所有核心模块可导入"""
     modules = [
-        "n9r20_structures", "n9r20_tension_bus", "n9r20_adaptive_router",
-        "n9r20_dual_reasoner", "n9r20_compression_core", "n9r20_semantic_graph",
-        "n9r20_memory_learner", "n9r20_llm_evaluator", "version",
+        "perspective_types", "tension_bus", "core_structures",
+        "dual_fold", "emergent_style", "graph_backend",
+        "memory", "learner", "routing",
+        "suspension_evaluator", "fold_depth_policy", "constitutional_dna",
     ]
     results = {}
     for mod in modules:
@@ -117,11 +119,11 @@ def test_core_modules() -> dict[str, bool]:
 def test_skillbook_system() -> dict[str, bool]:
     """测试技能书系统可导入"""
     try:
-        from n9r20_skillbook import n9r20_adaptive_router, n9r20_compression_core, n9r20_dual_reasoner, n9r20_memory_learner
-        return {"adaptive_router": True, "compression_core": True, "dual_reasoner": True, "memory_learner": True}
+        from kl9_skillbook import models, validator, scorer, importer
+        return {"models": True, "validator": True, "scorer": True, "importer": True}
     except Exception as e:
         print(f"  ✗ Skillbook system: {e}")
-        return {"adaptive_router": False, "compression_core": False, "dual_reasoner": False, "memory_learner": False}
+        return {"models": False, "validator": False, "scorer": False, "importer": False}
 
 # ── 健康检查 ──────────────────────────────────────────────
 def health_check(project_root: Path) -> dict:
@@ -143,7 +145,7 @@ def health_check(project_root: Path) -> dict:
     print(f"  Skillbook system: {sb_ok}/{len(skillbook_results)}")
     
     # 4. 数据库
-    db_path = project_root / "data" / "n9r20.db"
+    db_path = project_root / "data" / "kl9.db"
     db_ok = db_path.exists()
     print(f"  Database: {'✓' if db_ok else '✗'}")
     
@@ -173,7 +175,7 @@ def setup_openclaw() -> bool:
     print(f"\n🔌 OpenClaw detected: {openclaw_home}")
     
     # 检查 OpenClaw 插件目录
-    plugin_dir = Path(openclaw_home) / "plugins" / "n9r20-rhizome"
+    plugin_dir = Path(openclaw_home) / "plugins" / "kl9-rhizome"
     if plugin_dir.exists():
         print(f"  ✓ Plugin already registered: {plugin_dir}")
         return True
