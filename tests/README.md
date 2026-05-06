@@ -1,12 +1,6 @@
-# tests — 测试套件 · Test Suite
+# tests/
 
-| 文件 | 覆盖 | 测试数 |
-|------|------|:--:|
-| `test_basic.py` | 核心运行时基础功能 · Core runtime basics | — |
-| `test_bridge.py` | SQLite ↔ JSON 桥接 · Bridge integration | 13 |
+测试套件。
 
-### 运行
-
-```bash
-python3 -m pytest tests/ kl9_skillbook/tests/ -v
-```
+- `test_n9r20_*.py` — 9R-2.0 核心模块测试
+- `test_kl9_*.py` — 兼容层测试

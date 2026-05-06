@@ -1,32 +1,21 @@
-# KL9-RHIZOME 版本归档 · Version Archive
+# archive/
 
-命名规则：9R-{major}.{minor} = 开了玖(9) + RHIZOME(R) + 版本号
+版本归档区。
 
-## 归档目录
+## 归档规则
 
-```
-archive/
-  v1/
-    9R-1.9/          ← 1.x 系列最终版本
-      kl9_core/
-      kl9_skillbook/
-      skillbooks/
-      README.md
-```
+- 大版本升级时归档旧版
+- 归档保留完整代码、文档、测试
+- 归档版本不再活跃开发，仅供追溯和对比学习
 
-## 归档触发条件
+## 已归档版本
 
-当大版本升级时（如 1.x -> 2.0），将上一大版本的最新小版本归档：
-- 1.9 -> 归档到 `archive/v1/9R-1.9/`
-- 2.3 -> 归档到 `archive/v2/9R-2.3/`
+| 版本 | 路径 | 说明 |
+|------|------|------|
+| 9R-1.5 | `v1/9R-1.5/` | 初代 KL9 架构（~8,692 行代码） |
 
-## 如何归档
+### 9R-1.5 归档内容
 
-```bash
-./scripts/archive_version.sh 1.9.0
-```
-
-这将：
-1. 创建 `archive/v1/9R-1.9/` 目录
-2. 复制当前代码到归档目录
-3. 打 Git 标签 `v1.9.0-final`
+- `core/` — kl9_core 旧版核心模块
+- `skillbook/` — kl9_skillbook 旧版技能书系统
+- `docs/` — 旧版设计文档

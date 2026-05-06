@@ -1,5 +1,18 @@
 # KL9-RHIZOME · 9R-2.0
 
+## 仓库结构
+
+| 版本 | 路径 | 状态 |
+|------|------|------|
+| **9R-2.0 (最新)** | `core/` `skillbook/` | 活跃开发 |
+| 9R-1.5 (旧版) | `archive/v1/9R-1.5/` | 归档维护 |
+
+> 快速开始：见 `quickstart.py`
+> 旧版文档：`archive/v1/9R-1.5/README.md`
+
+
+
+
 > **在 LLM 之上运行的认知协议层** · *A cognitive protocol layer on top of LLMs*
 >
 > 版本命名：9R-2.0 = 开了玖(9) + RHIZOME(R) + 大版本(2).小版本(0)
