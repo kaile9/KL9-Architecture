@@ -130,7 +130,7 @@ skills/archive/legacy/
 ├── kl9-v2.0/          # 原始v2.0副本
 ├── kl9_core/          # 旧核心位置
 ├── kl9_engines/       # 旧引擎
-└── kl9_skillbook/     # 旧技能书
+└── kl9_skills/     # 旧技能书
 ```
 
 ---
