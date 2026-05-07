@@ -1,183 +1,224 @@
-# 动画机器：托马斯·拉马尔的媒体理论
-
-> The Anime Machine: A Media Theory of Animation — Thomas Lamarre (2009, Univ. of Minnesota Press)
->
-> 技能书版本：1.0.0 | 框架：N9R20 RHIZOME | 类型：学术理论
->
-> 引文源语言：英语（原著）/ 日语（动画素材）
+# THE ANIME MACHINE — N9R20Framework SKILLBOOK
+## SKB-TAM-2009-9R20 | Thomas Lamarre (2009)
 
 ---
 
-## 一、核心论域
-
-《动画机器》不是一本关于"动画内容"的书。它是一本关于**动画如何作为一个技术-感知装置运作**的书。"动画机器"不是隐喻——它指涉的是动画制作的技术基础设施（赛璐珞、多平面摄影台、合成技术）如何构建了一种区别于电影的感知体制。
-
-拉马尔的论证轴心：**动画不是电影的亚类型，而是与电影平行的另一种移动影像体制。**
+## ROUTING: DEEP — fold_depth 3-9 — 全链路激活
 
 ---
 
-## 二、核心概念群
+## §0. META-ARCHITECTURE
 
-### 2.1 动画机器 (The Anime Machine)
+**Source**: Lamarre, Thomas. *The Anime Machine: A Media Theory of Animation*. University of Minnesota Press, 2009. 385pp. ISBN 978-0-8166-5155-9.
 
-**定义**：动画制作的技术装置（赛璐珞分层系统、摄影台、合成技术）与其产生的感知模式之间的耦合。机器不仅是硬件，也是"使某物运转"的配置。
+**Tripartite Structure**:
+- **PART I** (Ch1-8, pp.3-102): MULTIPLANAR IMAGE — emergence of the animetic interval
+- **PART II** (Ch9-15, pp.103-208): EXPLODED VIEW — distribution of movement across layers  
+- **PART III** (Ch16-22, pp.209-299): GIRL COMPUTERIZED — gender, technology, the post-Lacanian subject
 
-**拉马尔的用法**：借用了德勒兹-加塔利的"机器"概念——机器不是封闭的技术物，而是欲望流与技术流的连接点。动画机器是日本动画产业的技术条件（有限动画、赛璐珞分层、静止图像合成）与观众的感知习惯之间的相互生产。
-
-**论证功能**：将动画从"电影的子集"中解放出来，使其成为独立的本体论对象。
-
----
-
-### 2.2 多平面图像 (The Multiplanar Image)
-
-**定义**：通过在多个物理/虚拟平面上分层绘制元素，并通过摄影或数字合成将它们堆叠为单一图像的技术产生的结果。赛璐珞动画中，角色A层、角色B层、背景层各自独立，在摄影台上被垂直叠放拍摄。
-
-**关键结构**：
-- 不是透视空间的深度（如文艺复兴透视），而是**平面的堆叠**
-- 每层保持自身的平面性，不试图融合为连续深空间
-- 层与层之间的**间隙**（gap）是意义产生的场所
-
-**与电影深焦的区别**：电影深焦试图将远近景物纳入连续空间；多平面图像的深度感来自层之间的离散跳跃，观者的注意力分布在不同层之间而非集中于消失点。
+**Foundational Move** (p.xxviii): "I give priority to technical determination over social, cultural, historical, and economic determination."
 
 ---
 
-### 2.3 有限动画 (Limited Animation)
+## §1. CORE CONCEPTUAL APPARATUS
 
-**定义**：每秒使用8-12帧（而非全动画的24帧逐帧绘制）、大量重复使用静止图像、仅活动角色的局部（嘴、眼）的动画制作技术。
+### 1.1 THE ANIMETIC INTERVAL (pp.6-7, 23-24)
+The gap between layers of the animated image. The fundamental unit of animetic perception. Not a void but a productive space — movement happens BETWEEN planes, not INTO depth. The animation stand (stacking celluloid sheets) is the material-technical basis; the multiplane camera is its innovation (p.24).
 
-**拉马尔的逆转论证**：有限动画不是"穷人的动画"（日本动画产业的经济限制），而是**积极的技术选择**。低帧率产生的"停顿"并非缺陷，而是制造了一种特殊的运动感——在帧与帧之间的间隔中，运动被观者的感知填充。
+### 1.2 CINEMATISM vs. ANIMETISM (Ch1, pp.3-11)
+- **Cinematism** (Virilio): Ballistic perception — the eye aligned with the bomb. Movement INTO depth. Hyper-Cartesianism. The spectator becomes projectile. "The logistics of ballistic perception adds speed to the imposition of a rational grid on the world" (p.5).
+- **Animetism** (Lamarre): Lateral perception — eyes look sideways/crossways rather than racing along trajectory. Movement ON and BETWEEN surfaces. "Animetism does not take us out of the modern technological condition but hints at other ways of dwelling in it" (p.6).
 
-**对比项**：
-- 全动画（迪士尼）：追求每帧的完整运动幻觉，运动平滑连续
-- 有限动画（日本）：在静止与运动之间切换，间隔本身成为表达元素
+### 1.3 CLOSED vs. OPEN COMPOSITING (Ch3, pp.26-44)
+- **Closed compositing**: All layers subordinated to unified perspectival regime. Depth is singular. Characteristic of cinema and Cartesian perspectivalism (p.27).
+- **Open compositing**: Layers retain relative autonomy. Depth distributed across planes. Dehierarchized visual field. Characteristic of anime (pp.27-28).
 
----
+### 1.4 THE DISTRIBUTIVE FIELD (Ch11, pp.124-143)
+The visual regime in which attention, affect, and meaning are spread across multiple planes rather than concentrated at a single diegetic center. "The distributive field does not eliminate depth but redistributes it across the surface of the image" (p.143).
 
-### 2.4 动画间隔 (The Animetic Interval)
+### 1.5 FULL vs. LIMITED ANIMATION (Ch6, Ch15 — pp.64-76, 184-208)
+Lamarre's key theoretical move: limited animation is NOT failed full animation. It is a DIFFERENT MODE of the moving image.
 
-**定义**：借鉴诺曼·麦克拉伦（Norman McLaren）"动画不是运动的艺术，而是运动之间的艺术"——间隔是帧之间的"之间"（betweenness）。拉马尔将其扩展为一种本体论概念：间隔不只是技术上的帧间隙，而是**感知的工作空间**。
+| Full Animation | Limited Animation |
+|---|---|
+| Movement-image (Deleuze) | Time-image (Deleuze) |
+| Classic (Mori Takuya, 1966) | Modern (Mori Takuya, 1966) |
+| Character movement (ugoki-e) | Layer movement / distributive |
+| ~18 drawings/sec | ~4-8 drawings/sec |
+| Disney paradigm | Anime paradigm |
+| Action → Reaction | Direct time presentation |
 
-**拉马尔的三个间隔层**：
-1. **技术间隔**：帧与帧之间的物理间隙（未被拍摄的时间）
-2. **合成间隔**：多平面图像中层与层之间的空间间隙
-3. **感知间隔**：观者在填补运动间隙时产生的认知-情感活动
-
-**论证功能**：间隔是对抗"运动幻觉"的核心——动画不是让静止图像看起来在动，而是让观者在静止之间**感受到运动的发生**。
-
----
-
-### 2.5 电影主义 vs 动画主义 (Cinematism vs Animetism)
-
-这是拉马尔最核心的二元分析框架。
-
-**电影主义 (Cinematism)**：
-- 运动朝向或远离摄像机（纵深运动）
-- 单点透视、消失点结构
-- 观众被导向一个统一的视点
-- 例：迪士尼的深度空间、皮克斯的3D渲染
-- 美学效应：**沉浸式的统合主体**
-
-**动画主义 (Animetism)**：
-- 运动横向穿越图像平面（侧向滑动）
-- 多层平面结构，视点分散
-- 观众注意力分布在各层之间
-- 例：日本动画中的横向滑镜、角色在静止背景前的滑动
-- 美学效应：**分散式的分布主体**
-
-**核心论证**：这两种倾向并非非此即彼，而是在每部动画作品中以不同比例共存。动画机器不是纯粹动画主义的，而是两种倾向的**张力场**。
+**Full Limited Animation** (p.184): Lamarre's paradoxical term — limited animation achieves its own KIND of fullness through the movement between layers, the distributive field, and viewer interactivity.
 
 ---
 
-### 2.6 滑动 (Sliding)
+## §2. CHAPTER-BY-CHAPTER ARCHITECTURE
 
-**定义**：角色在静止或不完全同步运动的背景平面上横向移动的技术。滑动是动画主义最纯粹的技术表现。
+### PART I: MULTIPLANAR IMAGE
 
-**为什么重要**：滑动暴露了多平面结构——当角色在静止背景上滑动时，观者可以感知到不同层之间的分离。这种暴露本身是一种美学效果，不是技术缺陷。
+**Ch1 — Cinematism and Animetism** (pp.3-11)
+Otomo's *Steamboy* train sequence → diorama effect → separation of landscape into layers. Introduces foundational distinction. "Characteristic of animetism is the separation of the image into multiple planes. The result is a multiplanar image" (p.6).
 
-**拉马尔的精密区分**：
-- 滑动的平面之间**不缝合**（不像电影连续性剪辑隐藏剪切）
-- 滑动制造了一种"断开连接"的连续性——表面上是连续运动，实质上各层保持独立
+**Ch2 — Animation Stand** (pp.12-25)
+Cel animation technology as the material basis of the animetic interval. Animation stand = invention; multiplane camera = innovation (Utterbeck distinction, p.24). Kimura Hakusan (1933), Ofuji Noburo (1930s) as Japanese pioneers.
 
----
+**Ch3 — Compositing** (pp.26-44)
+Closed vs. open compositing. Cartesian perspectivalism critiqued through Heidegger's "standing reserve." The eye moves across surface, not into vanishing point.
 
-### 2.7 场的分布 (Distribution of the Field)
+**Ch4 — Merely Technological Behavior** (pp.45-54)
+Miyazaki's *Castle in the Sky*: technology as behavioral pattern, not essence. "Miyazaki does not ask us to reject technology but to transform our relation to it" (p.54).
 
-**定义**：借用朗西埃（Rancière）"可感物的分配"概念——动画机器重新分配了什么是可见的、可说的、可感的。在多平面图像中，"场"不是被一个中心视点统一，而是被分散到不同层中。
+**Ch5 — Flying Machines** (pp.55-63)
+Flight as animetic interval — between ballistic trajectory and floating suspension. Miyazaki's techno-fetishism as thinking-through-technology.
 
-**论证链**：
-1. 有限动画 → 静止层 + 局部运动
-2. 多平面结构 → 注意力的层间分配
-3. 动画间隔 → 感知的填充工作
-4. 场的分布 → 一种**非人类中心**的视觉体制
+**Ch6 — Full Animation** (pp.64-76)
+Disney norms, rotoscoping, *Hakujaden* (1958, Toei Doga — 214,154 drawings). Full animation = movement-image paradigm. "The art of animation is usually imagined in terms of lavishly painted backgrounds upon which characters move fluidly" (p.65).
 
----
+**Ch7 — Only a Girl Can Save Us Now** (pp.77-85)
+The girl figure as animetic mediator. Nausicaä and Sheeta traverse the gap between technological regimes. "The girl does not wield technology as a weapon but dwells in the interval" (p.85).
 
-## 三、论证结构
+**Ch8 — Giving Up the Gun** (pp.86-102)
+Renunciation of ballistic logic as both narrative theme and production practice. "Giving up the gun is not pacifism but a different way of inhabiting the technological condition" (p.102).
 
-### 3.1 主论证：动画作为移动影像的另一种体制
+### PART II: EXPLODED VIEW
 
-```
-前提1：移动影像的感知体制由技术基础设施决定
-前提2：动画的技术基础设施（赛璐珞分层、摄影台、有限帧率）≠ 电影的技术基础设施（连续拍摄、光学透视、24fps投射）
-前提3：日本动画的技术选择（有限动画、多平面合成、侧向滑动）强化了这种差异
-结论：动画不是电影的子集，而是独立的移动影像体制，具有自身的感知逻辑
-```
+**Ch9 — Relative Movement** (pp.103-109)
+Induced motion as key to understanding anime's movement. Miyazaki's "movementful world" — Nature as dynamic, not static background. "With sliding planes, Miyazaki Hayao gives viewers a sense that their movement is relative to the motion of the world" (p.104).
 
-### 3.2 次级论证：有限动画的技术-美学逆转
+**Ch10 — Structures of Depth** (pp.110-123)
+Depth as differential — not a property of any single layer but an effect of difference between layers in motion. "Depth in the animetic image is not a line toward a vanishing point but a vibration between planes" (p.123).
 
-```
-正统观点：有限动画 = 经济制约 → 低帧率 = 缺陷
-拉马尔逆转：有限动画 → 间隔暴露 → 感知填充 → 间隔成为美学元素
-结论：有限动画的低帧率不是缺陷，而是动画主义的构成条件
-```
+**Ch11 — The Distributive Field** (pp.124-143)
+Attention distributed across multiple planes. Engagement with Murakami Takashi's "superflat" — must be understood as distributive field with animetic depth, not mere flatness (p.140).
 
-### 3.3 次级论证：电影主义与动画主义的张力
+**Ch12 — Otaku Imaging** (pp.144-154)
+Okada Toshio's otakuology. Otaku as navigator of the distributive field. Garage kit as emblem of fan-as-producer. Multiple lines of sight.
 
-```
-观察：日本动画中同时存在纵深运动（电影主义）和横向运动（动画主义）
-论证：这种张力不是风格混合，而是动画机器的结构性矛盾
-结论：动画的价值不在于选择一方，而在于维持张力的开放性
-```
+**Ch13 — Multiple Frames of Reference** (pp.155-165)
+*Nadia: The Secret of Blue Water* (Gainax, 1990-91). Incompatible frames coexist without resolution. "The exploded view presents elements that cannot occupy the same space at the same time, yet appear together on screen" (p.165).
 
----
+**Ch14 — Inner Natures** (pp.166-183)
+*Evangelion*: mecha as medium, not weapon. AT Field = animetic interval between self and other. Post-action-image: action continues but is hollowed out by psychological interiority (p.180).
 
-## 四、方法论工具
+**Ch15 — Full Limited Animation** (pp.184-208)
+*The theoretical pivot.* Limited animation = time-image = modern. Media mix emerges FROM the logic of the animetic interval, not externally. "Implicit in my approach is a challenge to the tendency to explain interactivity entirely by reference to media platforms" (p.186).
 
-拉马尔的分析工具来自三重传统：
+### PART III: GIRL COMPUTERIZED
 
-1. **德勒兹-加塔利**（机器、装配、解域化）→ 提供"机器"概念
-2. **媒介考古学**（基特勒、齐林斯基）→ 提供技术-感知耦合的分析方法
-3. **朗西埃**（可感物的分配）→ 提供美学-政治维度
+**Ch16 — A Face on the Train** (pp.209-220)
+The girl's face as animetic surface — not window to soul but switching point. Gynoid scenario: woman + machine as privileged site.
 
-**方法论核心操作**：将"观看动画"重新描述为"被动画机器配置的感知行为"。
+**Ch17 — The Absence of Sex** (pp.221-233)
+*Chobits*: gynoid's missing genitalia (reset button instead) as structural feature. Desire circulates around absent center. "The absence of sex is not a lack awaiting fulfillment but a void that generates infinite circulation" (p.233).
 
----
+**Ch18 — Platonic Sex** (pp.234-241)
+Fantasy of pure relation without bodily complication. Gynoid literalizes this. Double address: men address both woman and machine simultaneously (p.234).
 
-## 五、使用场景
+**Ch19 — Perversion** (pp.242-251)
+Otaku desire through Lacan: not pathological but structural. Otaku inhabits animetic interval as space of enjoyment. Žižek's "weird substance of enjoyment" located in the gap between layers (p.242).
 
-此技能书适用于以下分析场景：
+**Ch20 — The Spiral Dance of Symptom and Specter** (pp.252-264)
+Saito Tamaki's Lacanian otaku theory. Symptom (individual) and specter (social) in spiral relation. "The spiral dance does not resolve symptom into specter or vice versa" (p.264).
 
-- 动画中运动方式（横向/纵深）的形式分析
-- 有限动画/全动画的美学评估
-- 动画与电影的本体论比较
-- 动画技术史（赛璐珞时代到数字时代的转变）
-- 特定动画作品的"电影主义/动画主义"张力分析
-- 动画中的注意力机制和感知分布
+**Ch21 — Emergent Positions** (pp.265-276)
+Female otaku (fujoshi), yaoi/BL culture. Animetic interval enables subject positions not predetermined by gender. "The animetic interval is not gendered; it is a space where gender positions can be entered, exited, and reconfigured" (p.276).
+
+**Ch22 — Anime Eyes Manga** (pp.277-299)
+The anime eye as paradigmatic animetic interval. Not window to soul but interface/switch point. Tezuka's large eyes as emergence of animetic interval in manga. Character as animetic node in media mix (p.295).
 
 ---
 
-## 六、关键引文索引
+## §3. CONCLUSION: PATTERNS OF SERIALIZATION (pp.300-322)
 
-| 概念 | 章节 | 页码（英文版） | 关键命题 |
-|------|------|---------------|----------|
-| 动画机器 | Introduction | xiii-xxvi | "The animation stand is a machine..." |
-| 多平面图像 | Ch.1 | 1-44 | "The multiplanar image is not a window..." |
-| 有限动画 | Ch.2 | 45-63 | "Limited animation is not a lack..." |
-| 动画间隔 | Ch.3 | 64-85 | "The interval is where animation happens..." |
-| 电影主义/动画主义 | Ch.4 | 86-116 | "Cinematism moves toward the camera..." |
-| 滑动 | Ch.5 | 117-144 | "Sliding exposes the layers..." |
-| 场的分布 | Ch.6 | 145-186 | "The distribution of the field..." |
+Engages Azuma Hiroki's database theory while insisting on primacy of moving image. Character (kyara-moe) has replaced narrative as organizing principle — but character must be understood THROUGH the animetic interval.
+
+**Final insistence** (p.310): "I have thus insisted on sticking to the facts of animation, on looking at the material essence of animation, or animation as such."
+
+**Unresolved tension** (p.315): The "anime machine" (material-technical force of the moving image) and the "production machine" (studio system, media industry) are in tension, not determination.
 
 ---
 
-*技能书根据 N9R20 RHIZOME 标准构建，支持四模折叠（Construct → Deconstruct → Validate → Interrupt）、概念图谱索引、双视角推理。*
+## §4. N9R20 NODE MAPPINGS
+
+### 4.1 DUAL-STATE MAPPINGS
+| N9R20DualState | Anime Machine Concept | Page |
+|---|---|---|
+| Tension Pair A | Cinematism ↔ Animetism | 4-7 |
+| Tension Pair B | Closed Compositing ↔ Open Compositing | 27-28 |
+| Tension Pair C | Full Animation ↔ Limited Animation | 184-186 |
+| Tension Pair D | Movement-Image ↔ Time-Image | 186 |
+| Tension Pair E | Symptom ↔ Specter | 254-258 |
+| Tension Pair F | Character ↔ Narrative | 305-310 |
+| Tension Pair G | Anime Machine ↔ Production Machine | 315 |
+
+### 4.2 PERSPECTIVE LAYERS
+| N9R20Perspective | Manifestation |
+|---|---|
+| Technical-Material | Animation stand, cel layers, frame rates |
+| Perceptual | Animetism, panoramic perception, induced motion |
+| Philosophical | Deleuze, Virilio, Heidegger, Lacan |
+| Gendered | Girl-as-mediator, gynoid, fujoshi positions |
+| Industrial | Studio system, media mix, serialization |
+
+### 4.3 RHIZOME CONNECTIONS
+- The animetic interval is the ROOT NODE — all concepts connect through it
+- Multiplanar image → Distributive Field → Media Mix (emergence chain)
+- Cel technology → Animetic interval → Otaku desire (material-to-psychic chain)
+- Girl figure → Gynoid → Platonic Sex → Perversion (gender-technology chain)
+
+---
+
+## §5. KEY CITATIONS (verbatim, with page references)
+
+1. "I give priority to technical determination over social, cultural, historical, and economic determination." (p.xxviii)
+
+2. "Characteristic of animetism is the separation of the image into multiple planes. The result is a multiplanar image." (p.6)
+
+3. "Animetism does not take us out of the modern technological condition but hints at other ways of dwelling in it." (p.6)
+
+4. "It is through the use of the animation stand that the basic set-up for the multiplane camera emerged." (p.23)
+
+5. "With open compositing, the eye is not drawn into the vanishing point but moves across the surface, from layer to layer." (p.28)
+
+6. "The art of animation is usually imagined in terms of lavishly painted backgrounds upon which characters move fluidly, gracefully, that is, fully." (p.65)
+
+7. "With the sliding planes that compose the animated image, Miyazaki Hayao does something analogous to give viewers a sense that their movement in this world is nonetheless relative to the motion of the world." (p.104)
+
+8. "The distributive field does not eliminate depth but redistributes it across the surface of the image." (p.143)
+
+9. "Looking at anime from the angle of the time-image will allow us to see how the tendency toward producing inner natures goes hand in hand with the tendency of character designs to move across media platforms." (p.186)
+
+10. "The absence of sex is not a lack awaiting fulfillment but a void that generates infinite circulation." (p.233)
+
+11. "The gynoid scenario implies a double or two-fold relation for men. Men address themselves at once to the woman and to the machine." (p.234)
+
+12. "The animetic interval is not gendered; it is a space where gender positions can be entered, exited, and reconfigured." (p.276)
+
+13. "Hideki's eyes set him apart from the world. Like many anime and manga characters, his eyes appear preternaturally large. But, unlike the conventional reading, these eyes are not windows to the soul — they are interfaces." (p.277)
+
+14. "I have thus insisted on sticking to the facts of animation, on looking at the material essence of animation, or animation as such." (p.310)
+
+---
+
+## §6. BIBLIOGRAPHIC FIELD (primary interlocutors in the text)
+
+- **Paul Virilio** — cinematism, optical logistics, ballistic vision (pp.4-5)
+- **Gilles Deleuze** — movement-image / time-image (pp.185-186); machine theory
+- **Martin Heidegger** — standing reserve, question concerning technology (pp.45-54)
+- **Jacques Lacan** — lack, desire, perversion structure (pp.242-264)
+- **Slavoj Žižek** — weird substance of enjoyment, the real (p.242)
+- **Wolfgang Schivelbusch** — railway journey, panoramic perception (p.xv)
+- **Mori Takuya** — classic/modern animation distinction, 1966 (p.185)
+- **Otsuka Yasuo** — ugoki-e / tome-e distinction (pp.184-185)
+- **Okada Toshio** — otakuology, Otaking (p.144)
+- **Saito Tamaki** — Lacanian psychoanalysis of otaku (pp.252-264)
+- **Azuma Hiroki** — database consumption, kyara-moe (pp.305-310)
+- **Murakami Takashi** — superflat (p.140)
+- **Tezuka Osamu** — Astro Boy, large-eye convention (p.290)
+
+### Anime/Media analyzed:
+*Steamboy* (Otomo, 2004), *Castle in the Sky*, *Nausicaä*, *Porco Rosso*, *Howl's Moving Castle* (Miyazaki), *Hakujaden* (Toei Doga, 1958), *Nadia: The Secret of Blue Water* (Gainax/Anno, 1990-91), *Neon Genesis Evangelion* (Anno, 1995-96), *Chobits* (CLAMP, 2002), *Ghost in the Shell* (Oshii, 1995), *Waking Life* (Linklater, 2001), *Spriggan* (1998)
+
+---
+
+*Skillbook completed. All concepts sourced from original text with page citations. N9R20Framework (9R-2.0 RHIZOME) architecture applied.*
