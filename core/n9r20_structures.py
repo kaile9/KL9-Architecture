@@ -23,10 +23,18 @@ class N9R20Perspective:
     characteristics: List[str] = field(default_factory=list)
     key: str = ""
     perspective_type: N9R20PerspectiveType = N9R20PerspectiveType.THEORETICAL
+    viewpoint: str = ""  # 此视角的立场/观点摘要
     
     def __post_init__(self):
         if not self.key:
             self.key = self.name
+
+class FoldDepth(Enum):
+    """折叠深度 — 路由决策的目标层级"""
+    QUICK = "quick"
+    STANDARD = "standard"
+    DEEP = "deep"
+    DEGRADED = "degraded"
 
 
 @dataclass
@@ -37,8 +45,22 @@ class N9R20Tension:
     claim_A: str = ""
     claim_B: str = ""
     irreconcilable_points: List[str] = field(default_factory=list)
+    tension_points: List[str] = field(default_factory=list)  # alias for dual_reasoner compat
     tension_type: str = ""
     intensity: float = 0.5  # 张力强度 [0,1]
+    # v2.0 扩展字段
+    dual_state: Optional[Any] = None
+    max_fold_depth: int = 0
+    fold_count: int = 0
+    suspension_reached: bool = False
+
+    def assess_suspension(self) -> bool:
+        """检查是否达到悬置条件"""
+        self.suspension_reached = (
+            self.fold_count >= self.max_fold_depth 
+            or len(self.irreconcilable_points) >= 4
+        )
+        return self.suspension_reached
 
 
 @dataclass
