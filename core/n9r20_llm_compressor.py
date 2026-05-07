@@ -1,54 +1,64 @@
 """
-9R-2.0 RHIZOME · LLM 真实压缩实现（占位）
+9R-2.0 RHIZOME · LLM 压缩器（复用框架 LLM 连接）
 ────────────────────────────────────────────────────────
-提供与现有压缩核心（N9R20DynamicFoldEngine）兼容的 LLM 压缩器接口。
+接入框架内已有的 LLM 客户端，不再维护独立的 API key / endpoint。
 
-当前状态：
-  占位实现 — 使用简单截断（与 N9R20DynamicFoldEngine._simple_compress 相同逻辑）
-  后续接入真实 LLM 时，只需实现 `_call_llm_api` 方法即可。
+设计变更（Issue #2）：
+  原实现：N9R20LLMCompressorConfig 内含 api_endpoint + api_key，自行管理 HTTP 调用。
+  现实现：通过 llm_client 依赖注入，与 N9R20LLMFoldEvaluator 保持一致。
+  好处：单一 LLM 配置源，避免 key 泄漏面扩大，降级逻辑统一。
 
-设计目标：
-  1. 接口兼容性 — fold_once(state) 与 N9R20DynamicFoldEngine 完全一致
-  2. 可替换性   — 可直接替换 N9R20CompressionCore 中的 fold_engine
-  3. 可扩展性   — _call_llm_api 预留真实 LLM 接入点
-  4. 降级安全   — LLM 不可用时自动回退到简单截断
+依赖注入契约：
+  llm_client 只需实现 .generate(prompt: str) -> str 即可，无框架强耦合。
+  示例兼容对象：OpenAI client、Anthropic client、Ollama wrapper、自定义适配器。
 
-核心类：
-  N9R20LLMCompressor — LLM 压缩器（当前为占位实现）
+降级安全：
+  llm_client 为 None 或调用异常时，自动回退到 _simple_compress（字符截断）。
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Protocol
 
 from core.n9r20_structures import N9R20DualState
 from core.n9r20_config import n9r20_compression_config as C_CFG
 
 
 # ════════════════════════════════════════════════════════════════════
-# § 1 · LLM 调用配置
+# § 0 · LLM 客户端协议（最小化接口，便于注入任何兼容对象）
+# ════════════════════════════════════════════════════════════════════
+
+class LLMClientProtocol(Protocol):
+    """最小化 LLM 客户端协议。
+
+    任何实现了 generate(prompt: str) -> str 的对象都可注入，
+    无需继承或注册。
+    """
+
+    def generate(self, prompt: str) -> str: ...
+
+
+# ════════════════════════════════════════════════════════════════════
+# § 1 · LLM 压缩器配置（剥离 API 密钥，仅保留压缩行为参数）
 # ════════════════════════════════════════════════════════════════════
 
 @dataclass
 class N9R20LLMCompressorConfig:
     """
-    LLM 压缩器配置。
+    LLM 压缩器配置 —— 仅控制压缩行为，不管理 API 连接。
 
-    控制 LLM API 调用的参数，以及降级行为。
-    后续接入真实 LLM 时填充这些字段。
+    API 连接由外部 llm_client 统一提供，参见 N9R20LLMCompressor。
     """
 
-    # ── API 端点配置（后续接入时填充） ─────────────────────────
-    api_endpoint: str = ""          # LLM API 地址，空字符串表示未配置
-    api_key: str = ""               # API 密钥，空字符串表示未配置
-    model_name: str = "gpt-4o"      # 使用的模型名称
-    max_tokens: int = 500           # 最大输出 token 数
-    temperature: float = 0.3        # 温度参数（低温 = 更确定性）
+    # ── 压缩行为参数 ──────────────────────────────────────────
+    model_name: str = "gpt-4o"        # 仅作标识/日志，不参与实际调用
+    max_tokens: int = 500               # 期望 LLM 返回的最大 token 数（提示用）
+    temperature: float = 0.3            # 温度参数（提示用）
 
     # ── 降级配置 ──────────────────────────────────────────────
-    fallback_to_simple: bool = True  # LLM 不可用时回退到简单截断
-    timeout_seconds: float = 10.0   # API 调用超时时间
+    fallback_to_simple: bool = True     # LLM 不可用时回退到简单截断
+    timeout_seconds: float = 10.0       # 建议的超时时间（由 llm_client 实现）
 
     # ── 压缩指令模板 ──────────────────────────────────────────
     compress_instruction_template: str = (
@@ -56,55 +66,40 @@ class N9R20LLMCompressorConfig:
         "保留核心语义和关键概念，去除冗余表达：\n\n{text}"
     )
 
-    def is_configured(self) -> bool:
-        """判断 LLM API 是否已配置（端点和密钥均非空）。"""
-        return bool(self.api_endpoint) and bool(self.api_key)
-
 
 # ════════════════════════════════════════════════════════════════════
-# § 2 · LLM 压缩器主类
+# § 2 · LLM 压缩器主类（依赖注入版）
 # ════════════════════════════════════════════════════════════════════
 
 class N9R20LLMCompressor:
     """
-    LLM 真实压缩器 — 当前为占位实现。
+    LLM 语义压缩器 —— 复用框架内已有 LLM 连接。
 
-    接口与 N9R20DynamicFoldEngine 完全兼容，可直接替换：
-      core.fold_engine = N9R20LLMCompressor()
+    接口与 N9R20DynamicFoldEngine 兼容，可直接替换：
+      core.fold_engine = N9R20LLMCompressor(llm_client=my_client)
 
-    当前行为：
-      所有压缩操作均使用简单截断（与 N9R20DynamicFoldEngine._simple_compress 相同），
-      这是一个合理的 baseline 实现。
+    使用方式（两种）：
+      1. 注入 LLM 客户端（推荐）
+         compressor = N9R20LLMCompressor(llm_client=shared_llm)
 
-    后续接入真实 LLM 的步骤：
-      1. 填充 N9R20LLMCompressorConfig（端点、密钥）
-      2. 实现 _call_llm_api 方法
-      3. 将 _use_llm 标志设为 True（或在配置中启用）
-
-    使用示例：
-      # 占位使用
-      compressor = N9R20LLMCompressor()
-      state = compressor.fold_once(state)
-
-      # 接入 LLM 后
-      config = N9R20LLMCompressorConfig(
-          api_endpoint="https://api.openai.com/v1/chat/completions",
-          api_key="sk-...",
-      )
-      compressor = N9R20LLMCompressor(config=config)
+      2. 仅作占位 / 降级模式
+         compressor = N9R20LLMCompressor()   # llm_client=None，恒走简单截断
     """
 
     def __init__(
         self,
+        llm_client: Optional[LLMClientProtocol] = None,
         config: Optional[N9R20LLMCompressorConfig] = None,
     ) -> None:
         """
         初始化 LLM 压缩器。
 
         Args:
-            config: LLM 配置，None 时使用默认配置（占位模式）
+            llm_client: 外部 LLM 客户端，需实现 .generate(prompt) -> str。
+                        None 时所有压缩回退到简单截断。
+            config:     压缩行为配置，None 时使用默认配置。
         """
-        # LLM 配置（后续接入时填充）
+        self.llm_client: Optional[LLMClientProtocol] = llm_client
         self.config: N9R20LLMCompressorConfig = config or N9R20LLMCompressorConfig()
 
         # 调用统计（用于监控和调试）
@@ -121,9 +116,6 @@ class N9R20LLMCompressor:
         接口与 N9R20DynamicFoldEngine.fold_once 完全一致，
         可作为 N9R20CompressionCore.fold_engine 的替换。
 
-        当前实现：使用简单截断（占位）。
-        后续接入 LLM 后：使用 LLM 进行语义感知压缩。
-
         Args:
             state: 当前双状态容器
 
@@ -132,13 +124,9 @@ class N9R20LLMCompressor:
         """
         self._total_compress_count += 1
 
-        # 获取当前待压缩文本
         current_text = state.compressed_output or state.query
-
-        # 执行压缩（当前为占位，后续替换为 LLM 调用）
         compressed = self._compress_text(current_text)
 
-        # 更新状态
         state.compressed_output = compressed
         state.compression_ratio = len(state.query) / max(len(compressed), 1)
 
@@ -153,11 +141,9 @@ class N9R20LLMCompressor:
         """
         独立文本压缩接口（不依赖 N9R20DualState）。
 
-        提供更简单的调用方式，适合单次压缩场景。
-
         Args:
             text:         待压缩文本
-            target_ratio: 目标保留比例（0.6 = 保留 60%），默认使用配置值
+            target_ratio: 目标保留比例（0.6 = 保留 60%）
             instruction:  附加压缩指令（留空时使用默认模板）
 
         Returns:
@@ -168,8 +154,7 @@ class N9R20LLMCompressor:
         if not text:
             return text
 
-        # 当前占位：使用简单截断
-        return self._compress_text(text, target_ratio=target_ratio)
+        return self._compress_text(text, target_ratio=target_ratio, instruction=instruction)
 
     # ── 内部压缩逻辑 ─────────────────────────────────────────────
 
@@ -177,34 +162,34 @@ class N9R20LLMCompressor:
         self,
         text: str,
         target_ratio: Optional[float] = None,
+        instruction: str = "",
     ) -> str:
         """
         内部压缩分发器。
 
-        根据配置决定使用 LLM 还是简单截断。
-        当前恒走简单截断路径（占位实现）。
+        根据 llm_client 可用性决定走 LLM 语义压缩还是简单截断。
 
         Args:
             text:         待压缩文本
             target_ratio: 目标保留比例，None 时从配置读取
+            instruction:  附加压缩指令
 
         Returns:
             压缩后的文本
         """
-        # 判断是否使用 LLM（当前配置未就绪，恒为 False）
-        if self.config.is_configured():
-            # 尝试 LLM 压缩（后续接入时启用此路径）
+        # LLM 路径：客户端存在且未禁用
+        if self.llm_client is not None:
             try:
-                result = self._compress_with_llm(text, target_ratio)
+                result = self._compress_with_llm(text, target_ratio, instruction)
                 self._call_count += 1
                 return result
             except Exception:
-                # LLM 调用失败 → 回退到简单压缩
+                # LLM 调用失败 → 记录并回退
                 self._fallback_count += 1
                 if not self.config.fallback_to_simple:
                     raise
 
-        # 默认路径：简单截断（占位实现）
+        # 默认/降级路径：简单截断
         return self._simple_compress(text, target_ratio)
 
     def _simple_compress(
@@ -213,16 +198,14 @@ class N9R20LLMCompressor:
         target_ratio: Optional[float] = None,
     ) -> str:
         """
-        简单压缩（占位实现，与 N9R20DynamicFoldEngine._simple_compress 相同逻辑）。
+        简单压缩（降级方案）。
 
-        注意：这是模拟实现，实际生产环境应使用 LLM 进行语义压缩。
-        保留此方法作为 LLM 不可用时的降级方案。
-
-        压缩系数 = SIMPLE_COMPRESS_RATIO（默认 0.6，即保留 60% 字符）。
+        与 N9R20DynamicFoldEngine._simple_compress 逻辑一致，
+        作为 LLM 不可用时的保底实现。
 
         Args:
             text:         待压缩文本
-            target_ratio: 目标保留比例，None 时使用配置的 SIMPLE_COMPRESS_RATIO
+            target_ratio: 目标保留比例，None 时使用 SIMPLE_COMPRESS_RATIO
 
         Returns:
             截断后的文本（末尾附加 "..."）
@@ -235,87 +218,53 @@ class N9R20LLMCompressor:
         self,
         text: str,
         target_ratio: Optional[float] = None,
+        instruction: str = "",
     ) -> str:
         """
-        使用 LLM 进行语义感知压缩（占位，后续接入时实现）。
+        使用 LLM 进行语义感知压缩。
 
-        当 config.is_configured() 为 True 时，此方法会被调用。
-        当前抛出 NotImplementedError，表示尚未实现。
-
-        后续实现步骤：
-          1. 根据 target_ratio 构建压缩指令
-          2. 调用 _call_llm_api 获取压缩结果
-          3. 验证结果质量（长度、关键词保留）
+        流程：
+          1. 根据 target_ratio 和 instruction 构建压缩提示词
+          2. 调用注入的 llm_client.generate() 获取结果
+          3. 基本验证（非空检查）
           4. 返回压缩后文本
 
         Args:
             text:         待压缩文本
             target_ratio: 目标保留比例
+            instruction:  附加压缩指令（覆盖默认模板）
 
         Returns:
             LLM 压缩后的文本
 
         Raises:
-            NotImplementedError: 当前为占位，尚未实现
+            RuntimeError: llm_client 未注入时（此路径不应被调用，防御性检查）
         """
-        raise NotImplementedError(
-            "LLM 压缩尚未实现。"
-            "请在接入真实 LLM 后实现此方法，"
-            "或通过 _call_llm_api 提供 API 调用逻辑。"
-        )
-
-    # ── 预留 LLM API 接入点 ────────────────────────────────────────
-
-    def _call_llm_api(
-        self,
-        prompt: str,
-        max_tokens: Optional[int] = None,
-        temperature: Optional[float] = None,
-    ) -> str:
-        """
-        调用 LLM API（预留接入点，当前为占位）。
-
-        此方法是接入真实 LLM 的唯一修改点。
-        后续接入时，实现此方法即可完成从占位到真实 LLM 的切换。
-
-        接入示例（OpenAI 风格）：
-            import openai
-            client = openai.OpenAI(api_key=self.config.api_key)
-            response = client.chat.completions.create(
-                model=self.config.model_name,
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=max_tokens or self.config.max_tokens,
-                temperature=temperature or self.config.temperature,
+        if self.llm_client is None:
+            raise RuntimeError(
+                "_compress_with_llm 被调用但 llm_client 未注入。"
+                "这是内部错误，请检查 _compress_text 的分发逻辑。"
             )
-            return response.choices[0].message.content
 
-        接入示例（本地 LLM，Ollama 风格）：
-            import requests
-            response = requests.post(
-                self.config.api_endpoint,
-                json={"prompt": prompt, "stream": False},
-                timeout=self.config.timeout_seconds,
+        ratio = target_ratio if target_ratio is not None else C_CFG.SIMPLE_COMPRESS_RATIO
+
+        # 构建提示词
+        if instruction:
+            prompt = f"{instruction}\n\n{text}"
+        else:
+            prompt = self.config.compress_instruction_template.format(
+                ratio=ratio,
+                text=text,
             )
-            return response.json()["response"]
 
-        Args:
-            prompt:       发送给 LLM 的完整提示词
-            max_tokens:   最大输出 token 数，None 时使用配置值
-            temperature:  温度参数，None 时使用配置值
+        # 调用注入的 LLM 客户端
+        compressed = self.llm_client.generate(prompt)
 
-        Returns:
-            LLM 生成的文本
+        # 基本验证
+        if not compressed or not compressed.strip():
+            raise ValueError("LLM 返回空压缩结果")
 
-        Raises:
-            NotImplementedError: 当前为占位实现，尚未接入真实 LLM
-        """
-        # ══════════════════════════════════════════════════════════
-        # 后续接入真实 LLM 时，删除此行并实现上方示例代码。
-        # ══════════════════════════════════════════════════════════
-        raise NotImplementedError(
-            "_call_llm_api 尚未实现。"
-            "后续接入真实 LLM 时，请在此处实现 API 调用逻辑。"
-        )
+        return compressed.strip()
 
     # ── 统计与监控 ─────────────────────────────────────────────────
 
@@ -326,15 +275,16 @@ class N9R20LLMCompressor:
         Returns:
             包含调用统计的字典：
             - total_compress_count: 总压缩调用次数
-            - llm_call_count:       实际 LLM API 调用次数（当前恒为 0）
+            - llm_call_count:       实际 LLM API 调用次数
             - fallback_count:       降级到简单压缩的次数
-            - is_configured:        LLM API 是否已配置
+            - llm_available:        是否注入了 LLM 客户端
+            - model_name:           配置中的模型标识名
         """
         return {
             "total_compress_count": self._total_compress_count,
             "llm_call_count": self._call_count,
             "fallback_count": self._fallback_count,
-            "is_configured": self.config.is_configured(),
+            "llm_available": self.llm_client is not None,
             "model_name": self.config.model_name,
         }
 
@@ -345,7 +295,7 @@ class N9R20LLMCompressor:
         self._total_compress_count = 0
 
     def __repr__(self) -> str:
-        status = "configured" if self.config.is_configured() else "placeholder"
+        status = "active" if self.llm_client is not None else "fallback-only"
         return (
             f"N9R20LLMCompressor("
             f"status={status}, "
@@ -357,5 +307,6 @@ class N9R20LLMCompressor:
 # § 3 · 模块级便捷访问
 # ════════════════════════════════════════════════════════════════════
 
-#: 全局 LLM 压缩器单例（占位模式，未配置 LLM API）
+#: 全局 LLM 压缩器单例（未注入客户端，降级模式）
+#: 使用时注入：n9r20_llm_compressor.llm_client = shared_llm
 n9r20_llm_compressor: N9R20LLMCompressor = N9R20LLMCompressor()
