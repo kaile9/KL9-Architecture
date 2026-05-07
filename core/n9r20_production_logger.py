@@ -1,617 +1,737 @@
 """
-9R-2.0 RHIZOME · 全记录制作过程
-────────────────────────────────────────────────────────
-完整记录每次压缩/概念制作的迭代过程。
-
-核心类：
-  N9R20IterationLog     — 单次迭代的完整记录
-  N9R20ProductionSession — 一次制作会话（可能包含多次迭代）
-  N9R20ProductionLogger  — 全局记录器
-                            (开始/记录/结束/保存/加载/报告)
+9R-2.0 RHIZOME · Production Logger
+──────────────────────────────────
+生产日志系统 — 记录完整压缩管线中的每次迭代与整体会话。
 
 设计原则：
-  1. 每次迭代的可追溯性 — 谁/何时/做了什么/结果如何
-  2. 会话级聚合 — 一次制作 = 多次迭代 + 最终输出
-  3. 持久化 — JSON 格式保存，可加载分析
-  4. 自然语言报告 — 自动生成可读的制作过程摘要
+    1. 单次迭代记录（N9R20IterationLog）捕获每一步的微观状态
+    2. 完整会话记录（N9R20ProductionSession）聚合所有迭代 + 元数据
+    3. 生产日志器（N9R20ProductionLogger）提供 start/log/end/save/load/report
+    4. 类 SQLite 风格的持久化（JSON 文件），支持惰性写入
+    5. 与 N9R20TensionBus 集成，自动监听压缩事件
+
+使用示例：
+    >>> logger = N9R20ProductionLogger()
+    >>> session = logger.start(query="量子纠缠与缘起性空", session_id="s1")
+    >>> logger.log(session.session_id, mode="construct", fold_depth=1, ratio=1.5)
+    >>> logger.log(session.session_id, mode="deconstruct", fold_depth=2, ratio=2.0)
+    >>> output = logger.end(session.session_id, compressed_output="压缩结果...")
+    >>> report = logger.report(session.session_id)
+    >>> logger.save("production_logs.json")
 """
 
 from __future__ import annotations
 
 import json
-import time
 import os
+import time
+import uuid
+import threading
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
-from collections import defaultdict
+from typing import Any, Dict, List, Optional, Tuple
 
-from core.n9r20_config import n9r20_compression_config
+from core.n9r20_structures import N9R20CompressedOutput
+from core.n9r20_tension_bus import (
+    N9R20TensionBus,
+    n9r20_bus,
+    N9R20CompressionTensionEvent,
+    N9R20CompressionCompleteEvent,
+)
 
 
 # ════════════════════════════════════════════════════════════════════
-# § 1 · 单次迭代记录
+# § 1 · N9R20IterationLog — 单次迭代记录
 # ════════════════════════════════════════════════════════════════════
+
 
 @dataclass
 class N9R20IterationLog:
     """
-    单次迭代的完整记录。
+    单次压缩迭代的微观记录。
 
-    记录一次压缩折叠迭代中的所有关键信息：
-    - 哪个模式（建/破/证/截）
-    - 输入/输出变化
-    - 压缩率与保留率变化
-    - 是否触发验证/中断
+    捕获四模编码中每一步的状态快照，包括：
+    - 当前模式（construct / deconstruct / validate / interrupt）
+    - fold 深度与压缩率
+    - 语义保留率估算
+    - 时间戳
+    - 任意扩展字段
     """
 
-    # ── 标识 ──────────────────────────────────────────────
-    iteration_index: int = 0               # 迭代序号（从 0 开始）
-    session_id: str = ""                   # 所属会话 ID
+    iteration_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
+    """迭代唯一标识"""
 
-    # ── 模式 ──────────────────────────────────────────────
-    mode: str = ""                         # 当前四模编码模式
-    mode_sequence: List[str] = field(default_factory=list)  # 已执行的模式序列
+    mode: str = ""
+    """当前模式: 'construct' | 'deconstruct' | 'validate' | 'interrupt'"""
 
-    # ── 输入/输出 ─────────────────────────────────────────
-    input_text: str = ""                   # 进入本次迭代的文本
-    output_text: str = ""                  # 离开本次迭代的文本
-    input_length: int = 0                  # 输入字符数
-    output_length: int = 0                 # 输出字符数
+    fold_depth: int = 0
+    """当前 fold 深度"""
 
-    # ── 压缩指标 ─────────────────────────────────────────
-    fold_depth: int = 0                    # 当前折叠深度
-    compression_ratio: float = 1.0         # 当前压缩率
-    semantic_retention: float = 1.0        # 当前语义保留率
-    retention_passed: bool = True          # 语义保留是否达标
+    compression_ratio: float = 1.0
+    """当前压缩率"""
 
-    # ── 决断 ─────────────────────────────────────────────
-    decision_ready: bool = False           # 是否触发决断
-    interrupt_reason: str = ""             # 中断原因（如果触发）
-    target_reached: bool = False           # 是否达到目标压缩率
+    semantic_retention: float = 1.0
+    """估算语义保留率 [0, 1]"""
 
-    # ── 元信息 ───────────────────────────────────────────
-    duration_ms: float = 0.0               # 本次迭代耗时（毫秒）
+    output_preview: str = ""
+    """压缩输出预览（前 80 字符）"""
+
+    duration_ms: float = 0.0
+    """本迭代耗时（毫秒）"""
+
     timestamp: float = field(default_factory=time.time)
-    notes: str = ""                        # 额外备注
+    """Unix 时间戳"""
 
+    extras: Dict[str, Any] = field(default_factory=dict)
+    """扩展字段（任意键值对）"""
 
-# ════════════════════════════════════════════════════════════════════
-# § 2 · 制作会话
-# ════════════════════════════════════════════════════════════════════
-
-@dataclass
-class N9R20ProductionSession:
-    """
-    一次制作会话的完整记录。
-
-    一次制作会话 = 用户输入 → 路由 → 多次迭代 → 最终输出。
-    """
-
-    # ── 标识 ──────────────────────────────────────────────
-    session_id: str = ""                   # 会话唯一 ID
-    query: str = ""                        # 用户原始查询
-
-    # ── 路由 ──────────────────────────────────────────────
-    routing_path: str = "standard"         # 路由路径
-    routing_difficulty: float = 0.5        # 路由分配的难度
-    routing_urgency: float = 0.5           # 路由分配的紧急度
-    target_fold_depth: int = 4             # 目标折叠深度
-    target_compression_ratio: float = 2.5  # 目标压缩率
-
-    # ── 迭代记录 ─────────────────────────────────────────
-    iterations: List[N9R20IterationLog] = field(default_factory=list)
-
-    # ── 最终结果 ─────────────────────────────────────────
-    final_output: str = ""                 # 最终输出
-    final_compression_ratio: float = 1.0   # 最终压缩率
-    final_semantic_retention: float = 1.0  # 最终语义保留率
-    final_fold_depth: int = 0              # 最终折叠深度
-    success: bool = False                  # 制作是否成功
-
-    # ── 时间 ─────────────────────────────────────────────
-    started_at: float = field(default_factory=time.time)
-    ended_at: float = 0.0
-    total_duration_ms: float = 0.0
-
-    # ── 元信息 ───────────────────────────────────────────
-    tags: List[str] = field(default_factory=list)   # 标签
-    notes: str = ""                                  # 备注
-
-    @property
-    def iteration_count(self) -> int:
-        """迭代次数。"""
-        return len(self.iterations)
-
-    @property
-    def mode_summary(self) -> Dict[str, int]:
-        """
-        各模式的执行次数统计。
-
-        Returns:
-            {"construct": N, "deconstruct": N, ...}
-        """
-        summary: Dict[str, int] = defaultdict(int)
-        for it in self.iterations:
-            if it.mode:
-                summary[it.mode] += 1
-        return dict(summary)
-
-    @property
-    def retention_trend(self) -> List[float]:
-        """
-        保留率变化趋势（按迭代顺序）。
-
-        Returns:
-            各次迭代的保留率列表
-        """
-        return [it.semantic_retention for it in self.iterations]
-
-    @property
-    def compression_trend(self) -> List[float]:
-        """
-        压缩率变化趋势（按迭代顺序）。
-
-        Returns:
-            各次迭代的压缩率列表
-        """
-        return [it.compression_ratio for it in self.iterations]
-
-    def add_iteration(self, iteration: N9R20IterationLog) -> None:
-        """
-        添加一次迭代记录。
-
-        Args:
-            iteration: 迭代记录
-        """
-        iteration.iteration_index = len(self.iterations)
-        self.iterations.append(iteration)
-
-    def finalize(
-        self,
-        final_output: str,
-        compression_ratio: float,
-        semantic_retention: float,
-        fold_depth: int,
-        success: bool = False,
-    ) -> None:
-        """
-        终结会话，记录最终结果。
-
-        Args:
-            final_output:       最终输出文本
-            compression_ratio:  最终压缩率
-            semantic_retention: 最终语义保留率
-            fold_depth:         最终折叠深度
-            success:            是否成功
-        """
-        self.final_output = final_output
-        self.final_compression_ratio = compression_ratio
-        self.final_semantic_retention = semantic_retention
-        self.final_fold_depth = fold_depth
-        self.success = success
-        self.ended_at = time.time()
-        self.total_duration_ms = (self.ended_at - self.started_at) * 1000
+    def __post_init__(self) -> None:
+        if len(self.output_preview) > 80:
+            self.output_preview = self.output_preview[:80] + "..."
 
     def to_dict(self) -> Dict[str, Any]:
         """序列化为字典。"""
         return {
+            "iteration_id": self.iteration_id,
+            "mode": self.mode,
+            "fold_depth": self.fold_depth,
+            "compression_ratio": self.compression_ratio,
+            "semantic_retention": self.semantic_retention,
+            "output_preview": self.output_preview,
+            "duration_ms": self.duration_ms,
+            "timestamp": self.timestamp,
+            "extras": self.extras,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "N9R20IterationLog":
+        """从字典反序列化。"""
+        return cls(
+            iteration_id=data.get("iteration_id", uuid.uuid4().hex[:8]),
+            mode=data.get("mode", ""),
+            fold_depth=data.get("fold_depth", 0),
+            compression_ratio=data.get("compression_ratio", 1.0),
+            semantic_retention=data.get("semantic_retention", 1.0),
+            output_preview=data.get("output_preview", ""),
+            duration_ms=data.get("duration_ms", 0.0),
+            timestamp=data.get("timestamp", time.time()),
+            extras=data.get("extras", {}),
+        )
+
+
+# ════════════════════════════════════════════════════════════════════
+# § 2 · N9R20ProductionSession — 完整会话记录
+# ════════════════════════════════════════════════════════════════════
+
+
+@dataclass
+class N9R20ProductionSession:
+    """
+    一次完整生产会话的聚合记录。
+
+    包含：
+    - 输入查询与路由决策
+    - 所有迭代记录列表
+    - 最终压缩输出
+    - 聚合统计指标（总耗时、平均保留率、成功判定等）
+    """
+
+    session_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
+    """会话唯一标识"""
+
+    query: str = ""
+    """原始查询"""
+
+    query_length: int = 0
+    """查询字符数"""
+
+    # ── 路由决策 ──
+    path: str = "standard"
+    """路由路径: 'specialized' | 'standard'"""
+
+    target_fold_depth: int = 4
+    """目标 fold 深度"""
+
+    target_compression_ratio: float = 2.5
+    """目标压缩率"""
+
+    difficulty: float = 0.5
+    """任务难度 [0, 1]"""
+
+    urgency: float = 0.5
+    """紧急度 [0, 1]"""
+
+    # ── 迭代记录 ──
+    iterations: List[N9R20IterationLog] = field(default_factory=list)
+    """所有迭代记录（按时间排序）"""
+
+    # ── 最终输出 ──
+    compressed_output: str = ""
+    """最终压缩输出"""
+
+    final_compression_ratio: float = 1.0
+    """最终压缩率"""
+
+    final_semantic_retention: float = 1.0
+    """最终语义保留率"""
+
+    actual_fold_depth: int = 0
+    """实际 fold 深度"""
+
+    mode_sequence: List[str] = field(default_factory=list)
+    """模式序列"""
+
+    decision_ready: bool = False
+    """是否已决断"""
+
+    # ── 聚合统计 ──
+    total_duration_ms: float = 0.0
+    """总耗时（毫秒）"""
+
+    iteration_count: int = 0
+    """总迭代次数"""
+
+    avg_retention: float = 1.0
+    """平均语义保留率"""
+
+    success: bool = False
+    """本次生产是否成功"""
+
+    # ── 时间戳 ──
+    started_at: float = field(default_factory=time.time)
+    """开始时间"""
+
+    ended_at: float = 0.0
+    """结束时间（0 表示未结束）"""
+
+    # ── 元数据 ──
+    tags: List[str] = field(default_factory=list)
+    """标签"""
+
+    notes: str = ""
+    """备注"""
+
+    def __post_init__(self) -> None:
+        if self.query and not self.query_length:
+            self.query_length = len(self.query)
+
+    @property
+    def is_ended(self) -> bool:
+        """会话是否已结束。"""
+        return self.ended_at > 0.0
+
+    @property
+    def duration_seconds(self) -> float:
+        """会话耗时（秒）。"""
+        end = self.ended_at if self.ended_at > 0 else time.time()
+        return end - self.started_at
+
+    def add_iteration(self, log: N9R20IterationLog) -> None:
+        """
+        添加一次迭代记录并更新聚合统计。
+
+        参数：
+            log: 迭代记录
+        """
+        self.iterations.append(log)
+        self.iteration_count = len(self.iterations)
+        self.total_duration_ms += log.duration_ms
+        # 更新平均保留率
+        if self.iteration_count > 0:
+            retentions = [it.semantic_retention for it in self.iterations]
+            self.avg_retention = sum(retentions) / len(retentions)
+
+    def finalize(
+        self,
+        output: N9R20CompressedOutput,
+        success: bool = True,
+    ) -> None:
+        """
+        从 N9R20CompressedOutput 填充最终输出字段。
+
+        参数：
+            output: 压缩输出
+            success: 是否成功
+        """
+        self.compressed_output = output.output
+        self.final_compression_ratio = output.compression_ratio
+        self.final_semantic_retention = output.semantic_retention
+        self.actual_fold_depth = output.fold_depth
+        self.mode_sequence = list(output.mode_sequence)
+        self.decision_ready = output.decision_ready
+        self.success = success
+        self.ended_at = time.time()
+
+    def to_dict(self) -> Dict[str, Any]:
+        """序列化为字典（完整）。"""
+        return {
             "session_id": self.session_id,
             "query": self.query,
-            "routing_path": self.routing_path,
-            "routing_difficulty": self.routing_difficulty,
-            "routing_urgency": self.routing_urgency,
+            "query_length": self.query_length,
+            "path": self.path,
             "target_fold_depth": self.target_fold_depth,
             "target_compression_ratio": self.target_compression_ratio,
-            "iterations": [
-                {
-                    "iteration_index": it.iteration_index,
-                    "mode": it.mode,
-                    "mode_sequence": it.mode_sequence,
-                    "input_length": it.input_length,
-                    "output_length": it.output_length,
-                    "fold_depth": it.fold_depth,
-                    "compression_ratio": it.compression_ratio,
-                    "semantic_retention": it.semantic_retention,
-                    "retention_passed": it.retention_passed,
-                    "decision_ready": it.decision_ready,
-                    "interrupt_reason": it.interrupt_reason,
-                    "target_reached": it.target_reached,
-                    "duration_ms": it.duration_ms,
-                    "timestamp": it.timestamp,
-                    "notes": it.notes,
-                }
-                for it in self.iterations
-            ],
-            "final_output": self.final_output,
+            "difficulty": self.difficulty,
+            "urgency": self.urgency,
+            "iterations": [it.to_dict() for it in self.iterations],
+            "compressed_output": self.compressed_output,
             "final_compression_ratio": self.final_compression_ratio,
             "final_semantic_retention": self.final_semantic_retention,
-            "final_fold_depth": self.final_fold_depth,
+            "actual_fold_depth": self.actual_fold_depth,
+            "mode_sequence": self.mode_sequence,
+            "decision_ready": self.decision_ready,
+            "total_duration_ms": self.total_duration_ms,
+            "iteration_count": self.iteration_count,
+            "avg_retention": self.avg_retention,
             "success": self.success,
             "started_at": self.started_at,
             "ended_at": self.ended_at,
-            "total_duration_ms": self.total_duration_ms,
             "tags": self.tags,
             "notes": self.notes,
         }
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "N9R20ProductionSession":
+        """从字典反序列化。"""
+        session = cls(
+            session_id=data.get("session_id", uuid.uuid4().hex[:12]),
+            query=data.get("query", ""),
+            query_length=data.get("query_length", 0),
+            path=data.get("path", "standard"),
+            target_fold_depth=data.get("target_fold_depth", 4),
+            target_compression_ratio=data.get("target_compression_ratio", 2.5),
+            difficulty=data.get("difficulty", 0.5),
+            urgency=data.get("urgency", 0.5),
+            compressed_output=data.get("compressed_output", ""),
+            final_compression_ratio=data.get("final_compression_ratio", 1.0),
+            final_semantic_retention=data.get("final_semantic_retention", 1.0),
+            actual_fold_depth=data.get("actual_fold_depth", 0),
+            mode_sequence=data.get("mode_sequence", []),
+            decision_ready=data.get("decision_ready", False),
+            total_duration_ms=data.get("total_duration_ms", 0.0),
+            iteration_count=data.get("iteration_count", 0),
+            avg_retention=data.get("avg_retention", 1.0),
+            success=data.get("success", False),
+            started_at=data.get("started_at", time.time()),
+            ended_at=data.get("ended_at", 0.0),
+            tags=data.get("tags", []),
+            notes=data.get("notes", ""),
+        )
+        # 恢复迭代记录
+        session.iterations = [
+            N9R20IterationLog.from_dict(it)
+            for it in data.get("iterations", [])
+        ]
+        return session
+
 
 # ════════════════════════════════════════════════════════════════════
-# § 3 · 制作过程记录器
+# § 3 · N9R20ProductionLogger — 生产日志系统
 # ════════════════════════════════════════════════════════════════════
+
 
 class N9R20ProductionLogger:
     """
-    制作过程全局记录器。
+    生产日志记录器。
 
-    职责：
-    1. 管理所有制作会话
-    2. 提供开始/记录迭代/结束会话的 API
-    3. 持久化到 JSON 文件
-    4. 生成统计报告与自然语言摘要
+    核心功能：
+    - start(): 开始新生产会话
+    - log():   记录一次迭代
+    - end():   结束会话并记录最终输出
+    - save():  持久化到 JSON 文件
+    - load():  从 JSON 文件加载所有会话
+    - report(): 生成自然语言会话报告
 
-    使用示例：
-      logger = N9R20ProductionLogger()
-      logger.start_session("sess_001", "什么是空性？")
-      logger.log_iteration("sess_001", iteration_log)
-      logger.end_session("sess_001", output, ratio, retention, depth, True)
-      report = logger.generate_report()
+    与 N9R20TensionBus 集成：
+    - 自动监听 N9R20CompressionCompleteEvent，在压缩完成时自动记录
+
+    线程安全：使用 RLock 保护内部数据结构。
+
+    属性：
+        sessions: 所有会话记录（session_id → N9R20ProductionSession）
+        total_sessions: 历史总会话数
+        total_success: 历史成功会话数
+        success_rate: 历史成功率
     """
 
-    def __init__(self, storage_dir: str = ""):
+    def __init__(self, auto_subscribe: bool = True):
         """
-        初始化记录器。
+        初始化生产日志器。
 
-        Args:
-            storage_dir: 日志存储目录，空字符串表示不持久化
+        参数：
+            auto_subscribe: 是否自动订阅 N9R20TensionBus 事件
         """
         self._sessions: Dict[str, N9R20ProductionSession] = {}
-        self._active_session_ids: List[str] = []
-        self._storage_dir = storage_dir
+        self._lock = threading.RLock()
+        self._auto_subscribe = auto_subscribe
 
-    # ── 会话管理 ────────────────────────────────────────────
+        if auto_subscribe:
+            self._subscribe_to_bus()
 
-    def start_session(
+    # ── 属性 ──────────────────────────────────────────────────
+
+    @property
+    def sessions(self) -> Dict[str, N9R20ProductionSession]:
+        """返回所有会话记录的浅拷贝。"""
+        with self._lock:
+            return dict(self._sessions)
+
+    @property
+    def total_sessions(self) -> int:
+        """历史总会话数。"""
+        with self._lock:
+            return len(self._sessions)
+
+    @property
+    def total_success(self) -> int:
+        """历史成功会话数。"""
+        with self._lock:
+            return sum(1 for s in self._sessions.values() if s.success)
+
+    @property
+    def success_rate(self) -> float:
+        """历史成功率 [0, 1]。"""
+        with self._lock:
+            total = len(self._sessions)
+            if total == 0:
+                return 0.0
+            return self.total_success / total
+
+    # ── 公共 API ──────────────────────────────────────────────
+
+    def start(
         self,
-        session_id: str,
         query: str,
-        routing_path: str = "standard",
-        difficulty: float = 0.5,
-        urgency: float = 0.5,
+        session_id: str = "",
+        path: str = "standard",
         target_fold_depth: int = 4,
         target_compression_ratio: float = 2.5,
+        difficulty: float = 0.5,
+        urgency: float = 0.5,
+        **kwargs: Any,
     ) -> N9R20ProductionSession:
         """
-        开始一次制作会话。
+        开始一次新的生产会话。
 
-        Args:
-            session_id:              会话唯一 ID
-            query:                   用户原始查询
-            routing_path:            路由路径
-            difficulty:              路由分配的难度
-            urgency:                 紧急度
-            target_fold_depth:       目标折叠深度
+        参数：
+            query: 原始查询文本
+            session_id: 会话 ID（空则自动生成）
+            path: 路由路径
+            target_fold_depth: 目标 fold 深度
             target_compression_ratio: 目标压缩率
+            difficulty: 预估难度
+            urgency: 紧急度
+            **kwargs: 其他字段将存入 session 的 notes
 
-        Returns:
-            新创建的制作会话
+        返回：
+            新创建的 N9R20ProductionSession
         """
+        sid = session_id or uuid.uuid4().hex[:12]
+
         session = N9R20ProductionSession(
-            session_id=session_id,
+            session_id=sid,
             query=query,
-            routing_path=routing_path,
-            routing_difficulty=difficulty,
-            routing_urgency=urgency,
+            query_length=len(query),
+            path=path,
             target_fold_depth=target_fold_depth,
             target_compression_ratio=target_compression_ratio,
+            difficulty=difficulty,
+            urgency=urgency,
+            started_at=time.time(),
+            tags=kwargs.pop("tags", []),
+            notes=kwargs.pop("notes", ""),
         )
-        self._sessions[session_id] = session
-        self._active_session_ids.append(session_id)
+
+        with self._lock:
+            self._sessions[sid] = session
+
         return session
 
-    def log_iteration(
+    def log(
         self,
         session_id: str,
-        iteration: N9R20IterationLog,
-    ) -> None:
+        mode: str = "",
+        fold_depth: int = 0,
+        compression_ratio: float = 1.0,
+        semantic_retention: float = 1.0,
+        output_preview: str = "",
+        duration_ms: float = 0.0,
+        **extras: Any,
+    ) -> Optional[N9R20IterationLog]:
         """
-        记录一次迭代。
+        记录一次压缩迭代。
 
-        Args:
+        参数：
+            session_id: 所属会话 ID
+            mode: 当前模式
+            fold_depth: 当前 fold 深度
+            compression_ratio: 当前压缩率
+            semantic_retention: 当前语义保留率
+            output_preview: 输出预览
+            duration_ms: 迭代耗时（毫秒）
+            **extras: 扩展字段
+
+        返回：
+            新创建的 N9R20IterationLog，或 None（会话不存在）
+        """
+        with self._lock:
+            session = self._sessions.get(session_id)
+            if session is None:
+                return None
+
+            iteration = N9R20IterationLog(
+                mode=mode,
+                fold_depth=fold_depth,
+                compression_ratio=compression_ratio,
+                semantic_retention=semantic_retention,
+                output_preview=output_preview,
+                duration_ms=duration_ms,
+                extras=dict(extras),
+            )
+            session.add_iteration(iteration)
+            return iteration
+
+    def end(
+        self,
+        session_id: str,
+        output: Optional[N9R20CompressedOutput] = None,
+        success: bool = True,
+    ) -> Optional[N9R20ProductionSession]:
+        """
+        结束一次生产会话。
+
+        参数：
             session_id: 会话 ID
-            iteration:  迭代记录
+            output: 压缩输出（可选，提供则会自动填充 finalize）
+            success: 是否标记为成功
+
+        返回：
+            已结束的 N9R20ProductionSession，或 None（会话不存在）
         """
-        session = self._sessions.get(session_id)
+        with self._lock:
+            session = self._sessions.get(session_id)
+            if session is None:
+                return None
+
+            if output is not None:
+                session.finalize(output, success=success)
+            else:
+                session.success = success
+                session.ended_at = time.time()
+
+            return session
+
+    def get(self, session_id: str) -> Optional[N9R20ProductionSession]:
+        """
+        获取指定会话记录。
+
+        参数：
+            session_id: 会话 ID
+
+        返回：
+            N9R20ProductionSession 或 None
+        """
+        with self._lock:
+            return self._sessions.get(session_id)
+
+    def report(self, session_id: str) -> str:
+        """
+        生成自然语言会话报告。
+
+        参数：
+            session_id: 会话 ID
+
+        返回：
+            自然语言报告字符串
+        """
+        session = self.get(session_id)
         if session is None:
-            raise ValueError(f"会话 {session_id} 不存在，请先调用 start_session")
-        iteration.session_id = session_id
-        session.add_iteration(iteration)
+            return f"[ProductionLogger] 会话 '{session_id}' 不存在。"
 
-    def end_session(
-        self,
-        session_id: str,
-        final_output: str,
-        compression_ratio: float,
-        semantic_retention: float,
-        fold_depth: int,
-        success: bool = False,
-    ) -> N9R20ProductionSession:
-        """
-        结束一次制作会话。
-
-        Args:
-            session_id:        会话 ID
-            final_output:       最终输出
-            compression_ratio:  最终压缩率
-            semantic_retention: 最终语义保留率
-            fold_depth:         最终折叠深度
-            success:            是否成功
-
-        Returns:
-            已终结的制作会话
-        """
-        session = self._sessions.get(session_id)
-        if session is None:
-            raise ValueError(f"会话 {session_id} 不存在")
-        session.finalize(
-            final_output=final_output,
-            compression_ratio=compression_ratio,
-            semantic_retention=semantic_retention,
-            fold_depth=fold_depth,
-            success=success,
-        )
-        if session_id in self._active_session_ids:
-            self._active_session_ids.remove(session_id)
-        return session
-
-    def get_session(self, session_id: str) -> Optional[N9R20ProductionSession]:
-        """获取指定会话。"""
-        return self._sessions.get(session_id)
-
-    def get_active_sessions(self) -> List[N9R20ProductionSession]:
-        """获取所有活跃（未终结）的会话。"""
-        return [
-            self._sessions[sid]
-            for sid in self._active_session_ids
-            if sid in self._sessions
+        lines: List[str] = [
+            "=" * 60,
+            f"  生产报告 · 会话 {session.session_id}",
+            "=" * 60,
+            "",
+            f"  查询:       {session.query[:80]}{'...' if len(session.query) > 80 else ''}",
+            f"  路径:       {session.path}",
+            f"  难度:       {session.difficulty}",
+            f"  紧急度:     {session.urgency}",
+            f"  目标 fold:  {session.target_fold_depth}",
+            f"  目标压缩率: {session.target_compression_ratio}",
+            "",
+            f"  迭代次数:   {session.iteration_count}",
+            f"  实际 fold:  {session.actual_fold_depth}",
+            f"  实际压缩率: {session.final_compression_ratio}",
+            f"  平均保留率: {session.avg_retention:.2%}",
+            f"  总耗时:     {session.duration_seconds:.3f}s",
+            f"  成功:       {'✓' if session.success else '✗'}",
+            "",
+            "  模式序列:",
         ]
 
-    # ── 持久化 ──────────────────────────────────────────────
+        if session.mode_sequence:
+            lines.append(f"    {' → '.join(session.mode_sequence)}")
+        else:
+            lines.append("    (无)")
 
-    def save(self, filepath: Optional[str] = None) -> str:
+        if session.iterations:
+            lines.append("")
+            lines.append("  迭代详情:")
+            lines.append(f"    {'ID':<10} {'模式':<14} {'Fold':<6} {'压缩率':<8} {'保留率':<8}")
+            lines.append(f"    {'-'*10} {'-'*14} {'-'*6} {'-'*8} {'-'*8}")
+            for it in session.iterations:
+                lines.append(
+                    f"    {it.iteration_id:<10} {it.mode:<14} {it.fold_depth:<6} "
+                    f"{it.compression_ratio:<8.2f} {it.semantic_retention:<8.2%}"
+                )
+
+        lines.append("")
+        lines.append("=" * 60)
+        return "\n".join(lines)
+
+    def save(self, filepath: str) -> int:
         """
-        将所有会话保存为 JSON 文件。
+        将所有会话持久化到 JSON 文件。
 
-        Args:
-            filepath: 保存路径，None 时使用 storage_dir/sessions_TIMESTAMP.json
+        参数：
+            filepath: JSON 文件路径
 
-        Returns:
-            实际保存的文件路径
+        返回：
+            写入的会话数量
         """
-        if filepath is None:
-            if not self._storage_dir:
-                self._storage_dir = os.getcwd()
-            os.makedirs(self._storage_dir, exist_ok=True)
-            timestamp = int(time.time())
-            filepath = os.path.join(
-                self._storage_dir,
-                f"production_sessions_{timestamp}.json",
-            )
+        with self._lock:
+            data: Dict[str, Any] = {
+                "version": "9R-2.0",
+                "total_sessions": len(self._sessions),
+                "sessions": [
+                    session.to_dict() for session in self._sessions.values()
+                ],
+            }
+            os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return len(self._sessions)
 
-        data = {
-            "version": "9R-2.0",
-            "saved_at": time.time(),
-            "session_count": len(self._sessions),
-            "sessions": [
-                session.to_dict()
-                for session in self._sessions.values()
-            ],
-        }
-
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-
-        return filepath
-
-    def load(self, filepath: str) -> int:
+    def load(self, filepath: str, merge: bool = True) -> int:
         """
         从 JSON 文件加载会话。
 
-        Args:
+        参数：
             filepath: JSON 文件路径
+            merge: True → 合并到现有会话；False → 替换所有会话
 
-        Returns:
+        返回：
             加载的会话数量
         """
+        if not os.path.exists(filepath):
+            return 0
+
         with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        count = 0
-        for session_data in data.get("sessions", []):
-            session = self._dict_to_session(session_data)
-            if session:
-                self._sessions[session.session_id] = session
-                count += 1
+        loaded_sessions: Dict[str, N9R20ProductionSession] = {}
+        for raw in data.get("sessions", []):
+            session = N9R20ProductionSession.from_dict(raw)
+            loaded_sessions[session.session_id] = session
 
-        return count
-
-    def _dict_to_session(self, data: Dict[str, Any]) -> Optional[N9R20ProductionSession]:
-        """从字典恢复制作会话。"""
-        try:
-            session = N9R20ProductionSession(
-                session_id=data.get("session_id", ""),
-                query=data.get("query", ""),
-                routing_path=data.get("routing_path", "standard"),
-                routing_difficulty=data.get("routing_difficulty", 0.5),
-                routing_urgency=data.get("routing_urgency", 0.5),
-                target_fold_depth=data.get("target_fold_depth", 4),
-                target_compression_ratio=data.get("target_compression_ratio", 2.5),
-                final_output=data.get("final_output", ""),
-                final_compression_ratio=data.get("final_compression_ratio", 1.0),
-                final_semantic_retention=data.get("final_semantic_retention", 1.0),
-                final_fold_depth=data.get("final_fold_depth", 0),
-                success=data.get("success", False),
-                started_at=data.get("started_at", time.time()),
-                ended_at=data.get("ended_at", 0.0),
-                total_duration_ms=data.get("total_duration_ms", 0.0),
-                tags=data.get("tags", []),
-                notes=data.get("notes", ""),
-            )
-
-            for it_data in data.get("iterations", []):
-                iteration = N9R20IterationLog(
-                    iteration_index=it_data.get("iteration_index", 0),
-                    session_id=session.session_id,
-                    mode=it_data.get("mode", ""),
-                    mode_sequence=it_data.get("mode_sequence", []),
-                    input_length=it_data.get("input_length", 0),
-                    output_length=it_data.get("output_length", 0),
-                    fold_depth=it_data.get("fold_depth", 0),
-                    compression_ratio=it_data.get("compression_ratio", 1.0),
-                    semantic_retention=it_data.get("semantic_retention", 1.0),
-                    retention_passed=it_data.get("retention_passed", True),
-                    decision_ready=it_data.get("decision_ready", False),
-                    interrupt_reason=it_data.get("interrupt_reason", ""),
-                    target_reached=it_data.get("target_reached", False),
-                    duration_ms=it_data.get("duration_ms", 0.0),
-                    timestamp=it_data.get("timestamp", time.time()),
-                    notes=it_data.get("notes", ""),
-                )
-                session.iterations.append(iteration)
-
-            return session
-        except Exception:
-            return None
-
-    # ── 统计报告 ────────────────────────────────────────────
-
-    def generate_report(self) -> Dict[str, Any]:
-        """
-        生成制作过程统计报告。
-
-        报告包含：
-        - 总会话数
-        - 成功率
-        - 平均迭代次数
-        - 平均压缩率与保留率
-        - 模式使用分布
-        - 路由路径分布
-
-        Returns:
-            统计报告字典
-        """
-        sessions = list(self._sessions.values())
-        if not sessions:
-            return {"message": "无已记录的制作会话"}
-
-        total = len(sessions)
-        success_count = sum(1 for s in sessions if s.success)
-        total_iterations = sum(s.iteration_count for s in sessions)
-
-        avg_compression = (
-            sum(s.final_compression_ratio for s in sessions) / total
-        )
-        avg_retention = (
-            sum(s.final_semantic_retention for s in sessions) / total
-        )
-        avg_iterations = total_iterations / total
-        avg_duration = (
-            sum(s.total_duration_ms for s in sessions) / total
-        )
-
-        # 模式分布
-        mode_counts: Dict[str, int] = defaultdict(int)
-        for s in sessions:
-            for mode, count in s.mode_summary.items():
-                mode_counts[mode] += count
-
-        # 路由分布
-        path_counts: Dict[str, int] = defaultdict(int)
-        for s in sessions:
-            path_counts[s.routing_path] += 1
-
-        # 难度分布
-        difficulty_buckets = {"低 (0-0.33)": 0, "中 (0.33-0.66)": 0, "高 (0.66-1.0)": 0}
-        for s in sessions:
-            d = s.routing_difficulty
-            if d < 0.33:
-                difficulty_buckets["低 (0-0.33)"] += 1
-            elif d < 0.66:
-                difficulty_buckets["中 (0.33-0.66)"] += 1
+        with self._lock:
+            if merge:
+                self._sessions.update(loaded_sessions)
             else:
-                difficulty_buckets["高 (0.66-1.0)"] += 1
+                self._sessions = loaded_sessions
 
-        return {
-            "total_sessions": total,
-            "active_sessions": len(self._active_session_ids),
-            "success_count": success_count,
-            "success_rate": round(success_count / max(total, 1), 3),
-            "total_iterations": total_iterations,
-            "avg_iterations_per_session": round(avg_iterations, 1),
-            "avg_compression_ratio": round(avg_compression, 2),
-            "avg_semantic_retention": round(avg_retention, 2),
-            "avg_duration_ms": round(avg_duration, 1),
-            "mode_distribution": dict(mode_counts),
-            "routing_distribution": dict(path_counts),
-            "difficulty_distribution": difficulty_buckets,
-        }
+        return len(loaded_sessions)
 
-    def generate_narrative_report(self) -> str:
+    def list_sessions(
+        self,
+        success_only: bool = False,
+        limit: int = 20,
+    ) -> List[N9R20ProductionSession]:
         """
-        生成自然语言形式的制作过程报告。
+        列出会话（按开始时间降序）。
 
-        用中文自然语言描述统计结果，便于阅读和理解。
+        参数：
+            success_only: 仅列出成功会话
+            limit: 最大返回数量
 
-        Returns:
-            自然语言报告文本
+        返回：
+            会话列表
         """
-        stats = self.generate_report()
-        if "message" in stats:
-            return stats["message"]
+        with self._lock:
+            sessions = sorted(
+                self._sessions.values(),
+                key=lambda s: s.started_at,
+                reverse=True,
+            )
+            if success_only:
+                sessions = [s for s in sessions if s.success]
+            return sessions[:limit]
 
-        lines = [
-            "9R-2.0 RHIZOME · 制作过程报告",
-            "=" * 40,
-            "",
-            f"共完成 {stats['total_sessions']} 次制作会话，"
-            f"其中 {stats['success_count']} 次成功，"
-            f"成功率 {stats['success_rate'] * 100:.1f}%。",
-            "",
-            f"平均每次制作经历 {stats['avg_iterations_per_session']} 次迭代，"
-            f"平均耗时 {stats['avg_duration_ms']:.0f} 毫秒。",
-            "",
-            f"平均压缩率: {stats['avg_compression_ratio']:.2f}，"
-            f"平均语义保留率: {stats['avg_semantic_retention']:.2f}。",
-            "",
-            "模式使用分布:",
-        ]
+    def clear(self) -> int:
+        """
+        清空所有会话记录。
 
-        for mode, count in sorted(stats["mode_distribution"].items()):
-            lines.append(f"  {mode}: {count} 次")
+        返回：
+            清除的会话数量
+        """
+        with self._lock:
+            count = len(self._sessions)
+            self._sessions.clear()
+            return count
 
-        lines.append("")
-        lines.append("路由路径分布:")
-        for path, count in stats["routing_distribution"].items():
-            lines.append(f"  {path}: {count} 次")
+    # ── N9R20TensionBus 集成 ──────────────────────────────────
 
-        lines.append("")
-        lines.append("难度分布:")
-        for bucket, count in stats["difficulty_distribution"].items():
-            lines.append(f"  {bucket}: {count} 次")
+    def _subscribe_to_bus(self) -> None:
+        """订阅 N9R20TensionBus 的压缩事件。"""
+        try:
+            n9r20_bus.on("N9R20CompressionCompleteEvent", self._on_compression_complete)
+        except Exception:
+            pass  # 静默失败 — TensionBus 可能在测试环境中不可用
 
-        return "\n".join(lines)
+    def _on_compression_complete(self, event: Any) -> None:
+        """
+        处理 N9R20CompressionCompleteEvent。
 
-    # ── 清理 ────────────────────────────────────────────────
+        自动记录压缩完成事件到对应会话。
+        """
+        session_id = getattr(event, "session_id", "")
+        if not session_id:
+            return
 
-    def clear(self) -> None:
-        """清除所有记录。"""
-        self._sessions.clear()
-        self._active_session_ids.clear()
+        with self._lock:
+            session = self._sessions.get(session_id)
+            if session is None:
+                # 自动创建一个新会话（如果已有 TensionBus 事件但无会话）
+                return
 
-    @property
-    def session_count(self) -> int:
-        """已记录的总会话数。"""
-        return len(self._sessions)
+            # 从事件中提取 N9R20CompressedOutput
+            output = N9R20CompressedOutput(
+                output=getattr(event, "output", ""),
+                compression_ratio=getattr(event, "compression_ratio", 1.0),
+                semantic_retention=getattr(event, "semantic_retention", 1.0),
+                session_id=session_id,
+            )
+            # 如果 N9R20DualState 在事件中，提取更多信息
+            state = getattr(event, "state", None)
+            if state is not None:
+                output.fold_depth = getattr(state, "fold_depth", 0)
+                output.mode_sequence = getattr(state, "mode_sequence", [])
+                output.decision_ready = getattr(state, "decision_ready", False)
+
+            session.finalize(output, success=True)
 
 
-# 全局单例
-n9r20_production_logger = N9R20ProductionLogger()
+# ════════════════════════════════════════════════════════════════════
+# § 4 · 全局单例
+# ════════════════════════════════════════════════════════════════════
+
+#: 全局生产日志记录器单例
+n9r20_production_logger: N9R20ProductionLogger = N9R20ProductionLogger()
+
+
+__all__ = [
+    "N9R20IterationLog",
+    "N9R20ProductionSession",
+    "N9R20ProductionLogger",
+    "n9r20_production_logger",
+]

@@ -1,760 +1,667 @@
 """
-9R-2.0 RHIZOME · 旧版 SkillBook 兼容层
-────────────────────────────────────────────────────────
-向下兼容 9R-1.5 (kaile9/KL9-Architecture) 的 SkillBook 格式。
+9R-2.0 RHIZOME · SkillBook 兼容层
+──────────────────────────────────
+向下兼容旧版 kl9_skillbook 格式，同时扩展为新 9R-2.0 架构。
 
 设计原则：
-  1. 完全兼容旧版 SkillBookManifest 字段
-     (skill_book_id, book_title, concept_count, difficulty_breakdown)
-  2. 扩展新版统计字段
-     (total_calls, success_rate, average_retention, average_compression_ratio)
-  3. 支持冲突检测与迁移
-  4. 概念节点引入 context_variants（上下文变体），
-     支持人文社科中同一概念在不同思想家/文本中的差异
+    1. 完整兼容旧版 SkillBookManifest 格式（skill_book_id, book_title,
+       concept_count, difficulty_breakdown）
+    2. 扩展生产元数据（N9R20ProductionRecord）追踪完整制作过程
+    3. 上下文感知概念节点（N9R20ConceptNode）支持变体
+    4. 导入器/导出器实现双向兼容
+    5. 所有类名使用 N9R20 前缀，全局变量使用 n9r20_ 前缀
 
-核心类：
-  N9R20ProductionRecord    — 制作记录（扩展字段）
-  N9R20DifficultyBreakdown — 难度分解
-  N9R20ConceptProvenance   — 概念来源追溯
-  N9R20ConceptNode         — 概念节点（含上下文变体）
-  N9R20SkillBookManifest   — 完全兼容旧版 + 扩展
-  N9R20SkillBookImporter   — 导入 + 冲突检测 + 迁移
+兼容映射：
+    旧版 SkillBookManifest  →  N9R20SkillBookManifest（兼容 + 扩展）
+    旧版 ProductionRecord   →  N9R20ProductionRecord（扩展字段）
+    旧版 ConceptNode        →  N9R20ConceptNode（含 context_variants）
 """
 
 from __future__ import annotations
 
 import json
 import time
+import uuid
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
-from enum import Enum
-
-from core.n9r20_structures import N9R20SkillBook
-from core.n9r20_config import n9r20_compression_config
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 
 # ════════════════════════════════════════════════════════════════════
-# § 1 · 制作记录（扩展字段）
+# § 1 · N9R20ProductionRecord — 扩展生产元数据
 # ════════════════════════════════════════════════════════════════════
+
 
 @dataclass
 class N9R20ProductionRecord:
     """
-    单次制作的完整记录。
+    单次生产的完整元数据记录。
 
-    记录一次概念/输出从产生到验证的完整过程，
-    比旧版 ProductionRecord 增加了压缩率、折叠深度等字段。
+    记录从 query 到 compressed_output 的完整管线参数，
+    用于调试、审计和技能书传播。
+
+    兼容旧版 ProductionRecord 的全部字段并扩展。
     """
 
-    # ── 旧版字段 ──────────────────────────────────────────
-    concept: str = ""               # 产生的概念
-    source_text: str = ""           # 来源文本
-    difficulty: float = 0.5         # 制作难度 [0, 1]
-    success: bool = False           # 制作是否成功
+    # ── 标识 ──
+    record_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
+    session_id: str = ""
+    skill_name: str = "compression-core"
 
-    # ── 9R-2.0 扩展字段 ───────────────────────────────────
-    compression_ratio: float = 1.0       # 压缩率
-    fold_depth: int = 0                  # 折叠深度
-    semantic_retention: float = 1.0      # 语义保留率
-    mode_sequence: List[str] = field(default_factory=list)  # 四模编码序列
-    iteration_count: int = 1             # 迭代次数
-    session_id: str = ""                 # 会话 ID
+    # ── 输入特征 ──
+    query_preview: str = ""  # 前 100 字符
+    query_length: int = 0
+    concept_density: float = 0.0
+    tension_factor: float = 0.0
+    difficulty: float = 0.5
+
+    # ── 路由决策 ──
+    path: str = "standard"
+    target_fold_depth: int = 4
+    target_compression_ratio: float = 2.5
+    urgency: float = 0.5
+
+    # ── 压缩结果 ──
+    actual_fold_depth: int = 0
+    actual_compression_ratio: float = 1.0
+    semantic_retention: float = 1.0
+    mode_sequence: List[str] = field(default_factory=list)
+    decision_ready: bool = False
+
+    # ── 成功判定 ──
+    success: bool = False
+
+    # ── 时间戳 ──
     timestamp: float = field(default_factory=time.time)
 
+    def __post_init__(self) -> None:
+        if len(self.query_preview) > 100:
+            self.query_preview = self.query_preview[:100] + "..."
+
+    # ── 兼容旧版序列化 ──────────────────────────────────────────
+
+    def to_legacy_dict(self) -> Dict[str, Any]:
+        """
+        导出为旧版 dict 格式（kl9_skillbook 兼容）。
+
+        旧版期望字段：record_id, skill_name, success, retention,
+        compression_ratio, timestamp
+        """
+        return {
+            "record_id": self.record_id,
+            "skill_name": self.skill_name,
+            "success": self.success,
+            "retention": self.semantic_retention,
+            "compression_ratio": self.actual_compression_ratio,
+            "timestamp": self.timestamp,
+        }
+
+    @classmethod
+    def from_legacy_dict(cls, data: Dict[str, Any]) -> "N9R20ProductionRecord":
+        """从旧版 dict 格式导入。"""
+        return cls(
+            record_id=data.get("record_id", uuid.uuid4().hex[:12]),
+            skill_name=data.get("skill_name", "compression-core"),
+            success=data.get("success", False),
+            semantic_retention=data.get("retention", 1.0),
+            actual_compression_ratio=data.get("compression_ratio", 1.0),
+            timestamp=data.get("timestamp", time.time()),
+        )
+
 
 # ════════════════════════════════════════════════════════════════════
-# § 2 · 难度分解
+# § 2 · N9R20DifficultyBreakdown — 难度分布追踪
 # ════════════════════════════════════════════════════════════════════
+
 
 @dataclass
 class N9R20DifficultyBreakdown:
     """
-    难度分解 — 与旧版完全兼容。
+    难度分布统计。
 
-    将综合难度拆解为各维度的贡献值。
+    追踪不同难度区间的生产次数与成功/失败率，
+    用于技能书性能分析。
+
+    兼容旧版 difficulty_breakdown 格式。
     """
 
-    overall: float = 0.5               # 综合难度 [0, 1]
-    concept_complexity: float = 0.5    # 概念复杂度
-    tension_intensity: float = 0.5     # 张力强度
-    cognitive_load: float = 0.5        # 认知负载
-    compression_potential: float = 0.5 # 压缩潜力
+    # 难度区间 → (总调用次数, 成功次数)
+    easy: Tuple[int, int] = (0, 0)      # difficulty < 0.3
+    medium: Tuple[int, int] = (0, 0)    # 0.3 ≤ difficulty < 0.7
+    hard: Tuple[int, int] = (0, 0)      # difficulty ≥ 0.7
 
-    def to_dict(self) -> Dict[str, float]:
-        """输出为字典（与旧版序列化兼容）。"""
+    def record(self, difficulty: float, success: bool) -> None:
+        """记录一次生产。"""
+        if difficulty < 0.3:
+            bucket = "easy"
+        elif difficulty < 0.7:
+            bucket = "medium"
+        else:
+            bucket = "hard"
+
+        total, succ = getattr(self, bucket)
+        setattr(self, bucket, (total + 1, succ + (1 if success else 0)))
+
+    def success_rate(self, bucket: str) -> float:
+        """获取指定难度区间的成功率。"""
+        total, succ = getattr(self, bucket, (0, 0))
+        return succ / max(total, 1)
+
+    def to_legacy_dict(self) -> Dict[str, Dict[str, int]]:
+        """导出为旧版 difficulty_breakdown 格式。"""
         return {
-            "overall": self.overall,
-            "concept_complexity": self.concept_complexity,
-            "tension_intensity": self.tension_intensity,
-            "cognitive_load": self.cognitive_load,
-            "compression_potential": self.compression_potential,
+            "easy": {"total": self.easy[0], "success": self.easy[1]},
+            "medium": {"total": self.medium[0], "success": self.medium[1]},
+            "hard": {"total": self.hard[0], "success": self.hard[1]},
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, float]) -> "N9R20DifficultyBreakdown":
-        """从字典恢复（与旧版反序列化兼容）。"""
+    def from_legacy_dict(
+        cls, data: Dict[str, Dict[str, int]]
+    ) -> "N9R20DifficultyBreakdown":
+        """从旧版 difficulty_breakdown 格式导入。"""
         return cls(
-            overall=data.get("overall", 0.5),
-            concept_complexity=data.get("concept_complexity", 0.5),
-            tension_intensity=data.get("tension_intensity", 0.5),
-            cognitive_load=data.get("cognitive_load", 0.5),
-            compression_potential=data.get("compression_potential", 0.5),
+            easy=(
+                data.get("easy", {}).get("total", 0),
+                data.get("easy", {}).get("success", 0),
+            ),
+            medium=(
+                data.get("medium", {}).get("total", 0),
+                data.get("medium", {}).get("success", 0),
+            ),
+            hard=(
+                data.get("hard", {}).get("total", 0),
+                data.get("hard", {}).get("success", 0),
+            ),
         )
 
 
 # ════════════════════════════════════════════════════════════════════
-# § 3 · 概念来源
+# § 3 · N9R20ConceptProvenance — 概念来源追踪
 # ════════════════════════════════════════════════════════════════════
+
 
 @dataclass
 class N9R20ConceptProvenance:
     """
-    概念来源追溯。
+    概念来源追踪。
 
-    记录一个概念从哪个文本、哪个思想传统中提取，
-    支持人文社科概念的多源追溯。
+    记录一个概念在不同 session / 文本中的出现及上下文差异，
+    支持人文社科的上下文独立判断需求。
     """
 
-    concept: str = ""                     # 概念名称
-    source_text: str = ""                 # 来源文本
-    source_tradition: str = ""            # 思想传统（如 "佛学中观"、"现象学"）
-    source_thinker: str = ""              # 相关思想家（如 "龙树"、"胡塞尔"）
-    context_note: str = ""                # 上下文说明
-    extraction_method: str = "auto"       # 提取方式（"auto" | "manual" | "llm"）
-    confidence: float = 0.7               # 提取置信度
-    timestamp: float = field(default_factory=time.time)
+    concept: str
+    sources: List[str] = field(default_factory=list)  # session_id / 文本标识
+    context_variants: Dict[str, str] = field(default_factory=dict)  # source → 上下文描述
+    first_seen: float = field(default_factory=time.time)
+    last_seen: float = field(default_factory=time.time)
+    occurrence_count: int = 0
+
+    def touch(self, source: str, context_hint: str = "") -> None:
+        """记录一次出现。"""
+        if source not in self.sources:
+            self.sources.append(source)
+        if context_hint:
+            self.context_variants[source] = context_hint
+        self.occurrence_count += 1
+        self.last_seen = time.time()
+
+    def has_divergence(self) -> bool:
+        """检测：同一概念在不同来源中是否有定义/语境差异。"""
+        return len(set(self.context_variants.values())) > 1
+
+    def divergence_report(self) -> str:
+        """生成概念分歧自然语言报告。"""
+        if not self.has_divergence():
+            return f"概念 '{self.concept}' 在各来源中一致。"
+        lines = [f"概念 '{self.concept}' 存在语境分歧："]
+        for source, ctx in self.context_variants.items():
+            lines.append(f"  · {source}: {ctx}")
+        return "\n".join(lines)
 
 
 # ════════════════════════════════════════════════════════════════════
-# § 4 · 概念节点（含上下文变体）
+# § 4 · N9R20ConceptNode — 上下文感知概念节点
 # ════════════════════════════════════════════════════════════════════
+
 
 @dataclass
 class N9R20ConceptNode:
     """
-    概念节点 — 支持上下文变体。
+    上下文感知的概念节点。
 
-    人文社科中同一概念在不同思想家/文本中有差异化的含义。
-    context_variants 字段存储这些差异定义，
-    系统根据上下文独立判断使用哪个变体。
+    与传统术语节点不同，N9R20ConceptNode：
+    - 支持同一概念在不同上下文中的变体（如"空"在佛教/哲学中的差异）
+    - 携带来源追踪（N9R20ConceptProvenance）
+    - 支持语义边权重的动态更新
 
-    示例：
-      概念 "空" 在龙树《中论》和世亲《俱舍论》中含义不同，
-      各自存储为独立的 context_variant。
+    兼容旧版 ConceptNode / N9R20TermNode 格式。
     """
 
-    # ── 核心标识 ──────────────────────────────────────────
-    concept: str = ""                          # 概念名称（规范形式）
-    canonical_definition: str = ""             # 规范定义
+    term: str
+    edges: Dict[str, float] = field(default_factory=dict)  # 邻接概念 → 权重
+    source_session: str = ""
+    confidence: float = 0.7
+    added_timestamp: float = field(default_factory=time.time)
 
-    # ── 上下文变体 ────────────────────────────────────────
-    # 字典：上下文键 → 该上下文中的特定含义
-    # 上下文键格式示例："龙树/中论"、"胡塞尔/观念I"
-    context_variants: Dict[str, str] = field(default_factory=dict)
+    # ── 9R-2.0 扩展字段 ──
+    context_variants: Dict[str, str] = field(
+        default_factory=dict
+    )  # source → context_hint
+    provenance: Optional[N9R20ConceptProvenance] = None
 
-    # ── 元信息 ───────────────────────────────────────────
-    provenance: List[N9R20ConceptProvenance] = field(default_factory=list)
-    related_concepts: List[str] = field(default_factory=list)
-    tension_concepts: List[str] = field(default_factory=list)  # 与此概念有张力的概念
+    def __post_init__(self) -> None:
+        if self.provenance is None:
+            self.provenance = N9R20ConceptProvenance(concept=self.term)
 
-    # ── 统计 ─────────────────────────────────────────────
-    occurrence_count: int = 0                  # 出现次数
-    confidence: float = 0.7                    # 置信度
-    last_updated: float = field(default_factory=time.time)
-    created_at: float = field(default_factory=time.time)
+    def add_edge(self, term: str, weight: float) -> None:
+        """添加或更新一条语义边。"""
+        self.edges[term] = weight
 
-    def get_definition(self, context_key: Optional[str] = None) -> str:
-        """
-        获取概念定义。
+    def remove_edge(self, term: str) -> None:
+        """移除一条语义边。"""
+        self.edges.pop(term, None)
 
-        如果提供 context_key 且存在于 context_variants 中，
-        返回该上下文特定定义；否则返回规范定义。
+    def add_context_variant(self, source: str, context_hint: str) -> None:
+        """为一个来源添加上下文描述。"""
+        self.context_variants[source] = context_hint
+        if self.provenance:
+            self.provenance.touch(source, context_hint)
 
-        Args:
-            context_key: 上下文键（如 "龙树/中论"），None 时返回规范定义
+    def has_divergence(self) -> bool:
+        """检测概念在不同来源中是否存在歧义/分歧。"""
+        if self.provenance:
+            return self.provenance.has_divergence()
+        return len(set(self.context_variants.values())) > 1
 
-        Returns:
-            概念定义字符串
-        """
-        if context_key and context_key in self.context_variants:
-            return self.context_variants[context_key]
-        return self.canonical_definition
+    # ── 兼容旧版序列化 ──────────────────────────────────────────
 
-    def add_variant(self, context_key: str, definition: str) -> None:
-        """
-        添加或更新上下文变体。
-
-        Args:
-            context_key: 上下文键
-            definition:  该上下文中的概念定义
-        """
-        self.context_variants[context_key] = definition
-        self.last_updated = time.time()
-
-    def has_conflict_with(self, other: "N9R20ConceptNode") -> bool:
-        """
-        检测与另一概念节点是否存在定义冲突。
-
-        冲突判定：同名概念但规范定义不同（字符串级别简单比较）。
-
-        Args:
-            other: 另一概念节点
-
-        Returns:
-            是否存在冲突
-        """
-        if self.concept != other.concept:
-            return False
-        return self.canonical_definition != other.canonical_definition
-
-    def to_dict(self) -> Dict[str, Any]:
-        """序列化为字典（兼容导出）。"""
+    def to_legacy_dict(self) -> Dict[str, Any]:
+        """导出为旧版 TermNode 格式。"""
         return {
-            "concept": self.concept,
-            "canonical_definition": self.canonical_definition,
-            "context_variants": self.context_variants,
-            "provenance": [
-                {
-                    "concept": p.concept,
-                    "source_text": p.source_text,
-                    "source_tradition": p.source_tradition,
-                    "source_thinker": p.source_thinker,
-                    "context_note": p.context_note,
-                    "extraction_method": p.extraction_method,
-                    "confidence": p.confidence,
-                    "timestamp": p.timestamp,
-                }
-                for p in self.provenance
-            ],
-            "related_concepts": self.related_concepts,
-            "tension_concepts": self.tension_concepts,
-            "occurrence_count": self.occurrence_count,
+            "term": self.term,
+            "edges": dict(self.edges),
+            "source_session": self.source_session,
             "confidence": self.confidence,
-            "last_updated": self.last_updated,
-            "created_at": self.created_at,
+            "added_timestamp": self.added_timestamp,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "N9R20ConceptNode":
-        """从字典恢复（兼容导入）。"""
-        node = cls(
-            concept=data.get("concept", ""),
-            canonical_definition=data.get("canonical_definition", ""),
-            context_variants=data.get("context_variants", {}),
-            related_concepts=data.get("related_concepts", []),
-            tension_concepts=data.get("tension_concepts", []),
-            occurrence_count=data.get("occurrence_count", 0),
+    def from_legacy_dict(cls, data: Dict[str, Any]) -> "N9R20ConceptNode":
+        """从旧版 TermNode 格式导入。"""
+        return cls(
+            term=data.get("term", ""),
+            edges=data.get("edges", {}),
+            source_session=data.get("source_session", ""),
             confidence=data.get("confidence", 0.7),
-            last_updated=data.get("last_updated", time.time()),
-            created_at=data.get("created_at", time.time()),
+            added_timestamp=data.get("added_timestamp", time.time()),
         )
-        node.provenance = [
-            N9R20ConceptProvenance(**p)
-            for p in data.get("provenance", [])
-        ]
-        return node
 
 
 # ════════════════════════════════════════════════════════════════════
-# § 5 · SkillBook 清单（完全兼容旧版）
+# § 5 · N9R20SkillBookManifest — 向后兼容的 manifest
 # ════════════════════════════════════════════════════════════════════
+
 
 @dataclass
 class N9R20SkillBookManifest:
     """
-    SkillBook 清单 — 完全兼容 9R-1.5 旧版格式。
+    技能书清单 — 完全兼容旧版 SkillBookManifest + 9R-2.0 扩展。
 
-    旧版字段（完全兼容）：
-      skill_book_id, book_title, concept_count, difficulty_breakdown
+    旧版兼容字段：
+        - skill_book_id: 技能书唯一 ID
+        - book_title: 书名
+        - concept_count: 概念数量
+        - difficulty_breakdown: 难度分布（旧版格式）
 
-    9R-2.0 扩展字段（新增）：
-      total_calls, success_rate, average_retention,
-      average_compression_ratio, concepts
+    9R-2.0 扩展字段：
+        - production_history: 生产记录列表
+        - concept_nodes: 上下文感知概念节点
+        - metadata: 任意扩展元数据
     """
 
-    # ── 旧版兼容字段 ──────────────────────────────────────
-    skill_book_id: str = ""                     # 技能书唯一 ID
-    book_title: str = ""                        # 书名/标题
-    concept_count: int = 0                      # 包含的概念数量
+    # ── 旧版兼容字段 ──
+    skill_book_id: str = field(default_factory=lambda: uuid.uuid4().hex[:16])
+    book_title: str = ""
+    concept_count: int = 0
     difficulty_breakdown: N9R20DifficultyBreakdown = field(
         default_factory=N9R20DifficultyBreakdown
     )
 
-    # ── 9R-2.0 扩展字段 ──────────────────────────────────
-    total_calls: int = 0                        # 总调用次数
-    success_rate: float = 0.0                   # 成功率
-    average_retention: float = 0.0              # 平均语义保留率
-    average_compression_ratio: float = 0.0      # 平均压缩率
+    # ── 9R-2.0 扩展字段 ──
+    production_history: List[N9R20ProductionRecord] = field(default_factory=list)
+    concept_nodes: Dict[str, N9R20ConceptNode] = field(default_factory=dict)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    # ── 统计指标 ──
+    total_calls: int = 0
+    success_rate: float = 0.0
+    average_retention: float = 0.0
+    average_compression_ratio: float = 0.0
     last_updated: float = field(default_factory=time.time)
 
-    # ── 扩展数据 ─────────────────────────────────────────
-    concepts: List[N9R20ConceptNode] = field(default_factory=list)
-    production_history: List[N9R20ProductionRecord] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    version: str = "9R-1.5"                     # 来源版本标识
+    # ── 序列化 ──────────────────────────────────────────────────
 
-    def to_old_format(self) -> Dict[str, Any]:
+    def to_legacy_dict(self) -> Dict[str, Any]:
         """
-        导出为旧版兼容的字典格式。
+        导出为旧版 SkillBookManifest 格式（完全兼容）。
 
-        Returns:
-            仅包含旧版字段的字典，可直接被 9R-1.5 读取。
+        旧版期望字段：skill_book_id, book_title, concept_count,
+        difficulty_breakdown
         """
         return {
             "skill_book_id": self.skill_book_id,
             "book_title": self.book_title,
             "concept_count": self.concept_count,
-            "difficulty_breakdown": self.difficulty_breakdown.to_dict(),
-        }
-
-    def to_full_format(self) -> Dict[str, Any]:
-        """
-        导出为完整字典格式（含扩展字段）。
-
-        Returns:
-            包含所有字段的字典。
-        """
-        return {
-            "skill_book_id": self.skill_book_id,
-            "book_title": self.book_title,
-            "concept_count": self.concept_count,
-            "difficulty_breakdown": self.difficulty_breakdown.to_dict(),
-            # 9R-2.0 扩展
-            "total_calls": self.total_calls,
-            "success_rate": self.success_rate,
-            "average_retention": self.average_retention,
-            "average_compression_ratio": self.average_compression_ratio,
-            "last_updated": self.last_updated,
-            "concepts": [c.to_dict() for c in self.concepts],
-            "production_history": [
-                {
-                    "concept": r.concept,
-                    "source_text": r.source_text,
-                    "difficulty": r.difficulty,
-                    "success": r.success,
-                    "compression_ratio": r.compression_ratio,
-                    "fold_depth": r.fold_depth,
-                    "semantic_retention": r.semantic_retention,
-                    "session_id": r.session_id,
-                    "timestamp": r.timestamp,
-                }
-                for r in self.production_history
-            ],
-            "metadata": self.metadata,
-            "version": "9R-2.0",
+            "difficulty_breakdown": self.difficulty_breakdown.to_legacy_dict(),
         }
 
     @classmethod
-    def from_old_format(cls, data: Dict[str, Any]) -> "N9R20SkillBookManifest":
+    def from_legacy_dict(cls, data: Dict[str, Any]) -> "N9R20SkillBookManifest":
         """
-        从旧版 9R-1.5 字典格式加载。
+        从旧版 SkillBookManifest dict 导入。
 
-        Args:
-            data: 旧版格式字典
-
-        Returns:
-            新的 N9R20SkillBookManifest 实例（扩展字段使用默认值）
+        自动处理缺失字段，填充 9R-2.0 扩展为默认值。
         """
         breakdown_data = data.get("difficulty_breakdown", {})
-        if isinstance(breakdown_data, dict):
-            breakdown = N9R20DifficultyBreakdown.from_dict(breakdown_data)
-        else:
-            breakdown = N9R20DifficultyBreakdown()
+        breakdown = (
+            N9R20DifficultyBreakdown.from_legacy_dict(breakdown_data)
+            if breakdown_data
+            else N9R20DifficultyBreakdown()
+        )
 
         return cls(
-            skill_book_id=data.get("skill_book_id", ""),
+            skill_book_id=data.get("skill_book_id", uuid.uuid4().hex[:16]),
             book_title=data.get("book_title", ""),
             concept_count=data.get("concept_count", 0),
             difficulty_breakdown=breakdown,
-            version="9R-1.5",
         )
 
-    def sync_to_skill_book(self) -> N9R20SkillBook:
-        """
-        将清单中的统计信息同步到 N9R20SkillBook（运行时技能书）。
+    def to_json(self) -> str:
+        """导出为 JSON 字符串。"""
+        return json.dumps(self.to_legacy_dict(), ensure_ascii=False, indent=2)
 
-        Returns:
-            N9R20SkillBook 实例
-        """
-        return N9R20SkillBook(
-            skill_name=self.skill_book_id,
-            total_calls=self.total_calls,
-            success_rate=self.success_rate,
-            average_retention=self.average_retention,
-            average_compression_ratio=self.average_compression_ratio,
-            last_updated=self.last_updated,
-        )
-
-    def sync_from_skill_book(self, book: N9R20SkillBook) -> None:
-        """
-        从 N9R20SkillBook 同步统计信息到清单。
-
-        Args:
-            book: 运行时技能书实例
-        """
-        self.total_calls = book.total_calls
-        self.success_rate = book.success_rate
-        self.average_retention = book.average_retention
-        self.average_compression_ratio = book.average_compression_ratio
-        self.last_updated = book.last_updated
+    @classmethod
+    def from_json(cls, json_str: str) -> "N9R20SkillBookManifest":
+        """从 JSON 字符串导入。"""
+        return cls.from_legacy_dict(json.loads(json_str))
 
 
 # ════════════════════════════════════════════════════════════════════
-# § 6 · SkillBook 导入器
+# § 6 · N9R20SkillBookImporter — 导入/合并/迁移旧格式
 # ════════════════════════════════════════════════════════════════════
+
 
 class N9R20SkillBookImporter:
     """
     旧版 SkillBook 导入器。
 
     职责：
-    1. 从 9R-1.5 格式文件导入 SkillBook
-    2. 检测同名 SkillBook 的字段冲突
-    3. 执行迁移（从 9R-1.5 → 9R-2.0 格式）
-    4. 生成冲突报告
-
-    冲突类型：
-    - FIELD_CONFLICT: 同名字段值不同
-    - VERSION_MISMATCH: 版本声明与实际数据不符
-    - MISSING_FIELD: 旧版缺少必要字段
+    1. 从旧版 dict / JSON 导入 SkillBookManifest
+    2. 冲突检测：同一 skill_book_id 已存在时的合并策略
+    3. 迁移：将旧版 ProductionRecord / ConceptNode 批量转换为新版格式
     """
 
-    class ConflictType(Enum):
-        """冲突类型枚举"""
-        FIELD_CONFLICT = "field_conflict"        # 字段值冲突
-        VERSION_MISMATCH = "version_mismatch"    # 版本不匹配
-        MISSING_FIELD = "missing_field"          # 缺少字段
-        DUPLICATE_ID = "duplicate_id"            # 重复 ID
-
-    @dataclass
-    class ConflictReport:
-        """单条冲突记录"""
-        conflict_type: "N9R20SkillBookImporter.ConflictType"
-        skill_book_id: str
-        field_name: str = ""
-        old_value: Any = None
-        new_value: Any = None
-        resolution: str = ""  # 解决方式描述
-
-    def __init__(self):
-        self._manifest_registry: Dict[str, N9R20SkillBookManifest] = {}
-        self._conflicts: List[N9R20SkillBookImporter.ConflictReport] = []
-
-    # ── 导入接口 ────────────────────────────────────────────
-
-    def import_from_file(self, filepath: str) -> Optional[N9R20SkillBookManifest]:
+    @staticmethod
+    def import_manifest(data: Dict[str, Any]) -> N9R20SkillBookManifest:
         """
-        从 JSON 文件导入 SkillBook 清单。
+        导入单个 manifest。
 
-        自动检测格式版本并执行对应迁移。
+        参数：
+            data: 旧版 SkillBookManifest dict 格式
 
-        Args:
-            filepath: JSON 文件路径
-
-        Returns:
-            导入的清单（None 表示导入失败）
+        返回：
+            N9R20SkillBookManifest 实例
         """
-        try:
-            with open(filepath, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            return self.import_from_dict(data)
-        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
-            self._conflicts.append(self.ConflictReport(
-                conflict_type=self.ConflictType.MISSING_FIELD,
-                skill_book_id=filepath,
-                resolution=f"文件读取失败: {e}",
-            ))
-            return None
+        return N9R20SkillBookManifest.from_legacy_dict(data)
 
-    def import_from_dict(self, data: Dict[str, Any]) -> N9R20SkillBookManifest:
+    @staticmethod
+    def import_manifests(
+        data_list: List[Dict[str, Any]],
+    ) -> List[N9R20SkillBookManifest]:
         """
-        从字典导入 SkillBook 清单。
+        批量导入 manifest 列表。
 
-        Args:
-            data: SkillBook 字典数据
+        参数：
+            data_list: 旧版 SkillBookManifest dict 列表
 
-        Returns:
-            导入的清单
+        返回：
+            N9R20SkillBookManifest 实例列表
         """
-        version = data.get("version", "9R-1.5")
+        return [N9R20SkillBookManifest.from_legacy_dict(d) for d in data_list]
 
-        if version == "9R-1.5":
-            manifest = N9R20SkillBookManifest.from_old_format(data)
-            return self._migrate_to_2_0(manifest, data)
-        else:
-            # 假定已是 9R-2.0 格式
-            return self._load_2_0_manifest(data)
-
-    def import_batch(self, manifests: List[Dict[str, Any]]) -> List[N9R20SkillBookManifest]:
+    @staticmethod
+    def import_production_records(
+        data_list: List[Dict[str, Any]],
+    ) -> List[N9R20ProductionRecord]:
         """
-        批量导入 SkillBook 清单。
+        批量导入旧版 ProductionRecord。
 
-        Args:
-            manifests: 清单字典列表
+        参数：
+            data_list: 旧版 ProductionRecord dict 列表
 
-        Returns:
-            成功导入的清单列表
+        返回：
+            N9R20ProductionRecord 实例列表
         """
-        results = []
-        for data in manifests:
-            try:
-                manifest = self.import_from_dict(data)
-                if manifest:
-                    results.append(manifest)
-            except Exception as e:
-                self._conflicts.append(self.ConflictReport(
-                    conflict_type=self.ConflictType.MISSING_FIELD,
-                    skill_book_id=data.get("skill_book_id", "unknown"),
-                    resolution=f"导入异常: {e}",
-                ))
-        return results
+        return [N9R20ProductionRecord.from_legacy_dict(d) for d in data_list]
 
-    # ── 冲突检测 ────────────────────────────────────────────
+    @staticmethod
+    def import_concept_nodes(
+        data_dict: Dict[str, Dict[str, Any]],
+    ) -> Dict[str, N9R20ConceptNode]:
+        """
+        批量导入旧版 ConceptNode 映射。
 
-    def detect_conflicts(
-        self,
+        参数：
+            data_dict: {term: {concept_node_dict}}
+
+        返回：
+            {term: N9R20ConceptNode} 映射
+        """
+        return {
+            term: N9R20ConceptNode.from_legacy_dict(node_data)
+            for term, node_data in data_dict.items()
+        }
+
+    @staticmethod
+    def merge_manifests(
         existing: N9R20SkillBookManifest,
         incoming: N9R20SkillBookManifest,
-    ) -> List[ConflictReport]:
+        strategy: str = "update",
+    ) -> Tuple[N9R20SkillBookManifest, List[str]]:
         """
-        检测两个 SkillBook 清单之间的冲突。
+        合并两个 manifest。
 
-        Args:
-            existing: 已存在的清单
-            incoming: 待导入的清单
+        策略：
+            - "update": incoming 覆盖 existing 的非空字段
+            - "keep": existing 优先，仅填充缺失字段
+            - "reject": 冲突时拒绝合并，返回冲突列表
 
-        Returns:
-            冲突报告列表
+        参数：
+            existing: 已有 manifest
+            incoming: 新导入 manifest
+            strategy: 合并策略（"update" | "keep" | "reject"）
+
+        返回：
+            (merged_manifest, conflicts_list)
+            conflicts_list 描述被拒绝/冲突的字段名
         """
-        conflicts = []
+        conflicts: List[str] = []
 
-        # 检测 ID 重复
-        if existing.skill_book_id == incoming.skill_book_id:
-            # 逐字段比较
-            if existing.book_title != incoming.book_title:
-                conflicts.append(self.ConflictReport(
-                    conflict_type=self.ConflictType.FIELD_CONFLICT,
-                    skill_book_id=existing.skill_book_id,
-                    field_name="book_title",
-                    old_value=existing.book_title,
-                    new_value=incoming.book_title,
-                    resolution="保留已有标题，新标题存入 metadata",
-                ))
+        if strategy == "reject":
+            # 检测冲突
+            if (
+                incoming.book_title
+                and existing.book_title
+                and incoming.book_title != existing.book_title
+            ):
+                conflicts.append("book_title")
+            if incoming.concept_count != existing.concept_count:
+                conflicts.append("concept_count")
+            if conflicts:
+                return existing, conflicts
 
-            if existing.concept_count != incoming.concept_count:
-                conflicts.append(self.ConflictReport(
-                    conflict_type=self.ConflictType.FIELD_CONFLICT,
-                    skill_book_id=existing.skill_book_id,
-                    field_name="concept_count",
-                    old_value=existing.concept_count,
-                    new_value=incoming.concept_count,
-                    resolution="使用最新值",
-                ))
+        if strategy == "keep":
+            # existing 优先
+            merged = N9R20SkillBookManifest(
+                skill_book_id=existing.skill_book_id,
+                book_title=existing.book_title or incoming.book_title,
+                concept_count=max(existing.concept_count, incoming.concept_count),
+            )
+        else:  # "update"
+            merged = N9R20SkillBookManifest(
+                skill_book_id=existing.skill_book_id,
+                book_title=incoming.book_title or existing.book_title,
+                concept_count=max(existing.concept_count, incoming.concept_count),
+            )
 
-        return conflicts
+        # 合并难度分布（累加）
+        for bucket in ("easy", "medium", "hard"):
+            ex_total, ex_succ = getattr(existing.difficulty_breakdown, bucket)
+            in_total, in_succ = getattr(incoming.difficulty_breakdown, bucket)
+            setattr(
+                merged.difficulty_breakdown,
+                bucket,
+                (ex_total + in_total, ex_succ + in_succ),
+            )
 
-    def resolve_conflicts(
-        self,
-        existing: N9R20SkillBookManifest,
-        incoming: N9R20SkillBookManifest,
-        conflicts: List[ConflictReport],
-    ) -> N9R20SkillBookManifest:
-        """
-        自动解决冲突并合并两个清单。
+        # 合并生产历史（去重 record_id）
+        existing_ids: Set[str] = {r.record_id for r in existing.production_history}
+        merged.production_history = list(existing.production_history)
+        for record in incoming.production_history:
+            if record.record_id not in existing_ids:
+                merged.production_history.append(record)
 
-        合并策略：
-        - 保留 existing 的核心标识字段
-        - 统计数据使用加权平均
-        - 概念列表合并去重
-        - 不同的标题存入 metadata
+        # 合并概念节点（update 策略：incoming 覆盖同名节点）
+        merged.concept_nodes = dict(existing.concept_nodes)
+        merged.concept_nodes.update(incoming.concept_nodes)
 
-        Args:
-            existing:  已存在的清单
-            incoming:  待导入的清单
-            conflicts: 冲突报告列表
-
-        Returns:
-            合并后的清单
-        """
-        merged = N9R20SkillBookManifest(
-            skill_book_id=existing.skill_book_id,
-            book_title=existing.book_title or incoming.book_title,
-            concept_count=max(existing.concept_count, incoming.concept_count),
-            difficulty_breakdown=existing.difficulty_breakdown,
-            version="9R-2.0",
-        )
-
-        # 统计数据加权平均
-        total_calls = existing.total_calls + incoming.total_calls
-        if total_calls > 0:
-            merged.total_calls = total_calls
-            merged.success_rate = (
-                existing.success_rate * existing.total_calls +
-                incoming.success_rate * incoming.total_calls
-            ) / total_calls
-            merged.average_retention = (
-                existing.average_retention * existing.total_calls +
-                incoming.average_retention * incoming.total_calls
-            ) / total_calls
-            merged.average_compression_ratio = (
-                existing.average_compression_ratio * existing.total_calls +
-                incoming.average_compression_ratio * incoming.total_calls
-            ) / total_calls
-
-        # 合并概念列表（按名称去重）
-        existing_concepts = {c.concept: c for c in existing.concepts}
-        for c in incoming.concepts:
-            if c.concept in existing_concepts:
-                # 冲突检测：同名概念定义不同
-                if existing_concepts[c.concept].has_conflict_with(c):
-                    # 将 incoming 的定义作为上下文变体存储
-                    incoming_key = f"imported/{incoming.skill_book_id}"
-                    existing_concepts[c.concept].add_variant(
-                        incoming_key,
-                        c.canonical_definition,
-                    )
-                    # 同时合并变体
-                    for ctx_key, definition in c.context_variants.items():
-                        existing_concepts[c.concept].add_variant(
-                            f"{incoming_key}/{ctx_key}",
-                            definition,
-                        )
-            else:
-                existing_concepts[c.concept] = c
-        merged.concepts = list(existing_concepts.values())
-        merged.concept_count = len(merged.concepts)
-
-        # 存储冲突标题信息
-        if existing.book_title != incoming.book_title and incoming.book_title:
-            merged.metadata["alternate_title"] = incoming.book_title
-            merged.metadata["conflict_resolved"] = True
-
+        merged.total_calls = existing.total_calls + incoming.total_calls
         merged.last_updated = time.time()
-        return merged
 
-    # ── 迁移 ────────────────────────────────────────────────
+        return merged, conflicts
 
-    def _migrate_to_2_0(
-        self,
-        manifest: N9R20SkillBookManifest,
-        raw_data: Dict[str, Any],
-    ) -> N9R20SkillBookManifest:
+    @staticmethod
+    def migrate_from_json_str(json_str: str) -> N9R20SkillBookManifest:
         """
-        执行 9R-1.5 → 9R-2.0 格式迁移。
+        从旧版 JSON 字符串一键迁移。
 
-        迁移操作：
-        1. 更新版本号
-        2. 初始化扩展字段默认值
-        3. 转换旧概念格式为新 N9R20ConceptNode
-
-        Args:
-            manifest:  旧版格式解析出的清单
-            raw_data:  原始 JSON 数据（可能包含非标准字段）
-
-        Returns:
-            迁移后的清单
+        自动检测并处理旧版格式的所有字段。
         """
-        manifest.version = "9R-2.0"
+        data = json.loads(json_str)
+        return N9R20SkillBookManifest.from_legacy_dict(data)
 
-        # 尝试从旧版数据提取概念
-        if "concepts" in raw_data:
-            manifest.concepts = [
-                self._convert_old_concept(c)
-                for c in raw_data["concepts"]
-            ]
-            manifest.concept_count = len(manifest.concepts)
 
-        return manifest
+# ════════════════════════════════════════════════════════════════════
+# § 7 · N9R20SkillBookExporter — 导出到旧格式
+# ════════════════════════════════════════════════════════════════════
 
-    def _load_2_0_manifest(self, data: Dict[str, Any]) -> N9R20SkillBookManifest:
+
+class N9R20SkillBookExporter:
+    """
+    技能书导出器。
+
+    将 9R-2.0 格式导出为旧版兼容格式，确保下游消费者无缝衔接。
+    """
+
+    @staticmethod
+    def export_manifest(manifest: N9R20SkillBookManifest) -> Dict[str, Any]:
         """
-        加载 9R-2.0 格式清单。
+        导出 manifest 为旧版 dict 格式。
 
-        Args:
-            data: 9R-2.0 格式字典
-
-        Returns:
-            清单实例
+        包含旧版必需字段 + 9R-2.0 扩展（嵌套为旧版子格式）。
         """
-        breakdown_data = data.get("difficulty_breakdown", {})
-        breakdown = (
-            N9R20DifficultyBreakdown.from_dict(breakdown_data)
-            if isinstance(breakdown_data, dict)
-            else N9R20DifficultyBreakdown()
+        result = manifest.to_legacy_dict()
+
+        # 附加生产记录（旧版格式）
+        result["production_history"] = [
+            r.to_legacy_dict() for r in manifest.production_history
+        ]
+
+        # 附加概念节点（旧版格式）
+        result["concept_nodes"] = {
+            term: node.to_legacy_dict()
+            for term, node in manifest.concept_nodes.items()
+        }
+
+        # 附加统计指标
+        result["stats"] = {
+            "total_calls": manifest.total_calls,
+            "success_rate": manifest.success_rate,
+            "average_retention": manifest.average_retention,
+            "average_compression_ratio": manifest.average_compression_ratio,
+        }
+
+        return result
+
+    @staticmethod
+    def export_manifests(
+        manifests: List[N9R20SkillBookManifest],
+    ) -> List[Dict[str, Any]]:
+        """批量导出 manifest 列表。"""
+        return [
+            N9R20SkillBookExporter.export_manifest(m) for m in manifests
+        ]
+
+    @staticmethod
+    def export_to_json(manifest: N9R20SkillBookManifest, indent: int = 2) -> str:
+        """
+        导出为 JSON 字符串（向后兼容格式）。
+
+        参数：
+            manifest: 要导出的 manifest
+            indent: JSON 缩进，默认 2
+
+        返回：
+            JSON 字符串
+        """
+        return json.dumps(
+            N9R20SkillBookExporter.export_manifest(manifest),
+            ensure_ascii=False,
+            indent=indent,
         )
 
-        return N9R20SkillBookManifest(
-            skill_book_id=data.get("skill_book_id", ""),
-            book_title=data.get("book_title", ""),
-            concept_count=data.get("concept_count", 0),
-            difficulty_breakdown=breakdown,
-            total_calls=data.get("total_calls", 0),
-            success_rate=data.get("success_rate", 0.0),
-            average_retention=data.get("average_retention", 0.0),
-            average_compression_ratio=data.get("average_compression_ratio", 0.0),
-            last_updated=data.get("last_updated", time.time()),
-            concepts=[
-                N9R20ConceptNode.from_dict(c)
-                for c in data.get("concepts", [])
-            ],
-            metadata=data.get("metadata", {}),
-            version=data.get("version", "9R-2.0"),
-        )
-
-    def _convert_old_concept(self, old_data: Dict[str, Any]) -> N9R20ConceptNode:
+    @staticmethod
+    def export_to_json_lines(
+        manifests: List[N9R20SkillBookManifest],
+    ) -> str:
         """
-        将旧版概念格式转换为 N9R20ConceptNode。
+        批量导出为 JSON Lines 格式（每行一个 manifest）。
 
-        旧版概念格式可能是简单的 {name, definition} 或
-        较复杂的字典格式。
+        参数：
+            manifests: manifest 列表
 
-        Args:
-            old_data: 旧版概念数据
-
-        Returns:
-            新的 N9R20ConceptNode
+        返回：
+            JSON Lines 字符串
         """
-        return N9R20ConceptNode(
-            concept=old_data.get("name", old_data.get("concept", "")),
-            canonical_definition=old_data.get("definition", old_data.get("canonical_definition", "")),
-            context_variants=old_data.get("context_variants", {}),
-            related_concepts=old_data.get("related_concepts", old_data.get("relations", [])),
-            confidence=old_data.get("confidence", 0.7),
-        )
+        lines = [
+            json.dumps(
+                N9R20SkillBookExporter.export_manifest(m),
+                ensure_ascii=False,
+            )
+            for m in manifests
+        ]
+        return "\n".join(lines)
 
-    # ── 查询接口 ────────────────────────────────────────────
 
-    def get_manifest(self, skill_book_id: str) -> Optional[N9R20SkillBookManifest]:
-        """获取已注册的清单。"""
-        return self._manifest_registry.get(skill_book_id)
+# ════════════════════════════════════════════════════════════════════
+# § 8 · 全局单例
+# ════════════════════════════════════════════════════════════════════
 
-    def register(self, manifest: N9R20SkillBookManifest) -> None:
-        """
-        注册清单，自动检测与已存在清单的冲突。
+#: 全局导入器单例
+n9r20_skillbook_importer: N9R20SkillBookImporter = N9R20SkillBookImporter()
 
-        Args:
-            manifest: 待注册的清单
-        """
-        existing = self._manifest_registry.get(manifest.skill_book_id)
-        if existing is not None:
-            conflicts = self.detect_conflicts(existing, manifest)
-            self._conflicts.extend(conflicts)
-            # 自动合并
-            merged = self.resolve_conflicts(existing, manifest, conflicts)
-            self._manifest_registry[manifest.skill_book_id] = merged
-        else:
-            self._manifest_registry[manifest.skill_book_id] = manifest
+#: 全局导出器单例
+n9r20_skillbook_exporter: N9R20SkillBookExporter = N9R20SkillBookExporter()
 
-    @property
-    def conflicts(self) -> List[ConflictReport]:
-        """获取所有冲突报告。"""
-        return list(self._conflicts)
 
-    def clear_conflicts(self) -> None:
-        """清除冲突报告。"""
-        self._conflicts.clear()
-
-    @property
-    def manifest_count(self) -> int:
-        """已注册的清单数量。"""
-        return len(self._manifest_registry)
+__all__ = [
+    "N9R20ProductionRecord",
+    "N9R20DifficultyBreakdown",
+    "N9R20ConceptProvenance",
+    "N9R20ConceptNode",
+    "N9R20SkillBookManifest",
+    "N9R20SkillBookImporter",
+    "N9R20SkillBookExporter",
+    "n9r20_skillbook_importer",
+    "n9r20_skillbook_exporter",
+]
