@@ -1,0 +1,82 @@
+{
+  "manifest_version": "2.0",
+  "skillbook": {
+    "id": "anime_machine_lamarre_v1",
+    "name": "动画机器：托马斯·拉马尔的媒体理论",
+    "name_en": "The Anime Machine: A Media Theory of Animation — Thomas Lamarre",
+    "version": "1.0.0",
+    "type": "academic_theory",
+    "framework": "N9R20-RHIZOME",
+    "author": {
+      "primary": "Thomas Lamarre",
+      "skillbook_curator": "9R-2.0 RHIZOME"
+    },
+    "source": {
+      "title": "The Anime Machine: A Media Theory of Animation",
+      "publisher": "University of Minnesota Press",
+      "year": 2009,
+      "isbn": "978-0-8166-5154-2"
+    },
+    "language": {
+      "source": "en",
+      "glossary": ["en", "ja", "zh"],
+      "skillbook": "zh"
+    }
+  },
+  "files": {
+    "main": "SKILL.md",
+    "supporting": [
+      "concept-graph.json",
+      "glossary.md",
+      "core-arguments.md",
+      "references.md"
+    ],
+    "tests": [
+      "tests/test_skillbook.py"
+    ]
+  },
+  "concept_graph": {
+    "file": "concept-graph.json",
+    "node_count": 12,
+    "edge_count": 16,
+    "root_node": "ANIME_MACHINE",
+    "core_nodes": [
+      "MULTIPLANAR_IMAGE",
+      "LIMITED_ANIMATION",
+      "ANIMETIC_INTERVAL",
+      "CINEMATISM",
+      "ANIMETISM",
+      "SLIDING",
+      "FIELD_DISTRIBUTION"
+    ]
+  },
+  "academic_markers": [
+    "media_theory",
+    "animation_studies",
+    "deleuze_guattari",
+    "ranciere",
+    "media_archaeology",
+    "japanese_studies",
+    "film_theory",
+    "visual_culture",
+    "ontology_of_moving_image"
+  ],
+  "difficulty_profile": {
+    "base_difficulty": 0.7,
+    "concept_density": 0.75,
+    "theoretical_depth": 0.8,
+    "prerequisite_knowledge": [
+      "basic_film_theory",
+      "intro_deleuze",
+      "basic_anime_history"
+    ]
+  },
+  "n9r20_compatibility": {
+    "min_framework_version": "2.0.0",
+    "routing": "DEEP",
+    "fold_depth_default": 5,
+    "tension_bus_compatible": true,
+    "dual_reasoner_compatible": true,
+    "semantic_graph_compatible": true
+  }
+}
