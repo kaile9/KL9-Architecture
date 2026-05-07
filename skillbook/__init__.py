@@ -1,67 +1,54 @@
 """
-9R-2.0 RHIZOME · Skills Module
-自适应路由器 / 压缩核心 / 双视角推理器 / 语义图谱 / 记忆学习器
+KL9-RHIZOME · Skillbook Content Package
+
+此包仅提供技能书内容的发现和加载入口。
+运行时引擎请使用 core/ 目录。
 """
 
-from .n9r20_adaptive_router import (
-    N9R20AdaptiveRouter,
-    n9r20_router,
-)
+from pathlib import Path
 
-from .n9r20_compression_core import (
-    N9R20CompressionCore,
-    N9R20DynamicFoldEngine,
-    N9R20AdaptiveFourModeCodec,
-    N9R20SemanticValidator,
-    N9R20ValidationResult,
-    n9r20_compression_core,
-)
+__version__ = "2.0.0"
 
-from .n9r20_dual_reasoner import (
-    N9R20DualReasoner,
-    n9r20_dual_reasoner,
-)
+def get_prebuilt_dir() -> Path:
+    """返回预置技能书目录。"""
+    return Path(__file__).parent / "prebuilt"
 
-from .n9r20_semantic_graph import (
-    N9R20SemanticGraph,
-    N9R20EdgeWeightDecay,
-    N9R20ConceptCluster,
-    N9R20ConceptConflictDetector,
-    n9r20_semantic_graph,
-    n9r20_conflict_detector,
-)
+def list_skills(language: str = "") -> list:
+    """
+    列出可用的技能书。
+    
+    Args:
+        language: 语言代码（zh/en/de/fr/other），为空则列出全部
+    """
+    prebuilt = get_prebuilt_dir()
+    if language:
+        lang_dir = prebuilt / language
+        if not lang_dir.exists():
+            return []
+        return [d.name for d in lang_dir.iterdir() if d.is_dir()]
+    
+    result = []
+    for lang_dir in prebuilt.iterdir():
+        if lang_dir.is_dir() and not lang_dir.name.startswith("."):
+            for skill_dir in lang_dir.iterdir():
+                if skill_dir.is_dir():
+                    result.append(f"{lang_dir.name}/{skill_dir.name}")
+    return result
 
-from .n9r20_memory_learner import (
-    N9R20MemoryLearner,
-    N9R20SessionMemory,
-    N9R20SkillProfile,
-    n9r20_memory_learner,
-)
+def load_skill(language: str, skill_name: str) -> str:
+    """
+    加载指定技能书的 SKILL.md 内容。
+    
+    Args:
+        language: 语言代码
+        skill_name: 技能书目录名
+    Returns:
+        SKILL.md 文件内容
+    """
+    skill_path = get_prebuilt_dir() / language / skill_name / "SKILL.md"
+    if not skill_path.exists():
+        raise FileNotFoundError(f"技能书未找到: {language}/{skill_name}")
+    return skill_path.read_text(encoding="utf-8")
 
-__all__ = [
-    # Adaptive Router
-    "N9R20AdaptiveRouter",
-    "n9r20_router",
-    # Compression Core
-    "N9R20CompressionCore",
-    "N9R20DynamicFoldEngine",
-    "N9R20AdaptiveFourModeCodec",
-    "N9R20SemanticValidator",
-    "N9R20ValidationResult",
-    "n9r20_compression_core",
-    # Dual Reasoner
-    "N9R20DualReasoner",
-    "n9r20_dual_reasoner",
-    # Semantic Graph
-    "N9R20SemanticGraph",
-    "N9R20EdgeWeightDecay",
-    "N9R20ConceptCluster",
-    "N9R20ConceptConflictDetector",
-    "n9r20_semantic_graph",
-    "n9r20_conflict_detector",
-    # Memory Learner
-    "N9R20MemoryLearner",
-    "N9R20SessionMemory",
-    "N9R20SkillProfile",
-    "n9r20_memory_learner",
-]
+__all__ = ["get_prebuilt_dir", "list_skills", "load_skill"]
+
