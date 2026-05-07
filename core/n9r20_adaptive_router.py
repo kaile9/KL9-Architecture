@@ -9,6 +9,7 @@ Academic markers (≥2 triggers DEEP):
 
 from typing import List, Tuple
 from .n9r20_structures import FoldDepth, N9R20RoutingDecision
+from typing import List
 
 class N9R20AdaptiveRouter:
     """Adaptive routing based on academic content markers."""
@@ -31,33 +32,36 @@ class N9R20AdaptiveRouter:
 
         if len(text) <= 25 and marker_count == 0:
             return N9R20RoutingDecision(
-                route_type=FoldDepth.QUICK,
-                fold_depth_budget=0,
+                path="quick",
+                target_fold_depth=0,
+                confidence=0.9,
                 academic_markers=markers_found,
                 reasoning="Short query, no academic markers. Zero module overhead."
             )
 
         if marker_count >= self.marker_count_threshold:
             return N9R20RoutingDecision(
-                route_type=FoldDepth.DEEP,
-                fold_depth_budget=9,
+                path="deep",
+                target_fold_depth=9,
+                confidence=0.85,
                 academic_markers=markers_found,
                 reasoning=f"Academic markers >= {self.marker_count_threshold}: full chain activation."
             )
 
         return N9R20RoutingDecision(
-            route_type=FoldDepth.STANDARD,
-            fold_depth_budget=3,
+            path="standard",
+            target_fold_depth=3,
+            confidence=0.7,
             academic_markers=markers_found,
             reasoning="Low academic content: single-layer expansion sufficient."
         )
 
     def degrade(self, decision: N9R20RoutingDecision) -> N9R20RoutingDecision:
         """Downgrade DEEP to STANDARD on failure."""
-        if decision.route_type == FoldDepth.DEEP:
+        if decision.path == "deep":
             return N9R20RoutingDecision(
-                route_type=FoldDepth.DEGRADED,
-                fold_depth_budget=3,
+                path="degraded",
+                target_fold_depth=3,
                 academic_markers=decision.academic_markers,
                 reasoning="DEEP path failed. Fallback to STANDARD with reduced budget."
             )

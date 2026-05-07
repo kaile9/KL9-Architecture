@@ -27,6 +27,7 @@ class N9R20DualReasoner:
             tp = self._identify_tension(dual_state, fold_idx)
             if tp:
                 tension.tension_points.append(tp)
+                tension.irreconcilable_points.append(tp)
             tension.fold_count = fold_idx + 1
 
             # Check suspension

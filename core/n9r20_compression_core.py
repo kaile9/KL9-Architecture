@@ -7,7 +7,7 @@ Four-mode folding engine:
     Interrupt    → Detect cheap synthesis, force re-fold
 """
 
-from typing import Optional
+from typing import Optional, List
 from .n9r20_structures import N9R20Tension, N9R20CompressedOutput, FoldDepth
 
 class N9R20CompressionCore:
@@ -56,10 +56,16 @@ class N9R20CompressionCore:
         )
 
     def _construct(self, tension: N9R20Tension) -> str:
-        return f"【Construct】{tension.dual_state.perspective_A.viewpoint[:200]}..."
+        ds = getattr(tension, 'dual_state', None)
+        pa = getattr(ds, 'perspective_A', None) if ds else None
+        vp = getattr(pa, 'viewpoint', '') if pa else getattr(pa, 'name', '') if pa else '视角A'
+        return f"【Construct】{vp[:200]}..."
 
     def _deconstruct(self, tension: N9R20Tension) -> str:
-        return f"【Deconstruct】{tension.dual_state.perspective_B.viewpoint[:200]}..."
+        ds = getattr(tension, 'dual_state', None)
+        pb = getattr(ds, 'perspective_B', None) if ds else None
+        vp = getattr(pb, 'viewpoint', '') if pb else getattr(pb, 'name', '') if pb else '视角B'
+        return f"【Deconstruct】{vp[:200]}..."
 
     def _validate(self, tension: N9R20Tension) -> bool:
         """Constitutional audit — pure rule engine, zero LLM overhead."""
