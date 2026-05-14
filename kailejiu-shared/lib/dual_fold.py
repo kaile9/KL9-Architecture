@@ -8,16 +8,17 @@ from core_structures import DualState, Tension, Perspective, SuspensionAssessmen
 from suspension_evaluator import evaluate_suspension
 
 
-def transform_from_perspective(query: str, perspective: Perspective, dialogues: list) -> str:
+def transform_from_perspective(query: str, perspective: Perspective, dialogues: list, state=None) -> str:
     """从指定视角 transform query。
 
     Args:
-        query: 用户查询
+        query: 用户查询或原文（翻译模式）
         perspective: 视角对象
         dialogues: 激活的理论对话列表
+        state: 可选 DualState，翻译模式下从中提取 term_bindings/source_text
 
     Returns:
-        transform 文本 — 从该视角出发对 query 的重述/解读。
+        transform 文本 — 从该视角出发对 query 的重述/解读/翻译。
     """
     if perspective is None:
         return query
@@ -25,6 +26,28 @@ def transform_from_perspective(query: str, perspective: Perspective, dialogues: 
     chars = perspective.characteristics if perspective.characteristics else [perspective.name]
     char_str = "、".join(chars[:3])
 
+    # ── 翻译模式 ──
+    if state and state.mode == "translation":
+        bindings_hint = ""
+        if state.term_bindings:
+            pairs = "；".join(f"{k}→{v}" for k, v in list(state.term_bindings.items())[:10])
+            bindings_hint = "\n已锁定术语（必须沿用）: " + pairs + "\n"
+
+        return f"""[翻译视角: {perspective.name}]
+特征: {char_str}{bindings_hint}
+
+原文:
+{query}
+
+要求:
+- 严格以{perspective.name}的立场翻译这段文字
+- 术语一致性: 已锁定术语必须使用指定译名
+- 不折中: 不在两种翻译哲学间寻求妥协
+- 保留该视角下特有的句法和措辞选择
+- 输出仅译文，不附加解释
+"""
+
+    # ── 默认模式（理论分析） ──
     dialogue_hints = ""
     if dialogues:
         theories = [d.get("theory", d.get("name", "")) for d in dialogues[:2] if d.get("theory") or d.get("name")]
@@ -131,10 +154,10 @@ def dual_fold(state: DualState, depth: int = 0, max_depth: int = 3, provider=Non
     """
     # Step 1: 从两个视角同时 transform
     transform_a = transform_from_perspective(
-        state.query, state.perspective_A, state.activated_dialogue
+        state.query, state.perspective_A, state.activated_dialogue, state=state
     )
     transform_b = transform_from_perspective(
-        state.query, state.perspective_B, state.activated_dialogue
+        state.query, state.perspective_B, state.activated_dialogue, state=state
     )
 
     # Step 2: 识别结构性张力

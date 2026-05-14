@@ -27,6 +27,10 @@ PERSPECTIVE_TYPES = {
     "truth_construction": {
         "truth": {"characteristics": ["可知论", "表象与本质", "启蒙理性"]},
         "slander": {"characteristics": ["话语权力", "真理体制", "知识考古学"]}
+    },
+    "translation": {
+        "foreignizing": {"characteristics": ["保留原文句法骨架", "术语优先概念保真", "让读者走向作者", "可见的译者"]},
+        "domesticating": {"characteristics": ["译入语习惯优先", "读者亲和流畅", "让作者走向读者", "透明的译者"]}
     }
 }
 
@@ -37,6 +41,7 @@ TENSION_TYPES = {
     "freedom_vs_security": {"perspective_source": "political", "emergent_style": "ironic_suspension"},
     "economic_vs_grotesque": {"perspective_source": "economic_grotesque", "emergent_style": "temporal_contrast"},
     "truth_vs_slander": {"perspective_source": "truth_construction", "emergent_style": "dialectical_negation"},
+    "foreignizing_vs_domesticating": {"perspective_source": "translation", "emergent_style": "analytical_juxtaposition"},
 }
 
 RECOMMENDED_DUALITIES = [
@@ -54,6 +59,8 @@ RECOMMENDED_DUALITIES = [
      "tension": "truth_vs_slander", "typical_query_patterns": ["真理", "知识", "事实", "后真相", "话语"]},
     {"perspective_A": "political.freedom_focused", "perspective_B": "social.regression",
      "tension": "freedom_vs_security", "typical_query_patterns": ["现代性", "个体化", "自律", "规范", "结构"]},
+    {"perspective_A": "translation.foreignizing", "perspective_B": "translation.domesticating",
+     "tension": "foreignizing_vs_domesticating", "typical_query_patterns": ["翻译", "中译", "英译", "译文", "译法", "术语翻译", "译名", "如何翻译"]},
 ]
 
 EMERGENT_STYLE_MAP = {

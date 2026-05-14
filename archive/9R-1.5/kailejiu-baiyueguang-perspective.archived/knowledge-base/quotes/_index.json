@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "sources": {
+    "baudrillard": {
+      "name": "让·鲍德里亚",
+      "works": [
+        "模拟与拟真",
+        "u7b26号交换与死亡"
+      ],
+      "file": "quotes/baudrillard.md",
+      "quote_count": 0
+    },
+    "foucault": {
+      "name": "米歇尔·福柏",
+      "works": [
+        "规训与惩罚",
+        "知识考古学"
+      ],
+      "file": "quotes/foucault.md",
+      "quote_count": 0
+    },
+    "lacan": {
+      "name": "雅克·拉康",
+      "works": [
+        "精神分析三论",
+        "集讵"
+      ],
+      "file": "quotes/lacan.md",
+      "quote_count": 0
+    },
+    "barthes": {
+      "name": "罗兰·巴尔特",
+      "works": [
+        "符号学原理",
+        "置身于柴可夫斯基"
+      ],
+      "file": "quotes/barthes.md",
+      "quote_count": 0
+    }
+  }
+}

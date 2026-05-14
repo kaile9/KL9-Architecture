@@ -36,6 +36,8 @@ class DualState:
     
     A 和 B 平等且不可调和。suspended=True 是可表达的前提。
     forced=True 表示达到 max_fold_depth 仍未自然悬置。
+    
+    mode="translation" 时，source_text/term_bindings 参与折叠。
     """
     query: str = ""
     perspective_A: Optional[Perspective] = None
@@ -48,6 +50,10 @@ class DualState:
     fold_depth: int = 0
     max_fold_depth: int = 2
     source_skill: str = "kailejiu-orchestrator"
+    mode: str = "default"
+    source_text: str = ""
+    target_lang: str = "zh"
+    term_bindings: Dict[str, str] = field(default_factory=dict)
 
 
 @dataclass

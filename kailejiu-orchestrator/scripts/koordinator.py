@@ -8,9 +8,9 @@ from typing import Optional
 
 SHARED_LIB = "/AstrBot/data/skills/kailejiu-shared/lib"
 sys.path.insert(0, SHARED_LIB)
-    SKILLS_ROOT = "/AstrBot/data/skills"
-    if SKILLS_ROOT not in sys.path:
-        sys.path.insert(0, SKILLS_ROOT)
+SKILLS_ROOT = "/AstrBot/data/skills"
+if SKILLS_ROOT not in sys.path:
+    sys.path.insert(0, SKILLS_ROOT)
 
 from tension_bus import (
     bus as TensionBus,
@@ -57,6 +57,10 @@ def coordinate(query: str, provider=None, session_id: Optional[str] = None) -> d
     
     # Phase 1: 路由层 — 深度评估 + 二重性检测
     depth_assessment = ROUTE.route_query(query)
+    
+    # ── 翻译意图分支 ──
+    if _is_translation_intent(query):
+        return _coordinate_translation(query, session_id, provider)
     
     # QUICK 模式：短问短答，不激活任何技能
     if depth_assessment.depth.name == "QUICK":
@@ -271,6 +275,88 @@ def status() -> dict:
         return {"graph": gs, "memory": ms, "learner": lr}
     except Exception as e:
         return {"error": str(e)}
+
+
+# ── 翻译模式 ──────────────────────────────────────────────────
+TRANSLATION_SIGNALS = ["翻译", "中译", "英译", "译文", "译法", "术语翻译", "译名", "如何翻译",
+                       "翻成", "翻译成", "翻译一下", "帮我翻", "译一下"]
+
+
+def _is_translation_intent(query: str) -> bool:
+    return any(s in query for s in TRANSLATION_SIGNALS)
+
+
+def _coordinate_translation(query: str, session_id: str, provider=None) -> dict:
+    """翻译模式的 dual_fold 协调。复用全部现有设施。"""
+    # 提取原文（去掉翻译指令前缀）
+    source_text = _extract_source_text(query)
+
+    # 视角：异化 vs 归化
+    pa = load_perspective("translation.foreignizing")
+    pb = load_perspective("translation.domesticating")
+
+    # 从 graph 检索已知术语译法
+    concepts = _retrieve_concepts(source_text, "foreignizing_vs_domesticating", pa, pb, top_k=8)
+    term_bindings = {}
+    for c in concepts:
+        name = c.get("name", "")
+        definition = c.get("definition", c.get("tier1_def", ""))
+        if name and definition and any(ch >= '\u4e00' and ch <= '\u9fff' for ch in definition):
+            term_bindings[name] = definition
+
+    # 组装 DualState — 一切交由 dual_fold 处理
+    state = DualState(
+        query=source_text,
+        perspective_A=pa, perspective_B=pb,
+        activated_dialogue=_activate_dialogues(query, concepts, pa, pb),
+        tension_type="foreignizing_vs_domesticating",
+        max_fold_depth=determine_max_fold_depth(
+            source_text, tension_type="foreignizing_vs_domesticating", mode="translation"
+        ),
+        mode="translation", source_text=source_text,
+        term_bindings=term_bindings,
+        source_skill="kailejiu-orchestrator"
+    )
+
+    state = dual_fold(state, depth=0, max_depth=state.max_fold_depth, provider=provider)
+
+    # 表达生成（复用现有 emergent_style + constitutional DNA）
+    style = emergent_style("foreignizing_vs_domesticating")
+    cp = build_constitutional_prompt()
+
+    system_prompt = f"""{cp}
+{emergent_style_prompt("foreignizing_vs_domesticating")}
+
+翻译任务。原文立场不可调和：
+视角A({pa.name}): {', '.join(pa.characteristics[:3])}
+视角B({pb.name}): {', '.join(pb.characteristics[:3])}
+已锁定术语: {term_bindings if term_bindings else '无'}
+不可调和点: {state.tension.irreconcilable_points if state.tension else '待识别'}
+悬置质量: {'自然悬置' if state.suspended and not state.forced else '强制悬置'}
+
+输出格式:
+1. 术语决策表（每个术语的译法、理由、置信度）
+2. 全文译文
+3. 悬置项（若有未决译法，标注张力）
+"""
+    response = _generate_response(query, system_prompt, provider)
+
+    return {
+        "response": response, "session_id": session_id,
+        "mode": "translation",
+        "tension_type": "foreignizing_vs_domesticating",
+        "fold_depth": state.fold_depth,
+        "suspension_quality": "genuine" if (state.suspended and not state.forced) else "forced",
+    }
+
+
+import re
+
+def _extract_source_text(query: str) -> str:
+    """从翻译请求中剥离指令前缀，提取原文。"""
+    # 去掉常见指令前缀："请翻译" "翻译成中文" 等
+    cleaned = re.sub(r'^(请|帮我|麻烦你|能不能|能否)?\s*(翻译|译|翻)(一下|成(中文|英文|日语))?[：:：\s]*', '', query)
+    return cleaned.strip()
 
 
 if __name__ == "__main__":
