@@ -38,13 +38,18 @@ async def _resolve_llm(
     key: str,
     *,
     fallback: "AstrBotLLM | None" = None,
+    umo: str | None = None,
 ) -> LLMProvider | None:
     """Resolve a provider from config or fall back.
 
     Resolution order:
       1. config[key] → provider_manager.get_provider_by_id
       2. explicit `fallback` (already-resolved AstrBotLLM, e.g. fold_llm)
-      3. context.get_using_provider() — AstrBot's *actual* current main provider
+      3. context.get_using_provider(umo) — session-aware, current main provider
+
+    When ``umo`` is supplied, fallback respects session-level provider
+    preference (per-umo isolation).  Without it the *global* default provider
+    is returned — which may differ from the conversation the user is in.
     """
     pid = (config.get(key, "") or "").strip()
     pm = getattr(context, "provider_manager", None)
@@ -52,23 +57,40 @@ async def _resolve_llm(
     if pid and pm is not None:
         try:
             native = await pm.get_provider_by_id(pid)
-        except Exception:
+        except Exception as e:
+            logger.warning("[KL9][_resolve_llm] get_provider_by_id('%s') 异常: %s", pid, e)
             native = None
         if native:
+            logger.info("[KL9][_resolve_llm] %s → 通过 config['%s'] 命中 provider '%s'", key, key, pid)
             return AstrBotLLM(native)
+        else:
+            logger.warning("[KL9][_resolve_llm] config['%s']='%s' 但在 AstrBot 中找不到对应 provider，进入 fallback", key, pid)
+    else:
+        logger.info("[KL9][_resolve_llm] %s → config['%s'] 为空，进入 fallback", key, key)
 
     if fallback is not None:
+        logger.info("[KL9][_resolve_llm] %s → 使用显式 fallback (model=%s)", key, getattr(fallback, 'model', '?'))
         return fallback
 
-    # Last resort: AstrBot's currently-selected main provider
+    # Last resort: AstrBot's currently-selected main provider (session-aware)
     get_using = getattr(context, "get_using_provider", None)
     if callable(get_using):
         try:
-            native = get_using()
-        except Exception:
+            native = get_using(umo) if umo else get_using()
+        except Exception as e:
+            logger.warning("[KL9][_resolve_llm] get_using_provider(umo=%s) 异常: %s", umo, e)
             native = None
         if native:
+            prov_type = type(native).__name__
+            prov_id = getattr(native, 'meta_id', getattr(native, 'provider_config', {}).get('id', '?'))
+            prov_model = getattr(native, 'model_name', '?')
+            logger.info("[KL9][_resolve_llm] %s → fallback 到 AstrBot 当前 provider: type=%s id=%s model=%s umo=%s",
+                        key, prov_type, prov_id, prov_model, umo)
             return AstrBotLLM(native)
+        else:
+            logger.warning("[KL9][_resolve_llm] get_using_provider(umo=%s) 返回 None", umo)
+    else:
+        logger.warning("[KL9][_resolve_llm] context 没有 get_using_provider 方法")
     return None
 
 
@@ -84,13 +106,21 @@ class KL9Plugin(Star):
         # interfering with each other's KL9 calls (Bug-6).
         self._kl9_depth = contextvars.ContextVar('kl9_depth', default=0)
 
-    async def _get_kl9(self) -> KL9System:
-        """Lazy-init KL9 with per-stage LLM providers + source retriever."""
-        if self.kl9 is not None:
+    async def _get_kl9(self, umo: str | None = None) -> KL9System:
+        """Lazy-init KL9 with per-stage LLM providers + source retriever.
+
+        Caches per ``umo`` (session) when session-aware, otherwise globally.
+        """
+        if umo:
+            if not hasattr(self, "_kl9_cache"):
+                self._kl9_cache: dict[str, KL9System] = {}
+            if umo in self._kl9_cache:
+                return self._kl9_cache[umo]
+        elif self.kl9 is not None:
             return self.kl9
 
         # fold is the heaviest stage and must succeed; everything else falls back to it
-        fold_llm = await _resolve_llm(self.context, self.config, "fold_provider_id")
+        fold_llm = await _resolve_llm(self.context, self.config, "fold_provider_id", umo=umo)
         if not fold_llm:
             raise RuntimeError(
                 "[KL9] 无法获取 LLM Provider。请在 AstrBot 中配置至少一个 LLM 提供商，"
@@ -98,22 +128,27 @@ class KL9Plugin(Star):
             )
 
         router_llm = await _resolve_llm(
-            self.context, self.config, "router_provider_id", fallback=fold_llm)
+            self.context, self.config, "router_provider_id", fallback=fold_llm, umo=umo)
         decomposer_llm = await _resolve_llm(
-            self.context, self.config, "decomposer_provider_id", fallback=fold_llm)
+            self.context, self.config, "decomposer_provider_id", fallback=fold_llm, umo=umo)
         validator_llm = await _resolve_llm(
-            self.context, self.config, "validator_provider_id", fallback=fold_llm)
+            self.context, self.config, "validator_provider_id", fallback=fold_llm, umo=umo)
 
         # Build SourceRetriever
         retriever = await self._build_retriever(fold_llm)
 
-        self.kl9 = KL9System(
+        kl9 = KL9System(
             fold_llm,
             retriever=retriever,
             router_llm=router_llm,
             decomposer_llm=decomposer_llm,
             validator_llm=validator_llm,
         )
+
+        if umo:
+            self._kl9_cache[umo] = kl9
+        else:
+            self.kl9 = kl9
 
         # Diagnostic: report effective per-stage models
         try:
@@ -124,7 +159,7 @@ class KL9Plugin(Star):
         except Exception:
             pass
 
-        return self.kl9
+        return kl9
 
     async def _build_retriever(self, fold_llm: LLMProvider) -> SourceRetriever | None:
         """Build SourceRetriever from config.
@@ -249,34 +284,53 @@ class KL9Plugin(Star):
         """
         在 LLM 调用前拦截，用 Router 判断复杂度。
         """
+        import time as _time
         if not self.config.get("auto_activate", False):
+            logger.info("[KL9][Hook] auto_activate=false, 跳过")
             return None
         
         if not self.config.get("enabled", True):
+            logger.info("[KL9][Hook] enabled=false, 跳过")
             return None
         
         if self._kl9_depth.get() > 0:
+            logger.info("[KL9][Hook] 递归中 depth=%s, 跳过", self._kl9_depth.get())
             return None
         
         try:
             query = event.message_str.strip()
+            logger.info("[KL9][Hook] 收到 len=%s: '%s'", len(query), query[:120])
             if query.startswith("/"):
+                logger.info("[KL9][Hook] 命令消息, 跳过")
                 return None
             if len(query) < 5:
+                logger.info("[KL9][Hook] 太短 <5, 跳过")
                 return None
             
-            kl9 = await self._get_kl9()
-            route = kl9.router.route(query)
-            
+            kl9 = await self._get_kl9(umo=event.unified_msg_origin)
+            t0 = _time.perf_counter()
+            route = await kl9.router.route(query)
+            route_ms = (_time.perf_counter() - t0) * 1000
+            logger.info("[KL9][Hook] Router: %s (%.0fms, %s)",
+                        route.level.name, route_ms, route.reason)
+
             if route.level == RouteLevel.QUICK:
+                # Safety: if AstrBot's main LLM is Anthropic, handle it ourselves
+                main_prov = self._peek_main_provider(event)
+                if main_prov and self._is_anthropic(main_prov):
+                    logger.info("[KL9][Hook] QUICK 但主LLM是Anthropic → KL9用fold_llm快速回复")
+                    return await self._quick_kl9_reply(kl9, query)
+                logger.info("[KL9][Hook] QUICK → 放行, 主LLM接管!")
                 return None
             
             self._kl9_depth.set(1)
             try:
+                logger.info("[KL9][Hook] %s → pipeline启动...", route.level.name)
                 result = await kl9.process(
                     query,
                     force_depth=route.level.name.lower()
                 )
+                logger.info("[KL9][Hook] pipeline完成 fold=%s", result.fold_depth)
                 
                 if route.level == RouteLevel.DEEP and result.fold_depth > 0:
                     prefix = f"[KL9 深度折叠 × {result.fold_depth}"
@@ -292,9 +346,54 @@ class KL9Plugin(Star):
                 
         except Exception as e:
             import traceback
-            logger.error(f"[KL9] auto_activate 失败，fallback 到主 LLM: {e}")
-            logger.debug(traceback.format_exc())
+            logger.error(f"[KL9][Hook] 异常 → 返回None, 主LLM接管! err={e}")
+            logger.error(f"[KL9][Hook] traceback:\n{traceback.format_exc()}")
             return None
+
+    # --- Anthropic firewall helpers ---
+
+    @staticmethod
+    def _is_anthropic(prov):
+        """Check if a provider is Anthropic-based."""
+        if prov is None:
+            return False
+        name = type(prov).__name__.lower()
+        mn = getattr(prov, 'model_name', '').lower()
+        return ('anthropic' in name or 'claude' in name or
+                'claude' in mn or 'anthropic' in mn)
+
+    def _peek_main_provider(self, event: AstrMessageEvent):
+        """Peek at which provider AstrBot would use for the main LLM call."""
+        try:
+            get_using = getattr(self.context, "get_using_provider", None)
+            if callable(get_using):
+                return get_using(event.unified_msg_origin)
+        except Exception:
+            pass
+        pm = getattr(self.context, 'provider_manager', None)
+        if pm:
+            try:
+                pt = getattr(pm, 'ProviderType', None)
+                if pt:
+                    return pm.get_using_provider(pt.CHAT_COMPLETION, umo=event.unified_msg_origin)
+            except Exception:
+                pass
+        return None
+
+    async def _quick_kl9_reply(self, kl9, query: str) -> str:
+        """Use KL9 fold LLM for quick reply, bypassing Anthropic."""
+        try:
+            response = await kl9.llm.complete(
+                system_prompt="你是一个有帮助的AI助手。简洁直接地回答用户的问题。",
+                user_prompt=query,
+                temperature=0.3,
+                max_tokens=1024,
+                timeout=30.0,
+            )
+            return response.content
+        except Exception:
+            return "收到。如需深入分析，请使用 /deep 前缀。"
+
 
     # ============================================================
     # 命令入口
@@ -389,7 +488,7 @@ class KL9Plugin(Star):
             )
 
             # 2. Process chunks in parallel with force_optimize
-            kl9 = await self._get_kl9()
+            kl9 = await self._get_kl9(umo=event.unified_msg_origin)
             self._kl9_depth.set(1)
 
             # Process up to 5 chunks concurrently (rate limit friendly)
@@ -531,7 +630,7 @@ class KL9Plugin(Star):
             return
         try:
             self._kl9_depth.set(1)
-            kl9 = await self._get_kl9()
+            kl9 = await self._get_kl9(umo=event.unified_msg_origin)
             result = await kl9.process(query, force_depth="deep")
             prefix = f"*折叠深度: {result.fold_depth}"
             if result.quality and result.quality.grade:
@@ -560,7 +659,7 @@ class KL9Plugin(Star):
             return
         try:
             self._kl9_depth.set(1)
-            result = await (await self._get_kl9()).process(query, force_depth="standard")
+            result = await (await self._get_kl9(umo=event.unified_msg_origin)).process(query, force_depth="standard")
             yield event.plain_result(result.content)
         except Exception as e:
             yield event.plain_result(f"[KL9] 错误: {e}")

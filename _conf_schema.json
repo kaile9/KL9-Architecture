@@ -100,7 +100,7 @@
         "description": "默认递归折叠深度 [2–9]",
         "type": "int",
         "hint": "DEEP 路径下的最大折叠层数。超过后即使有新张力也停止。",
-        "default": 5
+        "default": 4
     },
     "openai_compatible": {
         "description": "OpenAI-API 兼容模式 ▸ 适用于 DeepSeek / Kimi",

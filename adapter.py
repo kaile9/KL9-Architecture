@@ -9,8 +9,13 @@ v2.2: Exposes embed() for SourceRetriever (semantic dedup + local search).
 """
 from __future__ import annotations
 
+import asyncio
+import logging
+
 from kl9.models import LLMProvider, LLMResponse, Message, Usage, RetryConfig
 from kl9.utils.exceptions import ProviderError
+
+logger = logging.getLogger("kl9.adapter")
 
 
 class AstrBotLLM(LLMProvider):
@@ -26,30 +31,54 @@ class AstrBotLLM(LLMProvider):
 
     async def complete(self, system_prompt: str, user_prompt: str, *,
                        temperature: float = 0.3, max_tokens: int = 8192,
-                       timeout: float = 120.0) -> LLMResponse:
+                       timeout: float = 300.0) -> LLMResponse:
         import time
         t0 = time.perf_counter()
-        try:
-            raw = await self._p.text_chat(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                timeout=timeout,
-            )
-            return LLMResponse(
-                content=raw.get("content", "") if isinstance(raw, dict) else str(raw),
-                usage=Usage(),
-                provider=self.NAME,
-                model=self.model,
-                latency_ms=(time.perf_counter() - t0) * 1000,
-            )
-        except Exception as e:
-            raise ProviderError(str(e), code="AST-000") from e
+        # Retry up to 3 times with exponential backoff for rate limit / transient errors
+        last_exc = None
+        for attempt in range(4):
+            try:
+                raw = await self._p.text_chat(
+                    system_prompt=system_prompt,
+                    user_prompt=user_prompt,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    timeout=timeout,
+                )
+                # Extract *actual text content* — never str() the whole object
+                if isinstance(raw, dict):
+                    text = raw.get("content", "")
+                elif hasattr(raw, "completion_text"):
+                    text = raw.completion_text
+                elif hasattr(raw, "content"):
+                    text = raw.content
+                else:
+                    text = str(raw)
+                return LLMResponse(
+                    content=text if isinstance(text, str) else str(text),
+                    usage=Usage(),
+                    provider=self.NAME,
+                    model=self.model,
+                    latency_ms=(time.perf_counter() - t0) * 1000,
+                )
+            except Exception as e:
+                last_exc = e
+                err_str = str(e).lower()
+                is_rate_limit = "429" in err_str or "rate_limit" in err_str or "overloaded" in err_str
+                is_timeout = "timeout" in err_str or "timed out" in err_str
+                if attempt < 3 and (is_rate_limit or is_timeout):
+                    delay = 5 * (attempt + 1)  # 5s, 10s, 15s
+                    logger.warning("[KL9][Retry] %s, attempt %d/3, waiting %ds: %s",
+                                   "rate limit" if is_rate_limit else "timeout",
+                                   attempt + 1, delay, e)
+                    await asyncio.sleep(delay)
+                else:
+                    break
+        raise ProviderError(str(last_exc), code="AST-000") from last_exc
 
     async def chat(self, messages: list[Message], *,
                    temperature: float = 0.3, max_tokens: int = 8192,
-                   timeout: float = 120.0) -> LLMResponse:
+                   timeout: float = 300.0) -> LLMResponse:
         system = ""
         user = ""
         for m in messages:
@@ -63,28 +92,44 @@ class AstrBotLLM(LLMProvider):
     async def embed(self, texts: list[str]) -> list[list[float]]:
         """Embed texts via the wrapped provider.
 
-        Raises:
-            NotImplementedError: when the underlying AstrBot provider does not
-                expose an embedding method (e.g. wrapping a chat-only LLM).
-                The plugin's startup probe relies on this to detect mis-config
-                rather than silently falling back to URL-only dedup.
+        Resolution order:
+          1. Native embed_text() / embed()
+          2. AstrBot EmbeddingProvider.get_embeddings()
+          3. OpenAI-compatible client.embeddings.create()
 
-        Other exceptions are re-raised so probes can show the real reason
-        (auth error, network, etc.).
+        Raises:
+            NotImplementedError: when none of the above are available.
         """
+        # 1) Native methods (legacy / custom providers)
         embed_fn = getattr(self._p, "embed_text", None) or getattr(self._p, "embed", None)
-        if not (embed_fn and callable(embed_fn)):
-            raise NotImplementedError(
-                f"provider {getattr(self._p, 'meta_id', type(self._p).__name__)!r} "
-                f"does not expose embed_text() or embed(); "
-                f"select an embedding-capable provider (e.g. BAAI/bge-m3) instead"
-            )
-        result = await embed_fn(texts)
-        if result is None:
-            raise NotImplementedError(
-                f"provider returned None from embed; treating as unsupported"
-            )
-        return result
+        if embed_fn and callable(embed_fn):
+            result = await embed_fn(texts)
+            if result is not None:
+                return result
+
+        # 2) AstrBot EmbeddingProvider interface
+        get_embeddings_fn = getattr(self._p, "get_embeddings", None)
+        if get_embeddings_fn and callable(get_embeddings_fn):
+            result = await get_embeddings_fn(texts)
+            if result is not None:
+                return result
+
+        # 3) OpenAI-compatible client (most cloud providers: SiliconFlow, etc.)
+        client = getattr(self._p, "client", None)
+        if client is not None and hasattr(client, "embeddings"):
+            try:
+                model = getattr(self._p, "model_name", None) or getattr(self._p, "model", None) or ""
+                resp = await client.embeddings.create(model=model, input=texts)
+                if resp and resp.data:
+                    return [d.embedding for d in resp.data]
+            except Exception:
+                pass
+
+        raise NotImplementedError(
+            f"provider {getattr(self._p, 'meta_id', type(self._p).__name__)!r} "
+            f"does not expose embed_text(), embed(), get_embeddings() or an OpenAI client; "
+            f"select an embedding-capable provider (e.g. BAAI/bge-m3) instead"
+        )
 
     def count_tokens(self, text: str) -> int:
         return max(1, len(text) // 4)

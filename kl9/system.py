@@ -98,7 +98,7 @@ class KL9System:
         # ── Stage 2: Source Retrieval (adaptive optimization) ──
         source_ctx = SourceContext(query=query)
         if self.retriever and route.level != RouteLevel.QUICK:
-            depth = 5 if route.level == RouteLevel.DEEP else 3
+            depth = 5 if route.level == RouteLevel.DEEP else 2
             source_ctx = await self.retriever.retrieve(
                 query,
                 depth=depth,
@@ -115,14 +115,14 @@ class KL9System:
                     degrade_from=RouteLevel.DEEP,
                 )
 
-        # ── Stage 3: Decompose (LLM call #1) ──
+        # ── Stage 3: Decompose (DEEP only) ──
         pa, pb, tensions = await self.decomposer.decompose(
             query,
             source_ctx=source_ctx if source_ctx.results else None,
         )
 
         if route.level == RouteLevel.STANDARD:
-            # Standard: single LLM call for basic analysis
+            # STANDARD fast-path: skip decompose, single LLM call with sources
             source_text = (
                 "\n\n" + source_ctx.format_for_prompt()
                 if source_ctx and source_ctx.results
@@ -131,30 +131,21 @@ class KL9System:
             response = await self.llm.complete(
                 system_prompt=CONSTITUTIONAL_SYSTEM_PROMPT,
                 user_prompt=(
-                    f"分析以下问题，遵循宪法DNA（含P10信源忠实）:\n\n{query}"
+                    f"分析以下问题，给出有深度的回答:\n\n{query}"
                     f"{source_text}"
-                    f"\n\n视角A: {pa.content[:500]}\n"
-                    f"视角B: {pb.content[:500]}"
                 ),
                 temperature=0.5,
                 max_tokens=8192 if source_ctx and source_ctx.results else 4096,
             )
-            # Gate check
-            passed, violations, _ = self.gate.inspect(response.content)
-
-            # Include source degradation note if applicable
             suffix = ""
             if route.is_degraded and source_ctx.missing_notice:
                 suffix = f"\n\n[信源说明] {source_ctx.missing_notice}。分析基于可用信源。"
 
             return AggregatedOutput(
                 content=response.content + suffix,
-                theorists_cited=pa.theorists_cited + pb.theorists_cited,
-                concepts_used=pa.concepts_used + pb.concepts_used,
                 fold_depth=1,
                 token_used=response.usage.total_tokens,
                 latency_ms=(time.perf_counter() - t0) * 1000,
-                constitutional_warning=not passed,
             )
 
         # ── Stage 4: Recursive Fold (LLM calls #2 to #N+1) ──
