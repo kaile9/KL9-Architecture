@@ -80,6 +80,51 @@ FOLD_DEEPEN_PROMPT = """你正在执行认知折叠的第 {fold_num} 步。
 - 所有断言必须可追溯到信源中的原文
 """
 
+# ── 翻译折叠专用 ──
+FOLD_TRANSLATE_PROMPT = """你正在执行翻译折叠的第 {fold_num} 步。
+
+前一步产生的翻译张力:
+{prior_tensions}
+
+当前视角A的翻译方案:
+{perspective_a}
+
+当前视角B的翻译方案:
+{perspective_b}
+
+任务: 在每个翻译视角上折叠一层——不是深化，而是从该翻译哲学出发生成译文。
+    - A视角翻译: 严格以异化视角翻译原文段落（保留句法骨架、术语异质性）
+    - B视角翻译: 严格以归化视角翻译同一段落（汉语语流优先、透明）
+    - 碰撞: 对比两个译文，识别新的翻译张力点
+
+输出格式:
+[视角A译文]
+<异化翻译的全文段落>
+
+[视角B译文]
+<归化翻译的全文段落>
+
+[碰撞]
+<对比两个译文，识别出具体的翻译抉择点>
+[硬张力]: <不可调和的翻译抉择，如"术语X: 原词根保真 vs 汉语通顺">
+[硬张力]: <另一个翻译张力点>
+
+约束:
+- 每个视角的翻译必须严格保持其翻译哲学的一致性
+- [硬张力]必须是具体的词汇/句式层面的不可调和选择
+- 不缝合、不收束、不提供中间态
+"""
+
+
+TRANSLATION_PERSPECTIVE_MARKERS = ["异化翻译视角", "归化翻译视角"]
+
+
+def _is_translation_fold(perspective_a: Perspective, perspective_b: Perspective) -> bool:
+    """根据视角名称检测是否为翻译折叠。"""
+    a_name = perspective_a.name if perspective_a else ""
+    b_name = perspective_b.name if perspective_b else ""
+    return any(m in a_name or m in b_name for m in TRANSLATION_PERSPECTIVE_MARKERS)
+
 
 class FoldEngine:
     """Recursive fold execution engine.
@@ -137,15 +182,23 @@ class FoldEngine:
         for fold_num in range(1, max_fold_depth + 1):
             t0 = time.perf_counter()
 
-            # Build fold prompt — LLM manages its own context, no hard truncation
+            # Build fold prompt — choose translation or deepen variant
             tensions_text = "\n".join(f"- {t}" for t in prior_tensions[-6:])
-            prompt = FOLD_DEEPEN_PROMPT.format(
-                fold_num=fold_num,
-                source_context=source_text,
-                prior_tensions=tensions_text,
-                perspective_a=pa_content,
-                perspective_b=pb_content,
-            )
+            if _is_translation_fold(perspective_a, perspective_b):
+                prompt = FOLD_TRANSLATE_PROMPT.format(
+                    fold_num=fold_num,
+                    prior_tensions=tensions_text,
+                    perspective_a=pa_content,
+                    perspective_b=pb_content,
+                )
+            else:
+                prompt = FOLD_DEEPEN_PROMPT.format(
+                    fold_num=fold_num,
+                    source_context=source_text,
+                    prior_tensions=tensions_text,
+                    perspective_a=pa_content,
+                    perspective_b=pb_content,
+                )
 
             try:
                 response = await self.llm.complete(
