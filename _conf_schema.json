@@ -1,0 +1,125 @@
+{
+    "enabled": {
+        "description": "启用 KL9 认知协议层",
+        "type": "bool",
+        "default": true
+    },
+    "auto_activate": {
+        "description": "自动激活模式（拦截所有消息自动判断）",
+        "type": "bool",
+        "hint": "开启后每条消息都会先经 Router 判断复杂度。QUICK 放行主 LLM；STANDARD/DEEP 走 KL9 管线。关闭后仅 /deep /standard 命令触发。",
+        "default": false
+    },
+    "router_provider_id": {
+        "description": "路由判断 LLM ▸ 推荐：DeepSeek V4 Flash（快速便宜）",
+        "type": "string",
+        "hint": "仅将 query 分类为 QUICK/STANDARD/DEEP。调用极轻（~250 tokens）。推荐用最便宜的模型。",
+        "_special": "select_provider",
+        "default": ""
+    },
+    "decomposer_provider_id": {
+        "description": "视角拆解 LLM ▸ 推荐：Kimi K2.6",
+        "type": "string",
+        "hint": "DEEP 路径触发。单次调用拆 A/B 双视角并标注初始张力。推荐默认模型 Kimi K2.6。",
+        "_special": "select_provider",
+        "default": ""
+    },
+    "fold_provider_id": {
+        "description": "递归折叠 LLM ▸ 关键环节 · 推荐：Kimi K2.6 Thinking / Claude Opus 4.7 / GPT-5.5",
+        "type": "string",
+        "hint": "核心引擎。深度优先递归折叠 N 步，每步 ~2K tokens。需要最强推理能力。推荐 Kimi thinking 模式或 Opus 4.7。",
+        "_special": "select_provider",
+        "default": ""
+    },
+    "validator_provider_id": {
+        "description": "质量审查 LLM ▸ 推荐：Kimi K2.6",
+        "type": "string",
+        "hint": "折叠完成后运行一次六维评分（~500 tokens）。推荐默认模型 Kimi K2.6。",
+        "_special": "select_provider",
+        "default": ""
+    },
+    "enable_search": {
+        "description": "启用信源检索 ▸ 核心功能 · 推荐开启",
+        "type": "bool",
+        "hint": "STANDARD/DEEP 路径先检索信源再分析。确保引用有原文支撑，防止 LLM 编造。关闭则退化到纯内部知识。",
+        "default": true
+    },
+    "search_provider": {
+        "description": "搜索服务商 ▸ 默认 Tavily",
+        "type": "string",
+        "hint": "当前仅支持 Tavily。未来将支持 Perplexity、SearXNG 等。",
+        "options": ["tavily"],
+        "default": "tavily"
+    },
+    "tavily_api_key": {
+        "description": "Tavily API Key ▸ 从 tavily.com 获取",
+        "type": "string",
+        "hint": "留空则尝试读取环境变量 TAVILY_API_KEY。两者都为空则跳过信源检索。",
+        "default": ""
+    },
+
+    "tavily_include_domains": {
+        "description": "限定搜索域名 ▸ 逗号分隔",
+        "type": "string",
+        "hint": "只搜索这些域名。例：arxiv.org,plato.stanford.edu,jstor.org。留空则不限制。",
+        "default": ""
+    },
+    "tavily_exclude_domains": {
+        "description": "排除搜索域名 ▸ 逗号分隔",
+        "type": "string",
+        "hint": "排除这些域名。例：wikipedia.org,zhihu.com。留空则不排除。",
+        "default": ""
+    },
+    "embedding_provider_id": {
+        "description": "嵌入向量 LLM ▸ 用于语义去重 + 本地检索",
+        "type": "string",
+        "hint": "语义去重：去掉 Tavily 返回的重复内容（同一网页不同 URL）。建议用免费模型（BGE-M3）或便宜 API。留空则只用 URL 去重（更快）。",
+        "_special": "select_provider",
+        "default": ""
+    },
+    "enable_embedding": {
+        "description": "启用语义去重 ▸ 需配置嵌入模型",
+        "type": "bool",
+        "hint": "开启后用 embedding 做语义去重。能识别内容重复但 URL 不同的结果。增加少量延迟（~200-500ms）。需 embedding_provider_id 可用。",
+        "default": false
+    },
+    "rerank_provider_id": {
+        "description": "重排序 LLM ▸ 用于结果精准重排",
+        "type": "string",
+        "hint": "检索后对结果 relevance 重排序。提升信源质量但增加一次 API 调用（~300-800ms）。留空则按权重+得分排序。",
+        "_special": "select_provider",
+        "default": ""
+    },
+    "enable_rerank": {
+        "description": "启用重排序 ▸ 需配置 rerank 模型",
+        "type": "bool",
+        "hint": "开启后调用 rerank_provider 对结果重排。显著提升 top-N 质量。增加一次 API 调用。",
+        "default": false
+    },
+    "default_fold_depth": {
+        "description": "默认递归折叠深度 [2–9]",
+        "type": "int",
+        "hint": "DEEP 路径下的最大折叠层数。超过后即使有新张力也停止。",
+        "default": 5
+    },
+    "openai_compatible": {
+        "description": "OpenAI-API 兼容模式 ▸ 适用于 DeepSeek / Kimi",
+        "type": "bool",
+        "hint": "开启使用 OpenAI 兼容 API（chat/completions）。关闭使用 Anthropic 原生 API（messages）。DeepSeek 和 Kimi 选开启。",
+        "obvious_hint": true,
+        "default": true
+    },
+    "thinking_mode": {
+        "description": "Thinking/Reasoning 模式开关 ▸ 适用 Kimi thinking / Claude adaptive",
+        "type": "bool",
+        "hint": "开启链式思考模式。Kimi 用温度 1.0 + thinking；Claude 用 adaptive thinking。不支持会自动降级。",
+        "default": true
+    }
+,
+    "skillbook_concurrency": {
+        "description": "Skillbook 并行处理块数 ▸ 默认 3",
+        "type": "int",
+        "hint": "处理大文档时同时处理的文本块数。值越大越快但可能触发 API 速率限制。建议 2-5。",
+        "default": 3
+    }
+}
